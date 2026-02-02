@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VPINHUB | Past Competitions</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Encode+Sans:wght@400;700;900&family=MedievalSharp&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Encode Sans', sans-serif; background: #020617; color: white; transition: background 0.5s ease; }
+        .medieval { font-family: 'MedievalSharp', cursive; }
+        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
+        .drop-zone { border: 2px dashed rgba(255,255,255,0.2); transition: all 0.3s ease; }
+        .drop-zone.active { border-color: #f97316; background: rgba(249, 115, 22, 0.05); }
+        .theme-throwdown { --accent: #f97316; }
+        .theme-swl { --accent: #d946ef; }
+        .theme-vpc { --accent: #6366f1; }
+        .accent-text { color: var(--accent, #94a3b8); }
+        .accent-border { border-color: var(--accent, #334155); }
+    </style>
+</head>
+<body class="min-h-screen pb-20">
+
+    <header class="container mx-auto px-6 py-12 text-center">
+        <h1 class="text-5xl font-black italic tracking-tighter uppercase mb-2">VPIN<span class="text-orange-500">HUB</span> ARCHIVE</h1>
+        <p class="medieval text-gray-400 tracking-[0.3em] uppercase text-sm">Historical Leaderboards</p>
+    </header>
+
+    <main class="container mx-auto px-6 max-w-5xl">
+        <div id="drop-zone" class="drop-zone rounded-3xl p-12 text-center mb-12 cursor-pointer">
+            <div class="text-4xl mb-4">📂</div>
+            <h3 class="text-xl font-bold mb-2">Load Competition Data</h3>
+            <p class="text-gray-500 text-sm">Drag and drop your exported .json file here to view history</p>
+            <input type="file" id="file-input" class="hidden" accept=".json">
+        </div>
+
+        <div id="archive-content" class="hidden space-y-10">
+            <div class="text-center">
+                <div id="comp-label" class="inline-block px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-white/10 mb-4">Competition</div>
+                <h2 id="table-name" class="text-4xl font-black uppercase italic mb-2">Table Name</h2>
+                <p id="event-period" class="text-gray-400 font-bold"></p>
+            </div>
+
+            <div id="winner-banner"></div>
+
+            <div id="achievements" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
+
+            <div class="glass rounded-3xl overflow-hidden shadow-2xl">
+                <div class="bg-white/5 px-8 py-4 border-b border-white/10">
+                    <span class="text-xs font-bold uppercase tracking-widest text-gray-400">Final Standings</span>
+                </div>
+                <div id="leaderboard" class="divide-y divide-white/5"></div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const AVATAR_BASE = "http://vpinhub.github.io/special-when-lit-leaderboard/img/";
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+
+        // Drag and Drop Logic
+        dropZone.onclick = () => fileInput.click();
+        dropZone.ondragover = (e) => { e.preventDefault(); dropZone.classList.add('active'); };
+        dropZone.ondragleave = () => dropZone.classList.remove('active');
+        dropZone.ondrop = (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('active');
+            handleFile(e.dataTransfer.files[0]);
+        };
+        fileInput.onchange = (e) => handleFile(e.target.files[0]);
+
+        function handleFile(file) {
+            if (!file || !file.name.endsWith('.json')) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    renderArchive(data);
+                } catch (err) { alert("Error parsing JSON file."); }
+            };
+            reader.readAsText(file);
+        }
+
+        function renderArchive(data) {
+            document.getElementById('archive-content').classList.remove('hidden');
+            
+            // Set Theme
+            const body = document.body;
+            body.classList.remove('theme-throwdown', 'theme-swl', 'theme-vpc');
+            if (data.competition.includes('Throwdown')) body.classList.add('theme-throwdown');
+            else if (data.competition.includes('Lit')) body.classList.add('theme-swl');
+            else body.classList.add('theme-vpc');
+
+            // Set Meta Data
+            document.getElementById('comp-label').innerText = data.competition.replace('_', ' ');
+            document.getElementById('table-name').innerText = data.table;
+            document.getElementById('event-period').innerText = data.period;
+
+            // Render Winner Banner
+            const winner = data.results[0];
+            const winnerAvatar = winner.avatar || `${AVATAR_BASE}${winner.name.toLowerCase().replace(/\s+/g, '_')}.gif`;
+            document.getElementById('winner-banner').innerHTML = `
+                <div class="glass p-8 rounded-3xl border-2 accent-border flex items-center justify-between">
+                    <div class="flex items-center gap-6">
+                        <div class="relative">
+                            <img src="${winnerAvatar}" class="w-24 h-24 rounded-full border-4 accent-border" onerror="this.src='https://via.placeholder.com/96?text=?'">
+                            <span class="absolute -top-2 -right-2 text-4xl">👑</span>
+                        </div>
+                        <div>
+                            <div class="medieval text-xs accent-text uppercase tracking-widest">Tournament Champion</div>
+                            <div class="text-4xl font-black italic uppercase">${winner.name}</div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-xs text-gray-500 font-bold uppercase">Winning Score</div>
+                        <div class="text-3xl font-mono font-bold accent-text">${winner.high.toLocaleString()}</div>
+                    </div>
+                </div>`;
+
+            // Render Achievements
+            const awards = data.awards || {};
+            const card = (icon, title, name, color) => `
+                <div class="glass p-4 rounded-xl border-l-4 ${color}">
+                    <div class="medieval text-[10px] text-gray-500 uppercase">${icon} ${title}</div>
+                    <div class="font-bold text-sm uppercase italic text-white">${name || 'N/A'}</div>
+                </div>`;
+            
+            document.getElementById('achievements').innerHTML = 
+                card("🔫", "Fast Draw", awards.fast_draw, "border-red-500") +
+                card("🎯", "Sharpshooter", awards.sharpshooter, "border-orange-500") +
+                card("📈", "Most Improved", awards.most_improved, "border-green-500") +
+                card("🔄", "Comeback Kid", awards.comeback_kid, "border-purple-500") +
+                card("🕹️", "Most Played", awards.most_played, "border-blue-500") +
+                card("☢️", "Burns Award", awards.burns_award, "border-yellow-500");
+
+            // Render Leaderboard
+            document.getElementById('leaderboard').innerHTML = data.results.map((p, i) => `
+                <div class="flex items-center justify-between px-8 py-4 hover:bg-white/5 transition">
+                    <div class="flex items-center gap-4">
+                        <span class="w-6 font-black text-xl italic ${i < 3 ? 'accent-text' : 'text-gray-700'}">${i+1}</span>
+                        <img src="${p.avatar || AVATAR_BASE + p.name.toLowerCase().replace(/\s+/g, '_') + '.gif'}" class="w-10 h-10 rounded-full border border-white/10" onerror="this.src='https://via.placeholder.com/40?text=?'">
+                        <span class="font-bold text-sm text-gray-200">${p.name}</span>
+                    </div>
+                    <span class="font-mono font-bold ${i === 0 ? 'text-yellow-400' : 'text-gray-400'}">${p.high.toLocaleString()}</span>
+                </div>`).join('');
+        }
+    </script>
+</body>
+</html>
