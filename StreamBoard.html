@@ -7,13 +7,27 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Encode+Sans:wght@400;700;900&family=MedievalSharp&display=swap" rel="stylesheet">
     <style>
-        /* 1920x1080 Locked Layout */
-        body { 
-            width: 1920px; height: 1080px; 
-            margin: 0; overflow: hidden; 
-            background: #020617; color: white;
+        /* Base Styling */
+        body, html { 
+            margin: 0; padding: 0; width: 100%; height: 100%; 
+            overflow: hidden; background: #020617; color: white;
             font-family: 'Encode Sans', sans-serif;
         }
+
+        /* Virtual Workspace */
+        #scaling-container {
+            width: 1920px;
+            height: 1080px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform-origin: center center;
+            display: flex;
+            flex-direction: column;
+            padding: 60px;
+            box-sizing: border-box;
+        }
+
         .medieval { font-family: 'MedievalSharp', cursive; }
         .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
         .theme-throwdown { --accent: #f97316; }
@@ -21,7 +35,7 @@
         .accent-text { color: var(--accent, #94a3b8); }
         .accent-border { border-color: var(--accent, #334155); }
 
-        /* Animation Keyframes */
+        /* Animation logic */
         @keyframes scrollUp {
             from { transform: translateY(0); }
             to { transform: translateY(var(--scroll-dist)); }
@@ -31,41 +45,41 @@
 </head>
 <body>
 
-    <div id="output-wrapper" class="p-12 h-full flex flex-col gap-8">
-        <div class="flex justify-between items-end border-b-4 accent-border pb-6">
+    <div id="scaling-container">
+        <div class="flex justify-between items-end border-b-4 accent-border pb-8 mb-8">
             <div>
-                <div id="comp-label" class="medieval text-xl accent-text uppercase tracking-widest mb-2">Tournament Results</div>
-                <h1 id="table-name" class="text-7xl font-black italic uppercase leading-none">Loading Table...</h1>
+                <div id="comp-label" class="medieval text-2xl accent-text uppercase tracking-widest mb-2">Tournament Results</div>
+                <h1 id="table-name" class="text-8xl font-black italic uppercase leading-none">Loading Table...</h1>
             </div>
             <div class="text-right">
-                <p id="event-period" class="text-2xl text-gray-500 font-bold mb-1"></p>
-                <div class="text-sm font-black uppercase tracking-tighter bg-white/10 px-4 py-1 rounded-full">Official Finals</div>
+                <p id="event-period" class="text-3xl text-gray-500 font-bold mb-1"></p>
+                <div class="text-lg font-black uppercase tracking-tighter bg-white/10 px-6 py-2 rounded-full">Official Finals</div>
             </div>
         </div>
 
-        <div class="grid grid-cols-12 gap-8 flex-1 overflow-hidden">
-            <div class="col-span-5 flex flex-col gap-6">
+        <div class="grid grid-cols-12 gap-10 flex-1 overflow-hidden">
+            <div class="col-span-5 flex flex-col gap-8">
                 <div id="winner-banner"></div>
-                <div id="achievements" class="grid grid-cols-2 gap-4"></div>
+                <div id="achievements" class="grid grid-cols-2 gap-6"></div>
                 
-                <div class="glass rounded-3xl p-8 mt-auto">
-                    <div class="text-xs font-black text-gray-500 uppercase tracking-[0.4em] mb-4">Competition Stats</div>
+                <div class="glass rounded-3xl p-10 mt-auto">
+                    <div class="text-sm font-black text-gray-500 uppercase tracking-[0.4em] mb-6">Competition Stats</div>
                     <div class="flex justify-between items-center">
                         <div>
-                            <div class="text-4xl font-black italic" id="total-players">0</div>
-                            <div class="text-[10px] uppercase font-bold text-gray-400">Total Players</div>
+                            <div class="text-6xl font-black italic" id="total-players">0</div>
+                            <div class="text-xs uppercase font-bold text-gray-400">Total Players</div>
                         </div>
                         <div class="text-right">
-                            <div class="text-4xl font-black italic accent-text" id="avg-score">0</div>
-                            <div class="text-[10px] uppercase font-bold text-gray-400">Average Score</div>
+                            <div class="text-6xl font-black italic accent-text" id="avg-score">0</div>
+                            <div class="text-xs uppercase font-bold text-gray-400">Average Score</div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="col-span-7 glass rounded-3xl relative overflow-hidden">
-                <div id="scroll-container" class="divide-y divide-white/5 p-4">
-                    <div id="leaderboard" class="flex flex-col"></div>
+            <div class="col-span-7 glass rounded-[40px] relative overflow-hidden border border-white/5">
+                <div id="leaderboard-viewport" class="h-full p-8">
+                    <div id="leaderboard" class="flex flex-col gap-4"></div>
                 </div>
             </div>
         </div>
@@ -74,12 +88,23 @@
     <script>
         const AVATAR_BASE = "http://vpinhub.github.io/special-when-lit-leaderboard/img/";
 
+        // Automatic Scaling Logic
+        function handleScaling() {
+            const container = document.getElementById('scaling-container');
+            const scaleX = window.innerWidth / 1920;
+            const scaleY = window.innerHeight / 1080;
+            const scale = Math.min(scaleX, scaleY);
+            container.style.transform = `translate(-50%, -50%) scale(${scale})`;
+        }
+
+        window.addEventListener('resize', handleScaling);
+
         async function init() {
             const params = new URLSearchParams(window.location.search);
             const jsonFile = params.get('json');
             
             if (!jsonFile) {
-                document.body.innerHTML = "<div class='h-full flex items-center justify-center text-3xl font-black uppercase italic text-gray-700'>No JSON Specified (?json=filename.json)</div>";
+                document.body.innerHTML = "<div class='h-full flex items-center justify-center text-4xl font-black uppercase italic text-gray-700'>No JSON Specified (?json=filename.json)</div>";
                 return;
             }
 
@@ -87,6 +112,7 @@
                 const res = await fetch(`json/${jsonFile}`);
                 const data = await res.json();
                 renderFinals(data, params.has('animate'));
+                handleScaling(); // Apply scale after content is ready
             } catch (err) {
                 console.error(err);
             }
@@ -105,22 +131,22 @@
 
             const winner = players[0];
             document.getElementById('winner-banner').innerHTML = `
-                <div class="glass p-10 rounded-3xl border-4 accent-border text-center">
-                    <div class="relative inline-block mb-6">
-                        <img src="${AVATAR_BASE}${winner.name.toLowerCase().replace(/\s+/g, '_')}.gif" class="w-48 h-48 rounded-full border-8 accent-border mx-auto shadow-2xl" onerror="this.src='https://via.placeholder.com/192?text=?'">
-                        <span class="absolute -top-4 -right-4 text-7xl">👑</span>
+                <div class="glass p-12 rounded-[40px] border-4 accent-border text-center shadow-2xl">
+                    <div class="relative inline-block mb-8">
+                        <img src="${AVATAR_BASE}${winner.name.toLowerCase().replace(/\s+/g, '_')}.gif" class="w-56 h-56 rounded-full border-8 accent-border mx-auto shadow-2xl" onerror="this.src='https://via.placeholder.com/224?text=?'">
+                        <span class="absolute -top-4 -right-4 text-8xl">👑</span>
                     </div>
-                    <div class="medieval text-lg accent-text uppercase tracking-[0.3em] mb-2">Grand Champion</div>
-                    <div class="text-6xl font-black italic uppercase">${winner.name}</div>
-                    <div class="text-3xl font-mono font-bold text-gray-500 mt-4">${winner.high.toLocaleString()}</div>
+                    <div class="medieval text-xl accent-text uppercase tracking-[0.3em] mb-4">Grand Champion</div>
+                    <div class="text-7xl font-black italic uppercase mb-4">${winner.name}</div>
+                    <div class="text-4xl font-mono font-bold text-gray-500">${winner.high.toLocaleString()}</div>
                 </div>`;
 
             const a = data.awards || {};
             const card = (icon, title, name, detail, color) => `
-                <div class="glass p-4 rounded-2xl border-l-4 ${color}">
-                    <div class="medieval text-[10px] text-gray-500 uppercase mb-1">${icon} ${title}</div>
-                    <div class="font-bold text-xl uppercase italic text-white truncate">${name || 'N/A'}</div>
-                    <div class="text-xs text-gray-400 truncate">${detail || ''}</div>
+                <div class="glass p-6 rounded-3xl border-l-8 ${color}">
+                    <div class="medieval text-xs text-gray-500 uppercase mb-2">${icon} ${title}</div>
+                    <div class="font-bold text-2xl uppercase italic text-white truncate">${name || 'N/A'}</div>
+                    <div class="text-sm text-gray-400 truncate mt-1">${detail || ''}</div>
                 </div>`;
 
             document.getElementById('achievements').innerHTML = 
@@ -129,25 +155,23 @@
                 card("📈", "Most Improved", a.most_improved, a.most_improved_detail, "border-green-500") +
                 card("🔄", "Comeback Kid", a.comeback_kid, a.comeback_kid_detail, "border-purple-500");
 
-            // Leaderboard Generation
             const lbContainer = document.getElementById('leaderboard');
             lbContainer.innerHTML = players.map((p, i) => `
-                <div class="flex items-center justify-between p-6 bg-white/5 rounded-2xl mb-2">
-                    <div class="flex items-center gap-6">
-                        <span class="text-4xl font-black italic w-12 ${i < 3 ? 'accent-text' : 'text-gray-700'}">${i+1}</span>
-                        <img src="${AVATAR_BASE}${p.name.toLowerCase().replace(/\s+/g, '_')}.gif" class="w-16 h-16 rounded-full border-2 border-white/10" onerror="this.src='https://via.placeholder.com/64?text=?'">
-                        <span class="text-2xl font-bold">${p.name}</span>
+                <div class="flex items-center justify-between p-7 bg-white/5 rounded-3xl border border-white/5">
+                    <div class="flex items-center gap-8">
+                        <span class="text-5xl font-black italic w-14 ${i < 3 ? 'accent-text' : 'text-gray-700'}">${i+1}</span>
+                        <img src="${AVATAR_BASE}${p.name.toLowerCase().replace(/\s+/g, '_')}.gif" class="w-20 h-20 rounded-full border-2 border-white/10" onerror="this.src='https://via.placeholder.com/80?text=?'">
+                        <span class="text-3xl font-bold">${p.name}</span>
                     </div>
-                    <span class="text-3xl font-mono font-bold ${i === 0 ? 'text-yellow-400' : 'text-gray-400'}">${p.high.toLocaleString()}</span>
+                    <span class="text-4xl font-mono font-bold ${i === 0 ? 'text-yellow-400' : 'text-gray-400'}">${p.high.toLocaleString()}</span>
                 </div>`).join('');
 
-            // Animation Logic
-            if (shouldAnimate && players.length > 8) {
+            if (shouldAnimate && players.length > 6) {
                 const lbHeight = lbContainer.offsetHeight;
-                const viewHeight = lbContainer.parentElement.offsetHeight;
+                const viewHeight = document.getElementById('leaderboard-viewport').offsetHeight;
                 const scrollDist = -(lbHeight - viewHeight + 100);
                 document.documentElement.style.setProperty('--scroll-dist', `${scrollDist}px`);
-                document.documentElement.style.setProperty('--scroll-speed', `${players.length * 2}s`);
+                document.documentElement.style.setProperty('--scroll-speed', `${players.length * 1.5}s`);
                 lbContainer.classList.add('scrolling-content');
             }
         }
