@@ -28,7 +28,6 @@
 <main class="container mx-auto px-6 max-w-7xl">
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-        <!-- THURSDAY THROWDOWN -->
         <a href="throwdown.html" class="tournament-card glass rounded-3xl p-8 border-t-4 border-orange-500 glow-orange flex flex-col justify-between">
             <div>
                 <div class="flex justify-between items-start mb-6">
@@ -44,7 +43,6 @@
             </div>
         </a>
 
-        <!-- SPECIAL WHEN LIT -->
         <a href="special_when_lit.html" class="tournament-card glass rounded-3xl p-8 border-t-4 border-fuchsia-600 glow-fuchsia flex flex-col justify-between">
             <div>
                 <div class="flex justify-between items-start mb-6">
@@ -60,8 +58,7 @@
             </div>
         </a>
 
-        <!-- COMPETITION CORNER -->
-        <a href="competition_corner" class="tournament-card glass rounded-3xl p-8 border-t-4 border-indigo-500 glow-indigo flex flex-col justify-between">
+        <a href="competition_corner.html" class="tournament-card glass rounded-3xl p-8 border-t-4 border-indigo-500 glow-indigo flex flex-col justify-between">
             <div>
                 <div class="flex justify-between items-start mb-6">
                     <span class="bg-indigo-500/20 text-indigo-400 text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full">Community Collab</span>
@@ -105,7 +102,7 @@ function renderPreview(targetId, tableName, leader, colorClass, avatarUrl, usern
     document.getElementById(targetId).innerHTML = `
         <div class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">Current Table</div>
         <div class="text-sm font-bold leading-snug mb-5 line-clamp-2 break-words">${tableName}</div>
-        <div class="flex items-center gap-3 bg-white/5 p-3 rounded-xl border border-white/5">
+        <div class="flex items-center gap-3 bg-white/5 p-3 rounded-xl border border-white/10">
             <img src="${avatarUrl}" class="w-8 h-8 rounded-full border border-white/10"
                  onerror="this.src='https://via.placeholder.com/32?text=?'">
             <div class="overflow-hidden">
@@ -122,14 +119,11 @@ async function fetchIScoredPreview(roomId, targetId, colorClass) {
         let r = await fetch(url);
         if (!r.ok) r = await fetch(PROXY + encodeURIComponent(url));
         const data = await r.json();
-
         const game = data.find(g => JSON.stringify(g).includes('game=')) || data[0];
         const vpsTable = getTableDetails(game);
         const tableName = formatTableName(vpsTable, game.longName);
-
         const leader = [...game.scores].map(s => ({...s, numScore: parseInt(s.score,10)||0}))
             .sort((a,b)=>b.numScore-a.numScore)[0];
-
         const avatar = `${AVATAR_BASE}${leader.name.toLowerCase().replace(/\s+/g,'_')}.gif`;
         renderPreview(targetId, tableName, leader, colorClass, avatar);
     } catch {}
@@ -142,10 +136,14 @@ async function fetchVPCPreview() {
         if (!r.ok) r = await fetch(PROXY + encodeURIComponent(url));
         const data = await r.json();
 
-        const tableName = `${data.table} (${data.manufacturer || "Unknown"} ${data.year || ""})`;
+        // FIX: Only append manufacturer/year if not already present in the title
+        let tableName = data.table;
+        if (!tableName.includes('(')) {
+            tableName += ` (${data.manufacturer || "Unknown"} ${data.year || ""})`;
+        }
+
         const leader = [...data.scores].map(s=>({...s,numScore:parseInt(s.score,10)||0}))
             .sort((a,b)=>b.numScore-a.numScore)[0];
-
         renderPreview('vpc-preview', tableName, leader, 'text-indigo-400', leader.userAvatarUrl, 'username');
     } catch {}
 }
