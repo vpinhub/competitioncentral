@@ -14,7 +14,20 @@
         .theme-swl { --accent: #d946ef; background-color: #0f0a0f; }
         .accent-text { color: var(--accent, #94a3b8); }
         .accent-border { border-color: var(--accent, #334155); }
-        select { background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e"); background-position: right 0.5rem center; background-repeat: no-repeat; background-size: 1.5em 1.5em; padding-right: 2.5rem; -webkit-appearance: none; -moz-appearance: none; appearance: none; }
+        
+        select { 
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e"); 
+            background-position: right 0.5rem center; 
+            background-repeat: no-repeat; 
+            background-size: 1.5em 1.5em; 
+            padding-right: 2.5rem; 
+            -webkit-appearance: none; 
+            -moz-appearance: none; 
+            appearance: none; 
+        }
+        
+        select option { background-color: #0f172a; color: white; padding: 10px; }
+        select:focus { border-color: var(--accent, #f97316); box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.1); }
     </style>
 </head>
 <body class="min-h-screen">
@@ -31,13 +44,13 @@
                 </div>
 
                 <div class="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
-                    <select id="type-filter" onchange="populateArchiveDropdown()" class="bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-xs font-bold uppercase tracking-widest outline-none focus:border-orange-500 cursor-pointer min-w-[200px]">
+                    <select id="type-filter" onchange="populateArchiveDropdown()" class="bg-slate-900 border border-white/10 rounded-xl px-4 py-2 text-xs font-bold uppercase tracking-widest outline-none cursor-pointer min-w-[200px] text-white">
                         <option value="all">All Competitions</option>
                         <option value="Thursday_Throwdown">Thursday Throwdown</option>
                         <option value="Special_When_Lit">Special When Lit</option>
                     </select>
 
-                    <select id="archive-dropdown" onchange="handleSelection()" class="bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-xs font-bold uppercase tracking-widest outline-none focus:border-orange-500 cursor-pointer min-w-[280px]">
+                    <select id="archive-dropdown" onchange="handleSelection()" class="bg-slate-900 border border-white/10 rounded-xl px-4 py-2 text-xs font-bold uppercase tracking-widest outline-none cursor-pointer min-w-[280px] text-white">
                         <option value="">Select an Event...</option>
                     </select>
                 </div>
@@ -57,9 +70,26 @@
                     <h2 id="table-name" class="text-4xl font-black uppercase italic mb-2">Table Name</h2>
                     <p id="event-period" class="text-gray-400 font-bold"></p>
                 </div>
+                
                 <div id="winner-banner"></div>
                 <div id="achievements" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
+
+                <div id="summary-card" class="glass rounded-2xl p-6 border-l-4 accent-border flex flex-col md:flex-row justify-around items-center text-center gap-6">
+                    <div>
+                        <div class="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-1">Total Competitors</div>
+                        <div id="total-players" class="text-2xl font-black italic">0</div>
+                    </div>
+                    <div class="hidden md:block w-px h-10 bg-white/10"></div>
+                    <div>
+                        <div class="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-1">Room Average Score</div>
+                        <div id="avg-score" class="text-2xl font-black italic accent-text">0</div>
+                    </div>
+                </div>
+
                 <div class="glass rounded-3xl overflow-hidden shadow-2xl">
+                    <div class="bg-white/5 px-8 py-4 border-b border-white/10">
+                        <span class="text-xs font-bold uppercase tracking-widest text-gray-400">Final Standings</span>
+                    </div>
                     <div id="leaderboard" class="divide-y divide-white/5"></div>
                 </div>
             </div>
@@ -72,7 +102,6 @@
 
         async function init() {
             try {
-                // Fetch the manifest from the published GitHub Pages folder
                 const response = await fetch('json/list.json');
                 if (!response.ok) throw new Error();
                 allFiles = await response.json();
@@ -90,7 +119,7 @@
             filtered.forEach(f => {
                 const cleanName = f.name.replace('.json', '').replace(/_/g, ' ');
                 const option = document.createElement('option');
-                option.value = f.path; // This uses the relative path from list.json
+                option.value = f.path;
                 option.textContent = cleanName;
                 dropdown.appendChild(option);
             });
@@ -104,14 +133,25 @@
         async function loadArchiveData(filePath) {
             const res = await fetch(filePath);
             const data = await res.json();
+            
             document.getElementById('empty-state').classList.add('hidden');
             document.getElementById('archive-content').classList.remove('hidden');
-            document.body.className = data.competition.includes('Throwdown') ? 'theme-throwdown' : 'theme-swl';
+            
+            const isThrowdown = data.competition.includes('Throwdown');
+            document.body.className = isThrowdown ? 'theme-throwdown' : 'theme-swl';
+            
             document.getElementById('comp-label').innerText = data.competition.replace(/_/g, ' ');
             document.getElementById('table-name').innerText = data.table;
             document.getElementById('event-period').innerText = data.period;
 
-            const winner = data.results[0];
+            // Update Summary Stats
+            const players = data.results || [];
+            document.getElementById('total-players').innerText = players.length;
+            const totalScore = players.reduce((sum, p) => sum + (p.high || 0), 0);
+            const avg = players.length > 0 ? Math.round(totalScore / players.length) : 0;
+            document.getElementById('avg-score').innerText = avg.toLocaleString();
+
+            const winner = players[0];
             document.getElementById('winner-banner').innerHTML = `
                 <div class="glass p-6 rounded-2xl border-2 accent-border flex flex-col md:flex-row items-center justify-between gap-6 shadow-2xl">
                     <div class="flex items-center gap-6">
@@ -131,10 +171,17 @@
                 </div>`;
 
             const a = data.awards || {};
-            const card = (icon, title, name, color) => `<div class="glass p-4 rounded-xl border-l-4 ${color}"><div class="medieval text-[10px] text-gray-400 uppercase">${icon} ${title}</div><div class="font-bold text-sm uppercase italic text-white">${name || 'N/A'}</div></div>`;
-            document.getElementById('achievements').innerHTML = card("🔫", "Fast Draw", a.fast_draw, "border-red-500") + card("🎯", "Sharpshooter", a.sharpshooter, "border-orange-500") + card("📈", "Most Improved", a.most_improved, "border-green-500") + card("🔄", "Comeback Kid", a.comeback_kid, "border-purple-500") + card("🕹️", "Most Played", a.most_played, "border-blue-500") + card("☢️", "Burns Award", a.burns_award, "border-yellow-500");
+            const card = (icon, title, name, color) => `<div class="glass p-4 rounded-xl border-l-4 ${color}"><div class="medieval text-[10px] text-gray-500 uppercase">${icon} ${title}</div><div class="font-bold text-sm uppercase italic text-white">${name || 'N/A'}</div></div>`;
+            
+            document.getElementById('achievements').innerHTML = 
+                card("🔫", "Fast Draw", a.fast_draw, "border-red-500") + 
+                card("🎯", "Sharpshooter", a.sharpshooter, "border-orange-500") + 
+                card("📈", "Most Improved", a.most_improved, "border-green-500") + 
+                card("🔄", "Comeback Kid", a.comeback_kid, "border-purple-500") + 
+                card("🕹️", "Most Played", a.most_played, "border-blue-500") + 
+                card("☢️", "C. Montgomery Burns Award", a.burns_award, "border-yellow-500");
 
-            document.getElementById('leaderboard').innerHTML = data.results.map((p, i) => `
+            document.getElementById('leaderboard').innerHTML = players.map((p, i) => `
                 <div class="flex items-center justify-between px-8 py-4 hover:bg-white/5 transition">
                     <div class="flex items-center gap-4">
                         <span class="w-6 font-black text-xl italic ${i < 3 ? 'accent-text' : 'text-gray-700'}">${i+1}</span>
