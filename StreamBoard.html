@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VPINHUB | Stream Asset Output</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Encode+Sans:wght@400;700;900&family=MedievalSharp&display=swap" rel="stylesheet">
+    <style>
+        /* 1920x1080 Locked Layout */
+        body { 
+            width: 1920px; height: 1080px; 
+            margin: 0; overflow: hidden; 
+            background: #020617; color: white;
+            font-family: 'Encode Sans', sans-serif;
+        }
+        .medieval { font-family: 'MedievalSharp', cursive; }
+        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
+        .theme-throwdown { --accent: #f97316; }
+        .theme-swl { --accent: #d946ef; }
+        .accent-text { color: var(--accent, #94a3b8); }
+        .accent-border { border-color: var(--accent, #334155); }
+
+        /* Animation Keyframes */
+        @keyframes scrollUp {
+            from { transform: translateY(0); }
+            to { transform: translateY(var(--scroll-dist)); }
+        }
+        .scrolling-content { animation: scrollUp var(--scroll-speed) linear infinite; }
+    </style>
+</head>
+<body>
+
+    <div id="output-wrapper" class="p-12 h-full flex flex-col gap-8">
+        <div class="flex justify-between items-end border-b-4 accent-border pb-6">
+            <div>
+                <div id="comp-label" class="medieval text-xl accent-text uppercase tracking-widest mb-2">Tournament Results</div>
+                <h1 id="table-name" class="text-7xl font-black italic uppercase leading-none">Loading Table...</h1>
+            </div>
+            <div class="text-right">
+                <p id="event-period" class="text-2xl text-gray-500 font-bold mb-1"></p>
+                <div class="text-sm font-black uppercase tracking-tighter bg-white/10 px-4 py-1 rounded-full">Official Finals</div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-12 gap-8 flex-1 overflow-hidden">
+            <div class="col-span-5 flex flex-col gap-6">
+                <div id="winner-banner"></div>
+                <div id="achievements" class="grid grid-cols-2 gap-4"></div>
+                
+                <div class="glass rounded-3xl p-8 mt-auto">
+                    <div class="text-xs font-black text-gray-500 uppercase tracking-[0.4em] mb-4">Competition Stats</div>
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <div class="text-4xl font-black italic" id="total-players">0</div>
+                            <div class="text-[10px] uppercase font-bold text-gray-400">Total Players</div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-4xl font-black italic accent-text" id="avg-score">0</div>
+                            <div class="text-[10px] uppercase font-bold text-gray-400">Average Score</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-span-7 glass rounded-3xl relative overflow-hidden">
+                <div id="scroll-container" class="divide-y divide-white/5 p-4">
+                    <div id="leaderboard" class="flex flex-col"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const AVATAR_BASE = "http://vpinhub.github.io/special-when-lit-leaderboard/img/";
+
+        async function init() {
+            const params = new URLSearchParams(window.location.search);
+            const jsonFile = params.get('json');
+            
+            if (!jsonFile) {
+                document.body.innerHTML = "<div class='h-full flex items-center justify-center text-3xl font-black uppercase italic text-gray-700'>No JSON Specified (?json=filename.json)</div>";
+                return;
+            }
+
+            try {
+                const res = await fetch(`json/${jsonFile}`);
+                const data = await res.json();
+                renderFinals(data, params.has('animate'));
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        function renderFinals(data, shouldAnimate) {
+            document.body.className = data.competition.includes('Throwdown') ? 'theme-throwdown' : 'theme-swl';
+            document.getElementById('comp-label').innerText = data.competition.replace(/_/g, ' ');
+            document.getElementById('table-name').innerText = data.table;
+            document.getElementById('event-period').innerText = data.period;
+
+            const players = data.results || [];
+            document.getElementById('total-players').innerText = players.length;
+            const totalHigh = players.reduce((s, p) => s + (p.high || 0), 0);
+            document.getElementById('avg-score').innerText = Math.round(totalHigh / players.length).toLocaleString();
+
+            const winner = players[0];
+            document.getElementById('winner-banner').innerHTML = `
+                <div class="glass p-10 rounded-3xl border-4 accent-border text-center">
+                    <div class="relative inline-block mb-6">
+                        <img src="${AVATAR_BASE}${winner.name.toLowerCase().replace(/\s+/g, '_')}.gif" class="w-48 h-48 rounded-full border-8 accent-border mx-auto shadow-2xl" onerror="this.src='https://via.placeholder.com/192?text=?'">
+                        <span class="absolute -top-4 -right-4 text-7xl">👑</span>
+                    </div>
+                    <div class="medieval text-lg accent-text uppercase tracking-[0.3em] mb-2">Grand Champion</div>
+                    <div class="text-6xl font-black italic uppercase">${winner.name}</div>
+                    <div class="text-3xl font-mono font-bold text-gray-500 mt-4">${winner.high.toLocaleString()}</div>
+                </div>`;
+
+            const a = data.awards || {};
+            const card = (icon, title, name, detail, color) => `
+                <div class="glass p-4 rounded-2xl border-l-4 ${color}">
+                    <div class="medieval text-[10px] text-gray-500 uppercase mb-1">${icon} ${title}</div>
+                    <div class="font-bold text-xl uppercase italic text-white truncate">${name || 'N/A'}</div>
+                    <div class="text-xs text-gray-400 truncate">${detail || ''}</div>
+                </div>`;
+
+            document.getElementById('achievements').innerHTML = 
+                card("🔫", "Fast Draw", a.fast_draw, a.fast_draw_detail, "border-red-500") +
+                card("🎯", "Sharpshooter", a.sharpshooter, a.sharpshooter_detail, "border-orange-500") +
+                card("📈", "Most Improved", a.most_improved, a.most_improved_detail, "border-green-500") +
+                card("🔄", "Comeback Kid", a.comeback_kid, a.comeback_kid_detail, "border-purple-500");
+
+            // Leaderboard Generation
+            const lbContainer = document.getElementById('leaderboard');
+            lbContainer.innerHTML = players.map((p, i) => `
+                <div class="flex items-center justify-between p-6 bg-white/5 rounded-2xl mb-2">
+                    <div class="flex items-center gap-6">
+                        <span class="text-4xl font-black italic w-12 ${i < 3 ? 'accent-text' : 'text-gray-700'}">${i+1}</span>
+                        <img src="${AVATAR_BASE}${p.name.toLowerCase().replace(/\s+/g, '_')}.gif" class="w-16 h-16 rounded-full border-2 border-white/10" onerror="this.src='https://via.placeholder.com/64?text=?'">
+                        <span class="text-2xl font-bold">${p.name}</span>
+                    </div>
+                    <span class="text-3xl font-mono font-bold ${i === 0 ? 'text-yellow-400' : 'text-gray-400'}">${p.high.toLocaleString()}</span>
+                </div>`).join('');
+
+            // Animation Logic
+            if (shouldAnimate && players.length > 8) {
+                const lbHeight = lbContainer.offsetHeight;
+                const viewHeight = lbContainer.parentElement.offsetHeight;
+                const scrollDist = -(lbHeight - viewHeight + 100);
+                document.documentElement.style.setProperty('--scroll-dist', `${scrollDist}px`);
+                document.documentElement.style.setProperty('--scroll-speed', `${players.length * 2}s`);
+                lbContainer.classList.add('scrolling-content');
+            }
+        }
+        init();
+    </script>
+</body>
+</html>
