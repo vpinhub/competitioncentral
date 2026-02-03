@@ -1,16 +1,22 @@
 {
     "competition": "Thursday_Throwdown",
-    "date_exported": "2026-02-03T19:12:25.529Z",
+    "date_exported": "2026-02-03T19:49:47.401Z",
     "period": "1/29/2026 - 2/5/2026",
     "table": "THE GOONIES NEVER SAY DIE PINBALL",
     "awards": {
         "winner": "ED-209",
         "fast_draw": "Mr J",
+        "fast_draw_detail": "First Entry",
         "sharpshooter": "ED-209",
+        "sharpshooter_detail": "Top Average",
         "most_improved": "TheEternalGremmie",
+        "most_improved_detail": "Gap: +41,345,420",
         "comeback_kid": "TheEternalGremmie",
+        "comeback_kid_detail": "Gain: +41,345,420",
         "most_played": "TheEternalGremmie",
-        "burns_award": "LexOnTilt"
+        "most_played_detail": "7 Games",
+        "burns_award": "Izz",
+        "burns_award_detail": "Excellent!"
     },
     "results": [
         {
