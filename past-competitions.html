@@ -66,28 +66,28 @@
                 <div class="text-center">
                     <div id="comp-label" class="inline-block px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-white/10 mb-4">Competition</div>
                     <h2 id="table-name" class="text-4xl font-black uppercase italic mb-2">Table Name</h2>
-                    <p id="event-period" class="text-gray-400 font-bold"></p>
+                    
+                    <div class="flex items-center justify-center gap-3">
+                        <p id="event-period" class="text-gray-400 font-bold"></p>
+                        <button id="share-btn" class="bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg px-3 py-1 text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2">
+                            <span>🔗</span> <span id="share-btn-text">Share</span>
+                        </button>
+                    </div>
                 </div>
                 
                 <div id="winner-banner"></div>
                 <div id="achievements" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
 
-                <div class="flex flex-col md:flex-row gap-4">
-                    <div id="summary-card" class="glass rounded-2xl p-6 border-l-4 accent-border flex-1 flex flex-col md:flex-row justify-around items-center text-center gap-6">
-                        <div>
-                            <div class="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-1">Competitors</div>
-                            <div id="total-players" class="text-2xl font-black italic">0</div>
-                        </div>
-                        <div class="hidden md:block w-px h-10 bg-white/10"></div>
-                        <div>
-                            <div class="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-1">Average Score</div>
-                            <div id="avg-score" class="text-2xl font-black italic accent-text">0</div>
-                        </div>
+                <div id="summary-card" class="glass rounded-2xl p-6 border-l-4 accent-border flex flex-col md:flex-row justify-around items-center text-center gap-6">
+                    <div>
+                        <div class="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-1">Competitors</div>
+                        <div id="total-players" class="text-2xl font-black italic">0</div>
                     </div>
-                    <button id="share-btn" class="glass rounded-2xl px-8 py-6 border-2 border-white/5 hover:border-white/20 transition-all group flex flex-col items-center justify-center">
-                        <span class="text-xl group-active:scale-90 transition-transform">🔗</span>
-                        <span class="text-[10px] font-black uppercase tracking-widest text-gray-400 mt-2">Share Record</span>
-                    </button>
+                    <div class="hidden md:block w-px h-10 bg-white/10"></div>
+                    <div>
+                        <div class="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-1">Average Score</div>
+                        <div id="avg-score" class="text-2xl font-black italic accent-text">0</div>
+                    </div>
                 </div>
 
                 <div class="glass rounded-3xl overflow-hidden shadow-2xl">
@@ -103,7 +103,6 @@
     <script>
         const AVATAR_BASE = "http://vpinhub.github.io/special-when-lit-leaderboard/img/";
         let allFiles = [];
-        let currentLoadedPath = "";
 
         async function init() {
             try {
@@ -112,12 +111,15 @@
                 allFiles = await response.json();
                 populateArchiveDropdown();
                 
-                // Deep Link Listener
                 const params = new URLSearchParams(window.location.search);
                 const jsonParam = params.get('json');
                 if (jsonParam) {
                     const targetFile = allFiles.find(f => f.name === jsonParam || f.path.includes(jsonParam));
-                    if (targetFile) loadArchiveData(targetFile.path);
+                    if (targetFile) {
+                        loadArchiveData(targetFile.path);
+                        // Hide share button if page is loaded via a share link
+                        document.getElementById('share-btn').classList.add('hidden');
+                    }
                 }
             } catch (err) {
                 document.getElementById('archive-dropdown').innerHTML = `<option>No Archives Found</option>`;
@@ -140,13 +142,16 @@
 
         function handleSelection() {
             const path = document.getElementById('archive-dropdown').value;
-            if (path) loadArchiveData(path);
+            if (path) {
+                loadArchiveData(path);
+                // Ensure share button is visible when manually selecting
+                document.getElementById('share-btn').classList.remove('hidden');
+            }
         }
 
         async function loadArchiveData(filePath) {
             const res = await fetch(filePath);
             const data = await res.json();
-            currentLoadedPath = filePath; // Track for sharing
             
             document.getElementById('empty-state').classList.add('hidden');
             document.getElementById('archive-content').classList.remove('hidden');
@@ -214,9 +219,9 @@
                 const fileName = filePath.split('/').pop();
                 const shareUrl = `${window.location.origin}${window.location.pathname}?json=${fileName}`;
                 navigator.clipboard.writeText(shareUrl).then(() => {
-                    const btnText = this.querySelector('span:last-child');
+                    const btnText = document.getElementById('share-btn-text');
                     const originalText = btnText.innerText;
-                    btnText.innerText = "Link Copied!";
+                    btnText.innerText = "Copied!";
                     setTimeout(() => btnText.innerText = originalText, 2000);
                 });
             };
