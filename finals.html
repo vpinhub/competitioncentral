@@ -4,123 +4,61 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>VPINHUB | Stream Finals Asset</title>
-
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
 <link href="https://fonts.googleapis.com/css2?family=Encode+Sans:wght@400;700;900&family=MedievalSharp&display=swap" rel="stylesheet">
-
 <style>
-html, body {
-    margin: 0;
-    padding: 0;
-    width: 100%;
-    height: 100%;
-    background: #020617;
-    color: white;
-    font-family: 'Encode Sans', sans-serif;
-    overflow: hidden;
-}
-body.is-transparent { background: transparent !important; }
-body.is-transparent .glass { background: rgba(0,0,0,0.7); }
-
-.medieval { font-family: 'MedievalSharp', cursive; }
-.glass {
-    background: rgba(255,255,255,0.03);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(255,255,255,0.1);
-}
-
-.theme-throwdown { --accent:#f97316; }
-.theme-swl { --accent:#d946ef; }
-.accent-text { color: var(--accent,#94a3b8); }
-.accent-border { border-color: var(--accent,#334155); }
-
-#main-stage {
-    width: 100%;
-    height: 100%;
-    display:flex;
-    flex-direction:column;
-    padding: clamp(24px,3vh,60px);
-    box-sizing:border-box;
-}
-#main-stage * { min-height:0; }
-
-.render-mode { width:1920px!important; height:1080px!important; padding:60px!important; }
-.render-mode.banner { width:1200px!important; height:630px!important; padding:40px!important; }
-
-#selector-overlay {
-    position:fixed;
-    inset:0;
-    z-index:100;
-    background:#020617;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-}
-
-.admin-select {
-    background:#0f172a;
-    border:1px solid rgba(255,255,255,0.1);
-    color:white;
-    padding:.75rem;
-    border-radius:.75rem;
-    font-size:.875rem;
-    font-weight:700;
-    width:100%;
-    outline:none;
-}
-
-@keyframes scrollLoop {
-    0%,15% { transform:translateY(0); }
-    85%,100% { transform:translateY(var(--scroll-dist)); }
-}
-.scrolling-content {
-    animation: scrollLoop var(--scroll-speed) ease-in-out infinite alternate;
-}
+    html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: #020617; color: white; font-family: 'Encode Sans', sans-serif; overflow: hidden; }
+    body.is-transparent { background: transparent !important; }
+    body.is-transparent .glass { background: rgba(0,0,0,0.8); }
+    .medieval { font-family: 'MedievalSharp', cursive; }
+    .glass { background: rgba(255,255,255,0.03); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
+    .theme-throwdown { --accent:#f97316; }
+    .theme-swl { --accent:#d946ef; }
+    .accent-text { color: var(--accent,#94a3b8); }
+    .accent-border { border-color: var(--accent,#334155); }
+    #main-stage { width: 100%; height: 100%; display:flex; flex-direction:column; padding: 40px; box-sizing:border-box; }
+    .render-mode { width:1920px!important; height:1080px!important; position: absolute; top:0; left:0; z-index:-10; }
+    #selector-overlay { position:fixed; inset:0; z-index:100; background:#020617; display:flex; align-items:center; justify-content:center; }
+    .admin-select { background:#0f172a; border:1px solid rgba(255,255,255,0.1); color:white; padding:.75rem; border-radius:.75rem; font-size:.875rem; font-weight:700; width:100%; outline:none; }
+    @keyframes scrollLoop { 0%,15% { transform:translateY(0); } 85%,100% { transform:translateY(var(--scroll-dist)); } }
+    .scrolling-content { animation: scrollLoop var(--scroll-speed) ease-in-out infinite alternate; }
 </style>
 </head>
-
 <body>
 
 <div id="selector-overlay">
-    <div class="glass p-10 rounded-[40px] w-full max-w-2xl border-2 border-white/10">
+    <div class="glass p-10 rounded-[40px] w-full max-w-2xl border-2 border-white/10 shadow-2xl">
         <h2 class="medieval text-3xl accent-text uppercase mb-8 text-center">Tournament Finals Selector</h2>
-
         <div class="grid grid-cols-2 gap-4 mb-8">
             <div class="col-span-2">
                 <label class="text-[10px] font-black uppercase tracking-widest text-gray-500 block mb-2">Record Selection</label>
-                <select id="json-list" class="admin-select"></select>
+                <select id="json-list" class="admin-select border-orange-500/30"></select>
             </div>
             <div>
                 <label class="text-[10px] font-black uppercase tracking-widest text-gray-500 block mb-2">Motion</label>
-                <select id="select-animate" class="admin-select">
-                    <option value="false">Static</option>
-                    <option value="true">Animate</option>
-                </select>
+                <select id="select-animate" class="admin-select"><option value="false">Static</option><option value="true">Animate</option></select>
             </div>
             <div>
                 <label class="text-[10px] font-black uppercase tracking-widest text-gray-500 block mb-2">Background</label>
-                <select id="select-transparent" class="admin-select">
-                    <option value="false">Solid</option>
-                    <option value="true">Transparent</option>
-                </select>
+                <select id="select-transparent" class="admin-select"><option value="false">Solid</option><option value="true">Transparent</option></select>
             </div>
         </div>
-
         <div class="flex flex-col gap-3">
-            <button onclick="launchFromSelector()" class="bg-white text-black font-black py-4 rounded-xl uppercase text-xs">Display Finals</button>
-            <button onclick="downloadFinalsImage()" class="bg-emerald-600 text-white font-black py-4 rounded-xl uppercase text-xs">📸 Download JPG</button>
-            <button onclick="downloadFinalsImage(true)" class="bg-blue-600 text-white font-black py-4 rounded-xl uppercase text-xs">🖼️ Discord Banner</button>
+            <div class="flex gap-3">
+                <button onclick="launchNewTab()" class="flex-1 bg-white text-black font-black py-4 rounded-xl uppercase text-xs hover:bg-orange-500 hover:text-white transition-colors">Display Finals</button>
+                <button onclick="copyDiscordTemplate()" class="flex-1 bg-indigo-600 text-white font-black py-4 rounded-xl uppercase text-xs">Copy Discord</button>
+            </div>
+            <button onclick="downloadFinalsImage()" class="bg-emerald-600 text-white font-black py-4 rounded-xl uppercase text-xs">📸 Download 1080p JPG</button>
         </div>
     </div>
 </div>
 
 <div id="main-stage" class="hidden">
-    <div class="flex justify-between items-end border-b-2 accent-border pb-4 mb-8">
+    <div class="flex justify-between items-end border-b-2 accent-border pb-4 mb-6">
         <div>
             <div class="medieval text-lg accent-text uppercase mb-1">Final Standings</div>
-            <h1 id="table-name" class="text-6xl xl:text-7xl font-black italic uppercase leading-tight break-words max-w-[900px]">Table</h1>
+            <h1 id="table-name" class="text-6xl font-black italic uppercase leading-tight">Table</h1>
         </div>
         <div class="text-right">
             <p id="event-period" class="text-xl text-gray-500 font-bold"></p>
@@ -128,17 +66,17 @@ body.is-transparent .glass { background: rgba(0,0,0,0.7); }
         </div>
     </div>
 
-    <div class="grid grid-cols-12 gap-8 flex-1 overflow-hidden min-h-0">
-        <div class="col-span-4 flex flex-col gap-6 min-h-0">
+    <div class="grid grid-cols-12 gap-6 flex-1 overflow-hidden">
+        <div class="col-span-5 flex flex-col gap-4 overflow-hidden">
             <div id="winner-banner"></div>
-            <div class="glass rounded-3xl p-8 mt-auto flex justify-around items-center border-t-2 accent-border">
+            <div id="achievements" class="grid grid-cols-2 gap-3"></div>
+            <div class="glass rounded-3xl p-6 mt-auto flex justify-around items-center border-t-2 accent-border">
                 <div class="text-center"><div id="total-players" class="text-4xl font-black italic">0</div><div class="text-[9px] uppercase font-bold text-gray-400">Field Size</div></div>
                 <div class="text-center"><div id="avg-score" class="text-4xl font-black italic accent-text">0</div><div class="text-[9px] uppercase font-bold text-gray-400">Average Score</div></div>
             </div>
         </div>
-
-        <div id="lb-viewport" class="col-span-8 glass rounded-[40px] overflow-hidden min-h-0">
-            <div id="leaderboard" class="p-6 flex flex-col gap-3"></div>
+        <div id="lb-viewport" class="col-span-7 glass rounded-[40px] overflow-hidden">
+            <div id="leaderboard" class="p-6 flex flex-col gap-2"></div>
         </div>
     </div>
 </div>
@@ -148,113 +86,95 @@ const AVATAR_BASE = "http://vpinhub.github.io/special-when-lit-leaderboard/img/"
 const el = id => document.getElementById(id);
 
 async function init(){
-    const res = await fetch('json/list.json');
-    const files = await res.json();
-    el('json-list').innerHTML = files.map(f =>
-        `<option value="${f.name}">${f.name.replace('.json','').replace(/_/g,' ')}</option>`
-    ).join('');
+    const params = new URLSearchParams(window.location.search);
+    const jsonParam = params.get('json');
+    
+    if(jsonParam) {
+        el('selector-overlay').classList.add('hidden');
+        if(params.get('transparent') === 'true') document.body.classList.add('is-transparent');
+        await loadData(jsonParam, params.get('animate') === 'true');
+    } else {
+        const res = await fetch('json/list.json');
+        const files = await res.json();
+        el('json-list').innerHTML = files.map(f => `<option value="${f.name}">${f.name.replace('.json','').replace(/_/g,' ')}</option>`).join('');
+    }
 }
-init();
 
-async function launchFromSelector(){
+function launchNewTab() {
     const file = el('json-list').value;
-    if(!file) return;
-
-    const animate = el('select-animate').value === 'true';
-
-    el('selector-overlay').classList.add('hidden');
-
-    if(el('select-transparent').value === 'true')
-        document.body.classList.add('is-transparent');
-
-    await loadData(file, animate);
+    const animate = el('select-animate').value;
+    const transparent = el('select-transparent').value;
+    const url = `${window.location.pathname}?json=${file}&animate=${animate}&transparent=${transparent}`;
+    window.open(url, '_blank');
 }
 
 async function loadData(file, animate=false){
     const res = await fetch(`json/${file}`);
     const data = await res.json();
-
-    document.body.classList.remove('theme-throwdown','theme-swl');
-    document.body.classList.add(
-        data.competition?.includes('Throwdown') ? 'theme-throwdown' : 'theme-swl'
-    );
-
+    document.body.className = data.competition?.includes('Throwdown') ? 'theme-throwdown' : 'theme-swl';
     el('main-stage').classList.remove('hidden');
     renderFinals(data, animate);
 }
 
 function renderFinals(data, animate){
     const players = data.results || [];
+    const a = data.awards || {};
     el('table-name').innerText = data.table;
     el('event-period').innerText = data.period;
     el('total-players').innerText = players.length;
     el('avg-score').innerText = players.length ? Math.round(players.reduce((s,p)=>s+p.high,0)/players.length).toLocaleString() : 0;
 
-    const winner = players[0];
-    if(winner){
-        el('winner-banner').innerHTML = `
-        <div class="glass p-8 rounded-[40px] border-4 accent-border text-center">
-            <img src="${AVATAR_BASE}${winner.name.replace(/\s+/g,'_').toLowerCase()}.gif"
-                 class="w-40 h-40 rounded-full mx-auto mb-4"
-                 onerror="this.src='https://via.placeholder.com/160?text=?'">
-            <div class="text-4xl font-black italic uppercase">${winner.name}</div>
+    el('winner-banner').innerHTML = `
+        <div class="glass p-6 rounded-[32px] border-4 accent-border text-center shadow-xl">
+            <img src="${AVATAR_BASE}${players[0].name.replace(/\s+/g,'_').toLowerCase()}.gif" class="w-32 h-32 rounded-full mx-auto mb-3 border-4 accent-border shadow-lg" onerror="this.src='https://via.placeholder.com/128?text=?'">
+            <div class="text-3xl font-black italic uppercase">${players[0].name}</div>
+            <div class="text-xl font-mono text-gray-400 font-bold">${players[0].high.toLocaleString()}</div>
         </div>`;
-    }
+
+    const card = (icon, title, name, detail, color) => `<div class="glass p-3 rounded-xl border-l-4 ${color}"><div class="text-[9px] uppercase text-gray-500 mb-0.5">${icon} ${title}</div><div class="font-bold text-xs uppercase italic truncate">${name || 'N/A'}</div><div class="text-[9px] text-gray-400 truncate">${detail || ''}</div></div>`;
+    el('achievements').innerHTML = card("🔫","Fast Draw", a.fast_draw, a.fast_draw_detail, "border-red-500") + card("🎯","Sharpshooter", a.sharpshooter, a.sharpshooter_detail, "border-orange-500") + card("📈","Most Improved", a.most_improved, a.most_improved_detail, "border-green-500") + card("🔄","Comeback Kid", a.comeback_kid, a.comeback_kid_detail, "border-purple-500") + card("🕹️","Most Played", a.most_played, a.most_played_detail, "border-blue-500") + card("☢️","Burns Award", a.burns_award, a.burns_award_detail, "border-yellow-500");
 
     const lb = el('leaderboard');
-    const viewport = el('lb-viewport');
-    lb.classList.remove('scrolling-content');
-    lb.style.transform = '';
-    lb.style.transformOrigin = 'top center';
+    lb.innerHTML = players.map((p,i)=>`<div class="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5"><div class="flex items-center gap-4"><span class="text-2xl font-black italic w-8 ${i<3?'accent-text':'text-gray-600'}">${i+1}</span><img src="${AVATAR_BASE}${p.name.replace(/\s+/g,'_').toLowerCase()}.gif" class="w-10 h-10 rounded-full border border-white/10" onerror="this.src='https://via.placeholder.com/40?text=?'"><span class="text-lg font-bold">${p.name}</span></div><span class="text-xl font-mono font-bold">${p.high.toLocaleString()}</span></div>`).join('');
 
-    lb.innerHTML = players.map((p,i)=>`
-        <div class="flex items-center justify-between p-4 bg-white/5 rounded-2xl">
-            <div class="flex items-center gap-6">
-                <span class="text-3xl font-black italic w-10 ${i<3?'accent-text':'text-gray-600'}">${i+1}</span>
-                <span class="text-xl font-bold">${p.name}</span>
-            </div>
-            <span class="text-2xl font-mono font-bold">${p.high.toLocaleString()}</span>
-        </div>
-    `).join('');
-
-    requestAnimationFrame(()=>{
-        const contentHeight = lb.scrollHeight;
-        const viewportHeight = viewport.offsetHeight;
-
-        if(animate && players.length > 7){
-            const dist = -(contentHeight - viewportHeight + 40);
-            document.documentElement.style.setProperty('--scroll-dist', `${dist}px`);
-            document.documentElement.style.setProperty('--scroll-speed', `${players.length * 1.4}s`);
-            lb.classList.add('scrolling-content');
-            return;
-        }
-
-        const scale = Math.min(1, viewportHeight / contentHeight);
+    if(animate && players.length > 7){
+        const dist = -(lb.scrollHeight - el('lb-viewport').offsetHeight + 40);
+        document.documentElement.style.setProperty('--scroll-dist', `${dist}px`);
+        document.documentElement.style.setProperty('--scroll-speed', `${players.length * 1.5}s`);
+        lb.classList.add('scrolling-content');
+    } else {
+        const scale = Math.min(1, el('lb-viewport').offsetHeight / lb.scrollHeight);
         lb.style.transform = `scale(${scale})`;
-    });
+        lb.style.transformOrigin = 'top center';
+    }
 }
 
-async function downloadFinalsImage(isBanner=false){
+async function downloadFinalsImage(){
     const file = el('json-list').value;
     if(!file) return;
-
-    await loadData(file,false);
-
+    await loadData(file, false);
     const stage = el('main-stage');
     stage.classList.add('render-mode');
-    if(isBanner) stage.classList.add('banner');
-
-    await new Promise(r=>setTimeout(r,100));
-
-    const canvas = await html2canvas(stage,{backgroundColor:"#020617",scale:1});
+    await new Promise(r=>setTimeout(r,500)); // Allow avatars to load
+    const canvas = await html2canvas(stage,{backgroundColor:"#020617", scale: 1});
     const link=document.createElement('a');
-    link.download=file.replace('.json','') + (isBanner?'_banner':'') + '.jpg';
-    link.href=canvas.toDataURL("image/jpeg",0.95);
+    link.download=file.replace('.json','')+'_Finals.jpg';
+    link.href=canvas.toDataURL("image/jpeg",0.9);
     link.click();
-
-    stage.classList.remove('render-mode','banner');
+    stage.classList.remove('render-mode');
 }
-</script>
 
+async function copyDiscordTemplate() {
+    const file = el('json-list').value;
+    if(!file) return;
+    const res = await fetch(`json/${file}`);
+    const d = await res.json();
+    const a = d.awards || {};
+    const bills = d.results.filter(p => p.high >= 1000000000).map(p => `${p.name}`).join('\n');
+    const template = `**${d.table}**\n\n👑 **Winner!**\n${d.results[0].name}\n${d.results[0].high.toLocaleString()}\n\n🔫 **Fast Draw**: ${a.fast_draw}\n🎯 **Sharpshooter**: ${a.sharpshooter}\n🔄 **Comeback Kid**: ${a.comeback_kid}\n📈 **Most Improved**: ${a.most_improved}\n🕹️ **Most Played**: ${a.most_played}\n☢️ **C. Montgomery Burns**: ${a.burns_award}\n\n💰 **Billionaires Club**\n${bills || 'None'}`;
+    navigator.clipboard.writeText(template);
+}
+init();
+</script>
 </body>
 </html>
