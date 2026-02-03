@@ -1,183 +1,216 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VPINHUB | Stream Finals Asset</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Encode+Sans:wght@400;700;900&family=MedievalSharp&display=swap" rel="stylesheet">
-    <style>
-        body, html { margin: 0; padding: 0; width: 100vw; height: 100vh; overflow: hidden; background: #020617; color: white; font-family: 'Encode Sans', sans-serif; }
-        body.is-transparent { background: transparent !important; }
-        body.is-transparent .glass { background: rgba(0, 0, 0, 0.7); border-color: rgba(255,255,255,0.1); }
-        .medieval { font-family: 'MedievalSharp', cursive; }
-        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
-        .theme-throwdown { --accent: #f97316; }
-        .theme-swl { --accent: #d946ef; }
-        .accent-text { color: var(--accent, #94a3b8); }
-        .accent-border { border-color: var(--accent, #334155); }
-        @keyframes scrollLoop { 0%, 15% { transform: translateY(0); } 85%, 100% { transform: translateY(var(--scroll-dist)); } }
-        .scrolling-content { animation: scrollLoop var(--scroll-speed) ease-in-out infinite alternate; }
-        #main-stage { height: 100%; display: flex; flex-direction: column; padding: 5vh; box-sizing: border-box; }
-        #selector-overlay { position: fixed; inset: 0; z-index: 100; background: #020617; display: flex; align-items: center; justify-content: center; }
-        .admin-select { background-color: #0f172a; border: 1px solid rgba(255,255,255,0.1); color: white; padding: 0.75rem; border-radius: 0.75rem; font-size: 0.875rem; font-weight: 700; width: 100%; outline: none; }
-    </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>VPINHUB | Stream Finals Asset</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<link href="https://fonts.googleapis.com/css2?family=Encode+Sans:wght@400;700;900&family=MedievalSharp&display=swap" rel="stylesheet">
+
+<style>
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background: #020617;
+    color: white;
+    font-family: 'Encode Sans', sans-serif;
+    overflow: hidden;
+}
+
+body.is-transparent { background: transparent !important; }
+body.is-transparent .glass { background: rgba(0,0,0,0.7); }
+
+.medieval { font-family: 'MedievalSharp', cursive; }
+.glass {
+    background: rgba(255,255,255,0.03);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.theme-throwdown { --accent: #f97316; }
+.theme-swl { --accent: #d946ef; }
+
+.accent-text { color: var(--accent,#94a3b8); }
+.accent-border { border-color: var(--accent,#334155); }
+
+#main-stage {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: clamp(24px,3vh,60px);
+    box-sizing: border-box;
+}
+#main-stage * { min-height: 0; }
+
+.render-mode {
+    width: 1920px !important;
+    height: 1080px !important;
+    padding: 60px !important;
+}
+.render-mode.banner {
+    width: 1200px !important;
+    height: 630px !important;
+    padding: 40px !important;
+}
+
+#selector-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: #020617;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.admin-select {
+    background-color: #0f172a;
+    border: 1px solid rgba(255,255,255,0.1);
+    color: white;
+    padding: 0.75rem;
+    border-radius: 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 700;
+    width: 100%;
+    outline: none;
+}
+</style>
 </head>
+
 <body>
 
-    <div id="selector-overlay">
-        <div class="glass p-10 rounded-[40px] w-full max-w-2xl border-2 border-white/10">
-            <h2 class="medieval text-3xl accent-text uppercase mb-8 text-center">Tournament Finals Selector</h2>
-            <div class="grid grid-cols-2 gap-4 mb-8">
-                <div class="col-span-2">
-                    <label class="text-[10px] font-black uppercase tracking-widest text-gray-500 block mb-2">Record Selection</label>
-                    <select id="json-list" class="admin-select border-orange-500/50"><option value="">Loading...</option></select>
-                </div>
-                <div>
-                    <label class="text-[10px] font-black uppercase tracking-widest text-gray-500 block mb-2">Motion</label>
-                    <select id="select-animate" class="admin-select"><option value="false">Static</option><option value="true">Animate</option></select>
-                </div>
-                <div>
-                    <label class="text-[10px] font-black uppercase tracking-widest text-gray-500 block mb-2">Background</label>
-                    <select id="select-transparent" class="admin-select"><option value="false">Solid</option><option value="true">Transparent</option></select>
-                </div>
-            </div>
-            <div class="flex flex-col gap-3">
-                <div class="flex gap-3">
-                    <button onclick="launchFromSelector()" class="flex-1 bg-white text-black font-black py-4 rounded-xl hover:bg-orange-500 hover:text-white transition-all uppercase text-xs">Display Finals</button>
-                    <button onclick="copyDiscordTemplate()" class="flex-1 bg-indigo-600 text-white font-black py-4 rounded-xl hover:bg-indigo-700 transition-all uppercase text-xs">Copy Discord</button>
-                </div>
-                <button id="image-btn" onclick="downloadFinalsImage()" class="w-full bg-emerald-600 text-white font-black py-4 rounded-xl hover:bg-emerald-700 transition-all uppercase text-xs">
-                    📸 <span id="image-btn-text">Download JPG (1080p)</span>
-                </button>
-                <button id="banner-btn" onclick="downloadFinalsImage(true)" class="w-full bg-blue-600 text-white font-black py-4 rounded-xl hover:bg-blue-700 transition-all uppercase text-xs">
-                    🖼️ <span>Download Discord Banner (1200x630)</span>
-                </button>
-            </div>
-        </div>
-    </div>
+<div id="selector-overlay">
+    <div class="glass p-10 rounded-[40px] w-full max-w-2xl border-2 border-white/10">
+        <h2 class="medieval text-3xl accent-text uppercase mb-8 text-center">Tournament Finals Selector</h2>
 
-    <div id="main-stage" class="hidden">
-        <div class="flex justify-between items-end border-b-2 accent-border pb-4 mb-8">
+        <div class="grid grid-cols-2 gap-4 mb-8">
+            <div class="col-span-2">
+                <label class="text-[10px] font-black uppercase tracking-widest text-gray-500 block mb-2">Record Selection</label>
+                <select id="json-list" class="admin-select"></select>
+            </div>
             <div>
-                <div id="comp-label" class="medieval text-lg accent-text uppercase tracking-widest mb-1">Final Standings</div>
-                <h1 id="table-name" class="text-7xl font-black italic uppercase leading-none">Table Name</h1>
+                <label class="text-[10px] font-black uppercase tracking-widest text-gray-500 block mb-2">Motion</label>
+                <select id="select-animate" class="admin-select">
+                    <option value="false">Static</option>
+                    <option value="true">Animate</option>
+                </select>
             </div>
-            <div class="text-right">
-                <p id="event-period" class="text-xl text-gray-500 font-bold"></p>
-                <div class="text-[10px] font-black uppercase tracking-[0.2em] bg-white/10 px-4 py-1 rounded-full inline-block mt-2">Official Result</div>
+            <div>
+                <label class="text-[10px] font-black uppercase tracking-widest text-gray-500 block mb-2">Background</label>
+                <select id="select-transparent" class="admin-select">
+                    <option value="false">Solid</option>
+                    <option value="true">Transparent</option>
+                </select>
             </div>
         </div>
-        <div class="grid grid-cols-12 gap-8 flex-1 overflow-hidden">
-            <div class="col-span-4 flex flex-col gap-6">
-                <div id="winner-banner"></div>
-                <div id="achievements" class="grid grid-cols-2 gap-4"></div>
-                <div class="glass rounded-3xl p-8 mt-auto flex justify-around items-center border-t-2 accent-border">
-                    <div class="text-center"><div class="text-4xl font-black italic" id="total-players">0</div><div class="text-[9px] uppercase font-bold text-gray-400">Field Size</div></div>
-                    <div class="text-center"><div class="text-4xl font-black italic accent-text" id="avg-score">0</div><div class="text-[9px] uppercase font-bold text-gray-400">Average Score</div></div>
-                </div>
-            </div>
-            <div id="lb-viewport" class="col-span-8 glass rounded-[40px] relative overflow-hidden">
-                <div id="leaderboard" class="p-6 flex flex-col gap-3"></div>
-            </div>
+
+        <div class="flex flex-col gap-3">
+            <button onclick="launchFromSelector()" class="bg-white text-black font-black py-4 rounded-xl hover:bg-orange-500 hover:text-white uppercase text-xs">Display Finals</button>
+            <button onclick="downloadFinalsImage()" class="bg-emerald-600 text-white font-black py-4 rounded-xl uppercase text-xs">📸 Download JPG (1080p)</button>
+            <button onclick="downloadFinalsImage(true)" class="bg-blue-600 text-white font-black py-4 rounded-xl uppercase text-xs">🖼️ Download Discord Banner</button>
+        </div>
+    </div>
+</div>
+
+<div id="main-stage" class="hidden">
+    <div class="flex justify-between items-end border-b-2 accent-border pb-4 mb-8">
+        <div>
+            <div id="comp-label" class="medieval text-lg accent-text uppercase mb-1">Final Standings</div>
+            <h1 id="table-name" class="text-6xl xl:text-7xl font-black italic uppercase leading-tight break-words max-w-[900px]">Table</h1>
+        </div>
+        <div class="text-right">
+            <p id="event-period" class="text-xl text-gray-500 font-bold"></p>
+            <div class="text-[10px] font-black uppercase tracking-widest bg-white/10 px-4 py-1 rounded-full inline-block mt-2">Official Result</div>
         </div>
     </div>
 
-    <script>
-        const AVATAR_BASE = "http://vpinhub.github.io/special-when-lit-leaderboard/img/";
+    <div class="grid grid-cols-12 gap-8 flex-1 overflow-hidden min-h-0">
+        <div class="col-span-4 flex flex-col gap-6 min-h-0">
+            <div id="winner-banner"></div>
+            <div id="achievements" class="grid grid-cols-2 gap-4"></div>
+            <div class="glass rounded-3xl p-8 mt-auto flex justify-around items-center border-t-2 accent-border">
+                <div class="text-center"><div id="total-players" class="text-4xl font-black italic">0</div><div class="text-[9px] uppercase font-bold text-gray-400">Field Size</div></div>
+                <div class="text-center"><div id="avg-score" class="text-4xl font-black italic accent-text">0</div><div class="text-[9px] uppercase font-bold text-gray-400">Average Score</div></div>
+            </div>
+        </div>
 
-        async function init() {
-            const params = new URLSearchParams(window.location.search);
-            if (params.get('json')) {
-                if (params.get('transparent') === 'true') document.body.classList.add('is-transparent');
-                loadData(params.get('json'), params.get('animate') === 'true');
-            } else { populateSelector(); }
-        }
+        <div id="lb-viewport" class="col-span-8 glass rounded-[40px] overflow-hidden min-h-0">
+            <div id="leaderboard" class="p-6 flex flex-col gap-3"></div>
+        </div>
+    </div>
+</div>
 
-        async function populateSelector() {
-            const res = await fetch('json/list.json');
-            const files = await res.json();
-            document.getElementById('json-list').innerHTML = files.map(f => `<option value="${f.name}">${f.name.replace('.json','').replace(/_/g,' ')}</option>`).join('');
-        }
+<script>
+const AVATAR_BASE = "http://vpinhub.github.io/special-when-lit-leaderboard/img/";
 
-        function launchFromSelector() {
-            const file = document.getElementById('json-list').value;
-            const animate = document.getElementById('select-animate').value === 'true';
-            const transparent = document.getElementById('select-transparent').value === 'true';
-            if (transparent) document.body.classList.add('is-transparent');
-            document.getElementById('selector-overlay').classList.add('hidden');
-            loadData(file, animate);
-        }
+async function init() {
+    const res = await fetch('json/list.json');
+    const files = await res.json();
+    json-list.innerHTML = files.map(f => `<option value="${f.name}">${f.name.replace('.json','')}</option>`).join('');
+}
+init();
 
-        async function loadData(file, animate) {
-            const res = await fetch(`json/${file}`);
-            const data = await res.json();
-            document.getElementById('main-stage').classList.remove('hidden');
-            renderFinals(data, animate);
-        }
+function launchFromSelector() {
+    selector-overlay.classList.add('hidden');
+    if(select-transparent.value==='true') document.body.classList.add('is-transparent');
+    loadData(json-list.value);
+}
 
-        async function downloadFinalsImage(isBanner = false) {
-            const fileName = document.getElementById('json-list').value;
-            if (!fileName) return;
-            await loadData(fileName, false);
-            const stage = document.getElementById('main-stage');
-            const originalStyle = stage.style.cssText;
+async function loadData(file){
+    const res = await fetch(`json/${file}`);
+    const data = await res.json();
 
-            // Dimensions for Banner Mode vs 1080p
-            const width = isBanner ? 1200 : 1920;
-            const height = isBanner ? 630 : 1080;
+    document.body.classList.remove('theme-throwdown','theme-swl');
+    document.body.classList.add(data.competition.includes('Throwdown') ? 'theme-throwdown':'theme-swl');
 
-            stage.style.cssText = `width: ${width}px; height: ${height}px; position: absolute; top: 0; left: 0; z-index: -1; background: #020617;`;
+    main-stage.classList.remove('hidden');
 
-            html2canvas(stage, { useCORS: true, backgroundColor: "#020617", width, height, scale: 1 }).then(canvas => {
-                const link = document.createElement('a');
-                link.download = `${fileName.replace('.json', '')}_${isBanner ? 'Banner' : 'Finals'}.jpg`;
-                link.href = canvas.toDataURL("image/jpeg", 0.9);
-                link.click();
-                stage.style.cssText = originalStyle;
-            });
-        }
+    table-name.innerText = data.table;
+    event-period.innerText = data.period;
 
-        async function copyDiscordTemplate() {
-            const file = document.getElementById('json-list').value;
-            const res = await fetch(`json/${file}`);
-            const d = await res.json();
-            const b = d.results.filter(p => p.high >= 1000000000).map(p => p.name).join('\n');
-            const text = `**${d.table}**\n👑 **Winner:** ${d.results[0].name} (${d.results[0].high.toLocaleString()})\n💰 **Billionaires Club:**\n${b || 'None'}`;
-            navigator.clipboard.writeText(text);
-        }
+    const players = data.results;
+    total-players.innerText = players.length;
+    avg-score.innerText = Math.round(players.reduce((s,p)=>s+p.high,0)/players.length).toLocaleString();
 
-        function renderFinals(data, shouldAnimate) {
-            document.body.className = data.competition.includes('Throwdown') ? 'theme-throwdown' : 'theme-swl';
-            document.getElementById('table-name').innerText = data.table;
-            document.getElementById('event-period').innerText = data.period;
-            const players = data.results || [];
-            document.getElementById('total-players').innerText = players.length;
-            const avg = Math.round(players.reduce((s, p) => s + (p.high || 0), 0) / players.length);
-            document.getElementById('avg-score').innerText = avg.toLocaleString();
+    const winner = players[0];
+    winner-banner.innerHTML = `
+        <div class="glass p-8 rounded-[40px] border-4 accent-border text-center">
+            <img src="${AVATAR_BASE}${winner.name.replace(/\s+/g,'_').toLowerCase()}.gif" class="w-40 h-40 rounded-full mx-auto mb-4">
+            <div class="text-4xl font-black italic uppercase">${winner.name}</div>
+        </div>`;
+    
+    leaderboard.innerHTML = players.map((p,i)=>`
+        <div class="flex items-center justify-between p-4 bg-white/5 rounded-2xl">
+            <div class="flex items-center gap-6">
+                <span class="text-3xl font-black italic w-10 ${i<3?'accent-text':'text-gray-600'}">${i+1}</span>
+                <span class="text-xl font-bold">${p.name}</span>
+            </div>
+            <span class="text-2xl font-mono font-bold">${p.high.toLocaleString()}</span>
+        </div>`).join('');
+}
 
-            const winner = players[0];
-            document.getElementById('winner-banner').innerHTML = `<div class="glass p-8 rounded-[40px] border-4 accent-border text-center shadow-2xl"><img src="${AVATAR_BASE}${winner.name.toLowerCase().replace(/\s+/g, '_')}.gif" class="w-40 h-40 rounded-full border-8 accent-border mx-auto mb-4" onerror="this.src='https://via.placeholder.com/160?text=?'"><div class="text-4xl font-black italic uppercase">${winner.name}</div></div>`;
+async function downloadFinalsImage(isBanner=false){
+    await loadData(json-list.value);
 
-            const a = data.awards || {};
-            const card = (icon, title, name, detail, color) => `<div class="glass p-4 rounded-xl border-l-4 ${color}"><div class="text-[9px] uppercase mb-1">${icon} ${title}</div><div class="font-bold text-sm uppercase italic">${name || 'N/A'}</div><div class="text-[9px] text-gray-400">${detail || ''}</div></div>`;
-            document.getElementById('achievements').innerHTML = card("🔫", "Fast Draw", a.fast_draw, a.fast_draw_detail, "border-red-500") + card("🎯", "Sharpshooter", a.sharpshooter, a.sharpshooter_detail, "border-orange-500") + card("📈", "Most Improved", a.most_improved, a.most_improved_detail, "border-green-500") + card("🔄", "Comeback Kid", a.comeback_kid, a.comeback_kid_detail, "border-purple-500");
+    main-stage.classList.add('render-mode');
+    if(isBanner) main-stage.classList.add('banner');
 
-            const lb = document.getElementById('leaderboard');
-            lb.innerHTML = players.map((p, i) => `<div class="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5"><div class="flex items-center gap-6"><span class="text-3xl font-black italic w-10 ${i < 3 ? 'accent-text' : 'text-gray-700'}">${i+1}</span><img src="${AVATAR_BASE}${p.name.toLowerCase().replace(/\s+/g, '_')}.gif" class="w-12 h-12 rounded-full border-2 border-white/10" onerror="this.src='https://via.placeholder.com/48?text=?'"><span class="text-xl font-bold">${p.name}</span></div><span class="text-2xl font-mono font-bold">${p.high.toLocaleString()}</span></div>`).join('');
+    await new Promise(r=>setTimeout(r,100));
 
-            if (shouldAnimate && players.length > 7) {
-                const dist = -(lb.scrollHeight - document.getElementById('lb-viewport').offsetHeight + 60);
-                document.documentElement.style.setProperty('--scroll-dist', `${dist}px`);
-                document.documentElement.style.setProperty('--scroll-speed', `${players.length * 1.5}s`);
-                lb.classList.add('scrolling-content');
-            } else if (!shouldAnimate && players.length > 10) {
-                lb.style.transform = `scale(${Math.max(0.4, 10 / players.length)})`;
-                lb.style.transformOrigin = 'top center';
-            }
-        }
-        init();
-    </script>
+    const canvas = await html2canvas(main-stage,{backgroundColor:"#020617",scale:1});
+    const link=document.createElement('a');
+    link.download='finals.jpg';
+    link.href=canvas.toDataURL("image/jpeg",0.95);
+    link.click();
+
+    main-stage.classList.remove('render-mode','banner');
+}
+</script>
 </body>
 </html>
