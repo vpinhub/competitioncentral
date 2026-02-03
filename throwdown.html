@@ -35,8 +35,8 @@
                     <h3 class="text-xl font-bold text-orange-400 mb-6 tracking-tight uppercase border-b border-white/10 pb-2">Rules & Submission</h3>
                     <ul class="text-left space-y-4 text-sm leading-relaxed text-gray-200 mb-8 list-none">
                         <li class="flex gap-3"><span class="text-orange-500">•</span><span>All scores must be submitted via <strong>iScored</strong>.</span></li>
-                        <li class="flex gap-3"><span class="text-orange-500">•</span><span>Manual submissions to iScored require a <strong>photo for verification</strong>.</span></li>
-                        <li class="flex gap-3"><span class="text-orange-500">•</span><span>VPinStudio auto-submissions are permitted; players must verify posts.</span></li>
+                        <li class="flex gap-3"><span class="text-orange-500">•</span><span>Manual submissions require a <strong>photo for verification</strong>.</span></li>
+                        <li class="flex gap-3"><span class="text-orange-500">•</span><span>VPinStudio auto-submissions are permitted; please verify your posts.</span></li>
                         <li class="flex gap-3"><span class="text-orange-500">•</span><span>No table or script modifications allowed.</span></li>
                         <li class="flex gap-3"><span class="text-orange-500">•</span><span>Highest valid score at end of period wins.</span></li>
                         <li class="flex gap-3"><span class="text-orange-500">•</span><span>Deadline: <strong>Thursday at 2:00 PM EST</strong>.</span></li>
@@ -138,15 +138,13 @@
                 return p;
             });
 
-            const sorted = playerList.sort((a,b) => b.high - a.high);
-            window.currentResults = sorted;
+            window.currentResults = playerList.sort((a,b) => b.high - a.high);
             const shooter = [...playerList].sort((a,b) => b.avg - a.avg)[0];
             const improved = [...playerList].sort((a,b) => b.improvementGap - a.improvementGap)[0];
             const grinder = [...playerList].sort((a,b) => b.scores.length - a.scores.length)[0];
             const comeback = [...playerList].sort((a,b) => b.comebackGrowth - a.comebackGrowth)[0];
             const burns = playerList[Math.floor(Math.random() * playerList.length)];
 
-            // Achievement Data with detailed string generation
             window.achievementData = {
                 winner: window.currentResults[0]?.name,
                 fast_draw: pioneer.name,
