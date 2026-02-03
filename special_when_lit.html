@@ -11,8 +11,6 @@
         .medieval { font-family: 'MedievalSharp', cursive; }
         .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
         .swl-accent { border-color: #d946ef; box-shadow: 0 0 15px rgba(217, 70, 239, 0.2); }
-        .achievement-card { transition: all 0.3s ease; }
-        .achievement-card:hover { transform: translateY(-2px); background: rgba(255,255,255,0.12); }
     </style>
 </head>
 <body class="min-h-screen pb-12">
@@ -35,7 +33,7 @@
                     <h3 class="text-xl font-bold text-fuchsia-400 mb-6 tracking-tight uppercase border-b border-white/10 pb-2">Rules & Submission</h3>
                     <ul class="text-left space-y-4 text-sm leading-relaxed text-gray-200 mb-8 list-none">
                         <li class="flex gap-3"><span class="text-fuchsia-500">•</span><span>All scores must be submitted via <strong>iScored</strong>.</span></li>
-                        <li class="flex gap-3"><span class="text-fuchsia-500">•</span><span>Manual submissions to iScored require a <strong>photo for verification</strong>.</span></li>
+                        <li class="flex gap-3"><span class="text-fuchsia-500">•</span><span>Manual submissions require a <strong>photo for verification</strong>.</span></li>
                         <li class="flex gap-3"><span class="text-fuchsia-500">•</span><span>Deadline: <strong>Sunday at 2:00 PM EST</strong>.</span></li>
                     </ul>
                     <a href="https://iscored.info/?mode=public&user=vpinhub" target="_blank" class="block w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg text-center shadow-sm uppercase text-sm">Submit Score</a>
@@ -144,19 +142,21 @@
 
         function renderAchievements(pioneer, shooter, improved, grinder, comeback, burns) {
             const card = (icon, title, name, detail, color) => `<div class="glass p-4 rounded-xl border-l-4 ${color} achievement-card"><div class="medieval text-[10px] text-gray-400 uppercase">${icon} ${title}</div><div class="font-bold text-sm uppercase italic text-white">${name}</div><div class="text-[10px] text-gray-500">${detail}</div></div>`;
-            document.getElementById('achievements').innerHTML = 
-                card("🔫", "Fast Draw", pioneer.name, "First Entry", "border-red-500") +
-                card("🎯", "Sharpshooter", shooter?.name, "Top Average", "border-fuchsia-500") +
-                card("📈", "Most Improved", improved?.name, `Gap: +${improved?.improvementGap.toLocaleString()}`, "border-green-500") +
-                card("🔄", "Comeback Kid", comeback?.name, `Gain: +${comeback?.comebackGrowth.toLocaleString()}`, "border-purple-500") +
-                card("🕹️", "Most Played", grinder?.name, `${grinder?.scores.length} Games`, "border-blue-500") +
-                card("☢️", "C. Montgomery Burns Award", burns?.name, "Excellent!", "border-fuchsia-500");
+            document.getElementById('achievements').innerHTML = card("🔫", "Fast Draw", pioneer.name, "First Entry", "border-red-500") + card("🎯", "Sharpshooter", shooter?.name, "Top Average", "border-fuchsia-500") + card("📈", "Most Improved", improved?.name, `Gap: +${improved?.improvementGap.toLocaleString()}`, "border-green-500") + card("🔄", "Comeback Kid", comeback?.name, `Gain: +${comeback?.comebackGrowth.toLocaleString()}`, "border-purple-500") + card("🕹️", "Most Played", grinder?.name, `${grinder?.scores.length} Games`, "border-blue-500") + card("☢️", "C. Montgomery Burns Award", burns?.name, "Excellent!", "border-fuchsia-500");
         }
 
         function renderTable(table, fallbackName) {
             const img = table?.b2sFiles?.[0]?.imgUrl || "https://via.placeholder.com/400x200";
+            const vpsLink = table ? `https://virtualpinballspreadsheet.github.io/vps-db/#${table.id}` : "#";
             document.getElementById('table-card').innerHTML = `
-                <div class="relative rounded-xl overflow-hidden border border-white/10 shadow-2xl"><img src="${img}" class="w-full h-52 object-cover"><div class="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent flex flex-col justify-end p-4"><h4 class="text-2xl font-black italic uppercase tracking-tighter">${table ? table.name : fallbackName}</h4><p class="text-[10px] text-fuchsia-400 font-bold uppercase tracking-widest">${table ? table.manufacturer : 'Premier Table'}</p></div></div>`;
+                <div class="relative rounded-xl overflow-hidden border border-white/10 shadow-2xl mb-4">
+                    <img src="${img}" class="w-full h-52 object-cover">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent flex flex-col justify-end p-4">
+                        <h4 class="text-2xl font-black italic uppercase tracking-tighter">${table ? table.name : fallbackName}</h4>
+                        <p class="text-[10px] text-fuchsia-400 font-bold uppercase tracking-widest">${table ? table.manufacturer : 'Premier Table'}</p>
+                    </div>
+                </div>
+                ${table ? `<div class="grid grid-cols-2 gap-3"><a href="${vpsLink}" target="_blank" class="bg-white/10 hover:bg-white/20 text-white text-center py-2 rounded-lg text-xs font-bold uppercase transition">Table Files</a><a href="${vpsLink}" target="_blank" class="bg-white/10 hover:bg-white/20 text-white text-center py-2 rounded-lg text-xs font-bold uppercase transition">B2S Files</a></div>` : ''}`;
         }
         init();
     </script>
