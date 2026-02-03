@@ -53,9 +53,9 @@
         <div class="flex flex-col gap-3">
             <div class="flex gap-3">
                 <button onclick="launchNewTab()" class="flex-1 bg-white text-black font-black py-4 rounded-xl uppercase text-xs hover:bg-orange-500 hover:text-white transition-colors">Display Finals</button>
-                <button onclick="copyDiscordTemplate()" class="flex-1 bg-indigo-600 text-white font-black py-4 rounded-xl uppercase text-xs">Copy Discord</button>
+                <button onclick="copyDiscordTemplate(this)" class="flex-1 bg-indigo-600 text-white font-black py-4 rounded-xl uppercase text-xs hover:bg-indigo-700 transition-colors">Copy Discord</button>
             </div>
-            <button onclick="downloadFinalsImage()" class="bg-emerald-600 text-white font-black py-4 rounded-xl uppercase text-xs">📸 Download 1080p JPG</button>
+            <button onclick="downloadFinalsImage(this)" class="bg-emerald-600 text-white font-black py-4 rounded-xl uppercase text-xs hover:bg-emerald-700 transition-colors">📸 Download 1080p JPG</button>
         </div>
     </div>
 </div>
@@ -136,7 +136,6 @@ function renderFinals(data, animate){
     el('total-players').innerText = players.length;
     el('avg-score').innerText = players.length ? Math.round(players.reduce((s,p)=>s+p.high,0)/players.length).toLocaleString() : 0;
 
-    // Restored Tournament Winner Header
     el('winner-banner').innerHTML = `
         <div class="glass p-6 rounded-[32px] border-4 accent-border text-center shadow-xl">
             <div class="medieval text-xs accent-text uppercase tracking-widest mb-2">Tournament Winner</div>
@@ -151,7 +150,6 @@ function renderFinals(data, animate){
     const lb = el('leaderboard');
     lb.innerHTML = players.map((p,i)=>`<div class="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5"><div class="flex items-center gap-4"><span class="text-2xl font-black italic w-8 ${i<3?'accent-text':'text-gray-600'}">${i+1}</span><img src="${AVATAR_BASE}${p.name.replace(/\s+/g,'_').toLowerCase()}.gif" class="w-10 h-10 rounded-full border border-white/10" onerror="this.src='https://via.placeholder.com/40?text=?'"><span class="text-lg font-bold">${p.name}</span></div><span class="text-xl font-mono font-bold">${p.high.toLocaleString()}</span></div>`).join('');
 
-    // Refined Static Scaling Logic
     setTimeout(() => {
         lb.classList.remove('scrolling-content');
         lb.style.transform = 'scale(1)';
@@ -164,7 +162,6 @@ function renderFinals(data, animate){
             document.documentElement.style.setProperty('--scroll-speed', `${players.length * 1.5}s`);
             lb.classList.add('scrolling-content');
         } else if (contentHeight > viewportHeight) {
-            // Shrink rows and gap if static to fit
             const scale = (viewportHeight - 20) / contentHeight;
             lb.style.transform = `scale(${scale})`;
             lb.style.transformOrigin = 'top center';
@@ -172,32 +169,49 @@ function renderFinals(data, animate){
     }, 150);
 }
 
-async function downloadFinalsImage(){
+async function downloadFinalsImage(btn){
     const file = el('json-list').value;
     if(!file) return;
+    const oldText = btn.innerText;
+    btn.innerText = "Generating...";
+    
     await loadData(file, false);
     const stage = el('main-stage');
     stage.classList.add('render-mode');
     stage.style.background = "#020617";
+    
     await new Promise(r=>setTimeout(r,800)); 
     const canvas = await html2canvas(stage,{backgroundColor:"#020617", scale: 1, useCORS: true});
     const link=document.createElement('a');
     link.download=file.replace('.json','')+'_Finals.jpg';
     link.href=canvas.toDataURL("image/jpeg",0.9);
     link.click();
+    
     stage.classList.remove('render-mode');
     stage.style.background = "";
+    btn.innerText = oldText;
 }
 
-async function copyDiscordTemplate() {
+// Fixed Discord function
+async function copyDiscordTemplate(btn) {
     const file = el('json-list').value;
     if(!file) return;
-    const res = await fetch(`json/${file}`);
-    const d = await res.json();
-    const a = d.awards || {};
-    const bills = d.results.filter(p => p.high >= 1000000000).map(p => `${p.name}`).join('\n');
-    const template = `**${d.table}**\n\n👑 **Winner!**\n${d.results[0].name}\n${d.results[0].high.toLocaleString()}\n\n🔫 **Fast Draw**: ${a.fast_draw}\n🎯 **Sharpshooter**: ${a.sharpshooter}\n🔄 **Comeback Kid**: ${a.comeback_kid}\n📈 **Most Improved**: ${a.most_improved}\n🕹️ **Most Played**: ${a.most_played}\n☢️ **C. Montgomery Burns**: ${a.burns_award}\n\n💰 **Billionaires Club**\n${bills || 'None'}`;
-    navigator.clipboard.writeText(template);
+    
+    try {
+        const res = await fetch(`json/${file}`);
+        const d = await res.json();
+        const a = d.awards || {};
+        const bills = d.results.filter(p => p.high >= 1000000000).map(p => `${p.name}`).join('\n');
+        
+        const template = `**${d.table}**\n\n👑 **Winner!**\n${d.results[0].name}\n${d.results[0].high.toLocaleString()}\n\n🔫 **Fast Draw**: ${a.fast_draw}\n🎯 **Sharpshooter**: ${a.sharpshooter}\n🔄 **Comeback Kid**: ${a.comeback_kid}\n📈 **Most Improved**: ${a.most_improved}\n🕹️ **Most Played**: ${a.most_played}\n☢️ **C. Montgomery Burns**: ${a.burns_award}\n\n💰 **Billionaires Club**\n${bills || 'None'}`;
+        
+        await navigator.clipboard.writeText(template);
+        const oldText = btn.innerText;
+        btn.innerText = "Copied!";
+        setTimeout(() => btn.innerText = oldText, 2000);
+    } catch (err) { 
+        console.error("Discord copy failed", err); 
+    }
 }
 </script>
 </body>
