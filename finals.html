@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VPINHUB | Stream Finals Asset</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Encode+Sans:wght@400;700;900&family=MedievalSharp&display=swap" rel="stylesheet">
+    <style>
+        body, html { 
+            margin: 0; padding: 0; width: 100vw; height: 100vh; 
+            overflow: hidden; background: #020617; color: white;
+            font-family: 'Encode Sans', sans-serif;
+        }
+        /* Transparent Mode for OBS */
+        body.is-transparent { background: transparent !important; }
+        body.is-transparent .glass { background: rgba(0, 0, 0, 0.7); border-color: rgba(255,255,255,0.1); }
+
+        .medieval { font-family: 'MedievalSharp', cursive; }
+        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
+        .theme-throwdown { --accent: #f97316; }
+        .theme-swl { --accent: #d946ef; }
+        .accent-text { color: var(--accent, #94a3b8); }
+        .accent-border { border-color: var(--accent, #334155); }
+
+        /* Animation Loop */
+        @keyframes scrollLoop {
+            0%, 15% { transform: translateY(0); }
+            85%, 100% { transform: translateY(var(--scroll-dist)); }
+        }
+        .scrolling-content { animation: scrollLoop var(--scroll-speed) ease-in-out infinite alternate; }
+
+        #main-stage { height: 100%; display: flex; flex-direction: column; padding: 5vh; box-sizing: border-box; }
+        #selector-overlay { position: fixed; inset: 0; z-index: 100; background: #020617; display: flex; align-items: center; justify-content: center; }
+    </style>
+</head>
+<body>
+
+    <div id="selector-overlay" class="hidden">
+        <div class="glass p-12 rounded-[40px] w-full max-w-xl border-2 border-white/10 text-center">
+            <h2 class="medieval text-3xl accent-text uppercase mb-8">Asset Selector</h2>
+            <div class="space-y-6">
+                <select id="json-list" class="w-full bg-slate-900 border border-white/20 rounded-2xl p-4 text-white font-bold outline-none">
+                    <option value="">Loading Records...</option>
+                </select>
+                <div class="flex gap-6 items-center justify-center py-2">
+                    <label class="flex items-center gap-2 cursor-pointer text-xs font-black uppercase tracking-widest">
+                        <input type="checkbox" id="check-animate" class="w-5 h-5 accent-orange-500"> Animate
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer text-xs font-black uppercase tracking-widest">
+                        <input type="checkbox" id="check-transparent" class="w-5 h-5 accent-orange-500"> Transparent
+                    </label>
+                </div>
+                <button onclick="launchFromSelector()" class="w-full bg-white text-black font-black py-4 rounded-2xl hover:bg-orange-500 hover:text-white transition-all uppercase tracking-widest">Display Finals</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="main-stage" class="hidden">
+        <div class="flex justify-between items-end border-b-2 accent-border pb-4 mb-8">
+            <div>
+                <div id="comp-label" class="medieval text-lg accent-text uppercase tracking-widest mb-1">Final Standings</div>
+                <h1 id="table-name" class="text-7xl font-black italic uppercase leading-none">Table Name</h1>
+            </div>
+            <div class="text-right">
+                <p id="event-period" class="text-xl text-gray-500 font-bold"></p>
+                <div class="text-[10px] font-black uppercase tracking-[0.2em] bg-white/10 px-4 py-1 rounded-full inline-block mt-2">Official Result</div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-12 gap-8 flex-1 overflow-hidden">
+            <div class="col-span-4 flex flex-col gap-6">
+                <div id="winner-banner"></div>
+                <div id="achievements" class="grid grid-cols-2 gap-4"></div>
+                
+                <div class="glass rounded-3xl p-8 mt-auto flex justify-around items-center border-t-2 accent-border">
+                    <div class="text-center">
+                        <div class="text-4xl font-black italic" id="total-players">0</div>
+                        <div class="text-[9px] uppercase font-bold text-gray-400">Field Size</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-4xl font-black italic accent-text" id="avg-score">0</div>
+                        <div class="text-[9px] uppercase font-bold text-gray-400">Average Score</div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="lb-viewport" class="col-span-8 glass rounded-[40px] relative overflow-hidden">
+                <div id="leaderboard" class="p-6 flex flex-col gap-3"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const AVATAR_BASE = "http://vpinhub.github.io/special-when-lit-leaderboard/img/";
+
+        async function init() {
+            const params = new URLSearchParams(window.location.search);
+            const jsonFile = params.get('json');
+
+            if (jsonFile) {
+                if (params.has('transparent')) document.body.classList.add('is-transparent');
+                loadData(jsonFile, params.has('animate'));
+            } else {
+                document.getElementById('selector-overlay').classList.remove('hidden');
+                populateSelector();
+            }
+        }
+
+        async function populateSelector() {
+            try {
+                const res = await fetch('json/list.json');
+                const files = await res.json();
+                const select = document.getElementById('json-list');
+                select.innerHTML = files.map(f => `<option value="${f.name}">${f.name.replace('.json','').replace(/_/g,' ')}</option>`).join('');
+            } catch(e) { console.error("Could not load list.json"); }
+        }
+
+        function launchFromSelector() {
+            const file = document.getElementById('json-list').value;
+            const animate = document.getElementById('check-animate').checked;
+            const transparent = document.getElementById('check-transparent').checked;
+            
+            if (transparent) document.body.classList.add('is-transparent');
+            document.getElementById('selector-overlay').classList.add('hidden');
+            loadData(file, animate);
+        }
+
+        async function loadData(file, animate) {
+            try {
+                const res = await fetch(`json/${file}`);
+                const data = await res.json();
+                document.getElementById('main-stage').classList.remove('hidden');
+                renderFinals(data, animate);
+            } catch (err) { console.error(err); }
+        }
+
+        function renderFinals(data, shouldAnimate) {
+            const isThrowdown = data.competition.includes('Throwdown');
+            document.body.className += " " + (isThrowdown ? 'theme-throwdown' : 'theme-swl');
+            document.getElementById('comp-label').innerText = data.competition.replace(/_/g, ' ');
+            document.getElementById('table-name').innerText = data.table;
+            document.getElementById('event-period').innerText = data.period;
+
+            const players = data.results || [];
+            document.getElementById('total-players').innerText = players.length;
+            const totalScore = players.reduce((s, p) => s + (p.high || 0), 0);
+            document.getElementById('avg-score').innerText = Math.round(totalScore / players.length).toLocaleString();
+
+            const winner = players[0];
+            document.getElementById('winner-banner').innerHTML = `
+                <div class="glass p-10 rounded-[40px] border-4 accent-border text-center shadow-2xl">
+                    <img src="${AVATAR_BASE}${winner.name.toLowerCase().replace(/\s+/g, '_')}.gif" class="w-40 h-40 rounded-full border-8 accent-border mx-auto mb-6" onerror="this.src='https://via.placeholder.com/160?text=?'">
+                    <div class="medieval text-sm accent-text uppercase tracking-widest mb-2">Grand Champion</div>
+                    <div class="text-5xl font-black italic uppercase">${winner.name}</div>
+                    <div class="text-3xl font-mono font-bold text-gray-500 mt-4">${winner.high.toLocaleString()}</div>
+                </div>`;
+
+            const a = data.awards || {};
+            const card = (icon, title, name, detail, color) => `
+                <div class="glass p-4 rounded-2xl border-l-4 ${color}">
+                    <div class="medieval text-[9px] text-gray-400 uppercase mb-1">${icon} ${title}</div>
+                    <div class="font-bold text-base uppercase italic text-white truncate">${name || 'N/A'}</div>
+                    <div class="text-[9px] text-gray-500 truncate">${detail || ''}</div>
+                </div>`;
+
+            document.getElementById('achievements').innerHTML = 
+                card("🔫", "Fast Draw", a.fast_draw, a.fast_draw_detail, "border-red-500") +
+                card("🎯", "Sharpshooter", a.sharpshooter, a.sharpshooter_detail, "border-orange-500") +
+                card("📈", "Most Improved", a.most_improved, a.most_improved_detail, "border-green-500") +
+                card("🔄", "Comeback Kid", a.comeback_kid, a.comeback_kid_detail, "border-purple-500");
+
+            const lbContainer = document.getElementById('leaderboard');
+            lbContainer.innerHTML = players.map((p, i) => `
+                <div class="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5">
+                    <div class="flex items-center gap-6">
+                        <span class="text-3xl font-black italic w-10 ${i < 3 ? 'accent-text' : 'text-gray-700'}">${i+1}</span>
+                        <img src="${AVATAR_BASE}${p.name.toLowerCase().replace(/\s+/g, '_')}.gif" class="w-12 h-12 rounded-full border-2 border-white/10" onerror="this.src='https://via.placeholder.com/48?text=?'">
+                        <span class="text-xl font-bold">${p.name}</span>
+                    </div>
+                    <span class="text-2xl font-mono font-bold ${i === 0 ? 'text-yellow-400' : 'text-gray-400'}">${p.high.toLocaleString()}</span>
+                </div>`).join('');
+
+            // Scaling/Scroll logic
+            if (shouldAnimate && players.length > 7) {
+                const lbHeight = lbContainer.scrollHeight;
+                const viewHeight = document.getElementById('lb-viewport').offsetHeight;
+                const scrollDist = -(lbHeight - viewHeight + 60);
+                document.documentElement.style.setProperty('--scroll-dist', `${scrollDist}px`);
+                document.documentElement.style.setProperty('--scroll-speed', `${players.length * 1.5}s`);
+                lbContainer.classList.add('scrolling-content');
+            } else if (!shouldAnimate && players.length > 10) {
+                const fitScale = Math.max(0.4, 10 / players.length);
+                lbContainer.style.transform = `scale(${fitScale})`;
+                lbContainer.style.transformOrigin = 'top center';
+            }
+        }
+        init();
+    </script>
+</body>
+</html>
