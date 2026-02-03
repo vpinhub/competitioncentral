@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VPINHUB | Stream Finals Asset</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Encode+Sans:wght@400;700;900&family=MedievalSharp&display=swap" rel="stylesheet">
     <style>
         body, html { 
@@ -12,7 +13,6 @@
             overflow: hidden; background: #020617; color: white;
             font-family: 'Encode Sans', sans-serif;
         }
-        /* Transparent Mode for OBS */
         body.is-transparent { background: transparent !important; }
         body.is-transparent .glass { background: rgba(0, 0, 0, 0.7); border-color: rgba(255,255,255,0.1); }
 
@@ -23,7 +23,6 @@
         .accent-text { color: var(--accent, #94a3b8); }
         .accent-border { border-color: var(--accent, #334155); }
 
-        /* Animation Loop */
         @keyframes scrollLoop {
             0%, 15% { transform: translateY(0); }
             85%, 100% { transform: translateY(var(--scroll-dist)); }
@@ -32,26 +31,56 @@
 
         #main-stage { height: 100%; display: flex; flex-direction: column; padding: 5vh; box-sizing: border-box; }
         #selector-overlay { position: fixed; inset: 0; z-index: 100; background: #020617; display: flex; align-items: center; justify-content: center; }
+        
+        .admin-select {
+            background-color: #0f172a;
+            border: 1px solid rgba(255,255,255,0.1);
+            color: white;
+            padding: 0.75rem;
+            border-radius: 0.75rem;
+            font-size: 0.875rem;
+            font-weight: 700;
+            width: 100%;
+            outline: none;
+        }
     </style>
 </head>
 <body>
 
     <div id="selector-overlay" class="hidden">
-        <div class="glass p-12 rounded-[40px] w-full max-w-xl border-2 border-white/10 text-center">
-            <h2 class="medieval text-3xl accent-text uppercase mb-8">Asset Selector</h2>
-            <div class="space-y-6">
-                <select id="json-list" class="w-full bg-slate-900 border border-white/20 rounded-2xl p-4 text-white font-bold outline-none">
-                    <option value="">Loading Records...</option>
-                </select>
-                <div class="flex gap-6 items-center justify-center py-2">
-                    <label class="flex items-center gap-2 cursor-pointer text-xs font-black uppercase tracking-widest">
-                        <input type="checkbox" id="check-animate" class="w-5 h-5 accent-orange-500"> Animate
-                    </label>
-                    <label class="flex items-center gap-2 cursor-pointer text-xs font-black uppercase tracking-widest">
-                        <input type="checkbox" id="check-transparent" class="w-5 h-5 accent-orange-500"> Transparent
-                    </label>
+        <div class="glass p-12 rounded-[40px] w-full max-w-2xl border-2 border-white/10">
+            <h2 class="medieval text-3xl accent-text uppercase mb-8 text-center">Tournament Finals Selector</h2>
+            <div class="grid grid-cols-2 gap-6 mb-8">
+                <div class="col-span-2">
+                    <label class="text-[10px] font-black uppercase tracking-widest text-gray-500 block mb-2">Select Competition Record</label>
+                    <select id="json-list" class="admin-select border-orange-500/50">
+                        <option value="">Loading Records...</option>
+                    </select>
                 </div>
-                <button onclick="launchFromSelector()" class="w-full bg-white text-black font-black py-4 rounded-2xl hover:bg-orange-500 hover:text-white transition-all uppercase tracking-widest">Display Finals</button>
+                <div>
+                    <label class="text-[10px] font-black uppercase tracking-widest text-gray-500 block mb-2">Motion Mode</label>
+                    <select id="select-animate" class="admin-select">
+                        <option value="false">Static (Fit to Screen)</option>
+                        <option value="true">Animated (Auto-Scroll)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-[10px] font-black uppercase tracking-widest text-gray-500 block mb-2">Background Type</label>
+                    <select id="select-transparent" class="admin-select">
+                        <option value="false">Solid (Dark Blue)</option>
+                        <option value="true">Transparent (For OBS)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-3">
+                <div class="flex gap-3">
+                    <button onclick="launchFromSelector()" class="flex-1 bg-white text-black font-black py-4 rounded-2xl hover:bg-orange-500 hover:text-white transition-all uppercase tracking-widest text-sm">Display Finals</button>
+                    <button id="discord-btn" onclick="copyDiscordTemplate()" class="flex-1 bg-indigo-600 text-white font-black py-4 rounded-2xl hover:bg-indigo-700 transition-all uppercase tracking-widest text-sm flex items-center justify-center gap-2">Copy Discord</button>
+                </div>
+                <button id="image-btn" onclick="downloadFinalsImage()" class="w-full bg-emerald-600 text-white font-black py-4 rounded-2xl hover:bg-emerald-700 transition-all uppercase tracking-widest text-sm flex items-center justify-center gap-2">
+                    📸 <span id="image-btn-text">Download Finals JPG</span>
+                </button>
             </div>
         </div>
     </div>
@@ -72,19 +101,11 @@
             <div class="col-span-4 flex flex-col gap-6">
                 <div id="winner-banner"></div>
                 <div id="achievements" class="grid grid-cols-2 gap-4"></div>
-                
                 <div class="glass rounded-3xl p-8 mt-auto flex justify-around items-center border-t-2 accent-border">
-                    <div class="text-center">
-                        <div class="text-4xl font-black italic" id="total-players">0</div>
-                        <div class="text-[9px] uppercase font-bold text-gray-400">Field Size</div>
-                    </div>
-                    <div class="text-center">
-                        <div class="text-4xl font-black italic accent-text" id="avg-score">0</div>
-                        <div class="text-[9px] uppercase font-bold text-gray-400">Average Score</div>
-                    </div>
+                    <div class="text-center"><div class="text-4xl font-black italic" id="total-players">0</div><div class="text-[9px] uppercase font-bold text-gray-400">Field Size</div></div>
+                    <div class="text-center"><div class="text-4xl font-black italic accent-text" id="avg-score">0</div><div class="text-[9px] uppercase font-bold text-gray-400">Average Score</div></div>
                 </div>
             </div>
-
             <div id="lb-viewport" class="col-span-8 glass rounded-[40px] relative overflow-hidden">
                 <div id="leaderboard" class="p-6 flex flex-col gap-3"></div>
             </div>
@@ -97,10 +118,9 @@
         async function init() {
             const params = new URLSearchParams(window.location.search);
             const jsonFile = params.get('json');
-
             if (jsonFile) {
-                if (params.has('transparent')) document.body.classList.add('is-transparent');
-                loadData(jsonFile, params.has('animate'));
+                if (params.get('transparent') === 'true') document.body.classList.add('is-transparent');
+                loadData(jsonFile, params.get('animate') === 'true');
             } else {
                 document.getElementById('selector-overlay').classList.remove('hidden');
                 populateSelector();
@@ -113,31 +133,70 @@
                 const files = await res.json();
                 const select = document.getElementById('json-list');
                 select.innerHTML = files.map(f => `<option value="${f.name}">${f.name.replace('.json','').replace(/_/g,' ')}</option>`).join('');
-            } catch(e) { console.error("Could not load list.json"); }
+            } catch(e) { console.error(e); }
+        }
+
+        // Capture Logic
+        async function downloadFinalsImage() {
+            const fileName = document.getElementById('json-list').value;
+            if (!fileName) return;
+
+            const btnText = document.getElementById('image-btn-text');
+            btnText.innerText = "Generating...";
+
+            // Temporary render to ensure content is present
+            await loadData(fileName, false); 
+            const stage = document.getElementById('main-stage');
+
+            html2canvas(stage, {
+                useCORS: true,
+                backgroundColor: "#020617",
+                scale: 1 // 1:1 scale for 1920x1080
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = `${fileName.replace('.json', '')}_Finals.jpg`;
+                link.href = canvas.toDataURL("image/jpeg", 0.9);
+                link.click();
+                btnText.innerText = "Download Complete!";
+                setTimeout(() => btnText.innerText = "Download Finals JPG", 2000);
+            });
+        }
+
+        async function copyDiscordTemplate() {
+            const fileName = document.getElementById('json-list').value;
+            if (!fileName) return;
+            try {
+                const res = await fetch(`json/${fileName}`);
+                const data = await res.json();
+                const a = data.awards || {};
+                const billionaires = data.results.filter(p => p.high >= 1000000000).map(p => p.name).join('\n');
+                const template = `**${data.table}** (${data.period})\n\n👑 **Winner!**\n${data.results[0].name}\n${data.results[0].high.toLocaleString()}\n\n🔫 **Fast Draw**\n${a.fast_draw || 'N/A'}\n${a.fast_draw_detail || ''}\n\n🎯 **Sharpshooter**\n${a.sharpshooter || 'N/A'}\n${a.sharpshooter_detail || ''}\n\n🔄 **Comeback Kid**\n${a.comeback_kid || 'N/A'}\n${a.comeback_kid_detail || ''}\n\n📈 **Most Improved**\n${a.most_improved || 'N/A'}\n${a.most_improved_detail || ''}\n\n🕹️ **Most Played**\n${a.most_played || 'N/A'}\n${a.most_played_detail || ''}\n\n☢️ **C. Montgomery Burns Award**\n${a.burns_award || 'N/A'}\n${a.burns_award_detail || ''}\n\n💰 **Billionaires Club**\n${billionaires || 'No inductees'}`;
+                await navigator.clipboard.writeText(template);
+                const btnText = document.getElementById('discord-btn');
+                const oldText = btnText.innerText; btnText.innerText = "Copied!";
+                setTimeout(() => btnText.innerText = oldText, 2000);
+            } catch (err) { console.error(err); }
         }
 
         function launchFromSelector() {
             const file = document.getElementById('json-list').value;
-            const animate = document.getElementById('check-animate').checked;
-            const transparent = document.getElementById('check-transparent').checked;
-            
+            const animate = document.getElementById('select-animate').value === 'true';
+            const transparent = document.getElementById('select-transparent').value === 'true';
             if (transparent) document.body.classList.add('is-transparent');
             document.getElementById('selector-overlay').classList.add('hidden');
             loadData(file, animate);
         }
 
         async function loadData(file, animate) {
-            try {
-                const res = await fetch(`json/${file}`);
-                const data = await res.json();
-                document.getElementById('main-stage').classList.remove('hidden');
-                renderFinals(data, animate);
-            } catch (err) { console.error(err); }
+            const res = await fetch(`json/${file}`);
+            const data = await res.json();
+            document.getElementById('main-stage').classList.remove('hidden');
+            renderFinals(data, animate);
         }
 
         function renderFinals(data, shouldAnimate) {
             const isThrowdown = data.competition.includes('Throwdown');
-            document.body.className += " " + (isThrowdown ? 'theme-throwdown' : 'theme-swl');
+            document.body.className = isThrowdown ? 'theme-throwdown' : 'theme-swl';
             document.getElementById('comp-label').innerText = data.competition.replace(/_/g, ' ');
             document.getElementById('table-name').innerText = data.table;
             document.getElementById('event-period').innerText = data.period;
@@ -157,12 +216,7 @@
                 </div>`;
 
             const a = data.awards || {};
-            const card = (icon, title, name, detail, color) => `
-                <div class="glass p-4 rounded-2xl border-l-4 ${color}">
-                    <div class="medieval text-[9px] text-gray-400 uppercase mb-1">${icon} ${title}</div>
-                    <div class="font-bold text-base uppercase italic text-white truncate">${name || 'N/A'}</div>
-                    <div class="text-[9px] text-gray-500 truncate">${detail || ''}</div>
-                </div>`;
+            const card = (icon, title, name, detail, color) => `<div class="glass p-4 rounded-2xl border-l-4 ${color}"><div class="medieval text-[9px] text-gray-400 uppercase mb-1">${icon} ${title}</div><div class="font-bold text-base uppercase italic text-white truncate">${name || 'N/A'}</div><div class="text-[9px] text-gray-500 truncate">${detail || ''}</div></div>`;
 
             document.getElementById('achievements').innerHTML = 
                 card("🔫", "Fast Draw", a.fast_draw, a.fast_draw_detail, "border-red-500") +
@@ -181,7 +235,6 @@
                     <span class="text-2xl font-mono font-bold ${i === 0 ? 'text-yellow-400' : 'text-gray-400'}">${p.high.toLocaleString()}</span>
                 </div>`).join('');
 
-            // Scaling/Scroll logic
             if (shouldAnimate && players.length > 7) {
                 const lbHeight = lbContainer.scrollHeight;
                 const viewHeight = document.getElementById('lb-viewport').offsetHeight;
