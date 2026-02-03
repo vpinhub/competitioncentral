@@ -33,7 +33,6 @@
                     <h3 class="text-xl font-bold text-indigo-400 mb-6 tracking-tight uppercase border-b border-white/10 pb-2">Rules & Submission</h3>
                     <ul class="text-left space-y-4 text-sm leading-relaxed text-gray-200 mb-8 list-none">
                         <li class="flex gap-3"><span class="text-indigo-500">•</span><span>Submit in VPC Discord using !score command.</span></li>
-                        <li class="flex gap-3"><span class="text-indigo-500">•</span><span>Deadline: <strong>Monday at 12:00 AM PST</strong>.</span></li>
                     </ul>
                     <a href="https://discord.com/invite/virtual-pinball-chat" target="_blank" class="block w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-lg text-center uppercase text-sm">Join Discord</a>
                 </div>
@@ -57,8 +56,6 @@
 
         async function init() {
             calculateVPCPeriod();
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.has('showachievements')) { document.getElementById('achievement-zone').classList.remove('hidden'); }
             try {
                 const dbRes = await fetch(VPS_DATA); vpsDB = await dbRes.json();
                 const vpcRes = await fetch(VPC_API);
@@ -79,14 +76,6 @@
             document.getElementById('event-period').innerText = `${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}`;
         }
 
-        function exportTournamentData(prefix) {
-            const exportObj = { competition: prefix, date_exported: new Date().toISOString(), period: document.getElementById('event-period').innerText, table: document.querySelector('#table-card h4')?.innerText || 'Unknown', awards: window.achievementData, results: window.currentResults || [] };
-            const blob = new Blob([JSON.stringify(exportObj, null, 4)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a'); a.href = url; a.download = `${prefix}_${new Date().toISOString().split('T')[0]}.json`;
-            document.body.appendChild(a); a.click(); document.body.removeChild(a);
-        }
-
         function processVPCData(weekData) {
             const scores = (weekData.scores || []).sort((a, b) => b.score - a.score);
             window.currentResults = scores.map(s => ({ name: s.username, high: s.score, avatar: s.userAvatarUrl }));
@@ -95,11 +84,18 @@
             renderLeaderboard(window.currentResults);
             renderWinner(window.currentResults[0]);
             renderAchievements(window.currentResults[0], burns, weekData.weekNumber);
-            renderTable(weekData.vpsId, weekData.table, weekData.versionNumber);
+            renderTable(weekData.vpsId, weekData.table, weekData.versionNumber, weekData.tableId);
         }
 
         function renderLeaderboard(players) {
-            document.getElementById('leaderboard').innerHTML = players.map((p, i) => `<div class="flex items-center justify-between px-6 py-4 hover:bg-white/5 transition"><div class="flex items-center gap-4"><span class="w-6 font-black text-xl italic ${i < 3 ? 'text-indigo-400' : 'text-gray-700'}">${i+1}</span><img src="${p.avatar}" class="w-10 h-10 rounded-full border border-white/10" onerror="this.src='https://via.placeholder.com/40?text=?'"><span class="font-bold text-sm text-gray-200">${p.name}</span></div><span class="font-mono font-bold ${i === 0 ? 'text-yellow-400' : 'text-gray-400'}">${p.high.toLocaleString()}</span></div>`).join('');
+            document.getElementById('leaderboard').innerHTML = players.map((p, i) => `<div class="flex items-center justify-between px-6 py-4 hover:bg-white/5 transition">
+                <div class="flex items-center gap-4">
+                    <span class="w-6 font-black text-xl italic ${i < 3 ? 'text-indigo-400' : 'text-gray-700'}">${i+1}</span>
+                    <img src="${p.avatar}" class="w-10 h-10 rounded-full border border-white/10" onerror="this.src='https://via.placeholder.com/40?text=?'">
+                    <span class="font-bold text-sm text-gray-200">${p.name}</span>
+                </div>
+                <span class="font-mono font-bold ${i === 0 ? 'text-yellow-400' : 'text-gray-400'}">${p.high.toLocaleString()}</span>
+            </div>`).join('');
         }
 
         function renderWinner(winner) {
@@ -112,19 +108,18 @@
             document.getElementById('achievements').innerHTML = card("🏆", "Front Runner", winner?.name || "N/A", "Ranked #1", "border-indigo-500") + card("☢️", "C. Montgomery Burns Award", burns?.name || "N/A", "Excellent!", "border-indigo-500") + card("📅", "Week #", week, "Event Cycle", "border-indigo-500");
         }
 
-        function renderTable(releaseId, tableName, version) {
+        function renderTable(releaseId, tableName, version, tableId) {
             const parentTable = vpsDB.find(t => (t.tableFiles || []).some(f => f.id === releaseId));
             const img = parentTable?.b2sFiles?.[0]?.imgUrl || "https://via.placeholder.com/400x200";
-            const vpsLink = parentTable ? `https://virtualpinballspreadsheet.github.io/vps-db/#${parentTable.id}` : "#";
             document.getElementById('table-card').innerHTML = `
-                <div class="relative rounded-xl overflow-hidden border border-white/10 shadow-2xl mb-4">
+                <div class="relative rounded-xl overflow-hidden border border-white/10 shadow-2xl">
                     <img src="${img}" class="w-full h-52 object-cover">
                     <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent flex flex-col justify-end p-4">
                         <h4 class="text-2xl font-black italic uppercase tracking-tighter">${tableName}</h4>
                         <p class="text-[10px] text-indigo-400 font-bold uppercase tracking-widest">${version ? 'v' + version : ''} • ${parentTable ? parentTable.manufacturer : 'VPC'}</p>
                     </div>
                 </div>
-                ${parentTable ? `<div class="grid grid-cols-2 gap-3"><a href="${vpsLink}" target="_blank" class="bg-white/10 hover:bg-white/20 text-white text-center py-2 rounded-lg text-xs font-bold uppercase transition">Table Files</a><a href="${vpsLink}" target="_blank" class="bg-white/10 hover:bg-white/20 text-white text-center py-2 rounded-lg text-xs font-bold uppercase transition">B2S Files</a></div>` : ''}`;
+                <a href="https://vpinhub.github.io/tournamenthelper/?tableId=${tableId}&releaseId=${releaseId}&vpc" target="_blank" class="block w-full bg-white text-black text-center py-4 rounded-xl font-black text-xs hover:bg-indigo-500 transition mt-4 uppercase">Download Table Files</a>`;
         }
         init();
     </script>
