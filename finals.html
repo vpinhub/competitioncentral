@@ -91,18 +91,14 @@
 const AVATAR_BASE = "http://vpinhub.github.io/special-when-lit-leaderboard/img/";
 const el = id => document.getElementById(id);
 
-// Force check on load
 window.onload = function() {
     const params = new URLSearchParams(window.location.search);
     const jsonParam = params.get('json');
-    
     if (jsonParam) {
-        // Param found - hide selector immediately
         el('selector-overlay').style.display = 'none';
         if (params.get('transparent') === 'true') document.body.classList.add('is-transparent');
         loadData(jsonParam, params.get('animate') === 'true');
     } else {
-        // No param - show selector and populate list
         el('selector-overlay').style.display = 'flex';
         populateSelector();
     }
@@ -113,26 +109,23 @@ async function populateSelector() {
         const res = await fetch('json/list.json');
         const files = await res.json();
         el('json-list').innerHTML = files.map(f => `<option value="${f.name}">${f.name.replace('.json','').replace(/_/g,' ')}</option>`).join('');
-    } catch(e) { console.error("Error loading list.json", e); }
+    } catch(e) { console.error(e); }
 }
 
 function launchNewTab() {
     const file = el('json-list').value;
     const animate = el('select-animate').value;
     const transparent = el('select-transparent').value;
-    // Build the URL to trigger the parameter logic in window.onload
     const url = window.location.pathname + `?json=${file}&animate=${animate}&transparent=${transparent}`;
     window.open(url, '_blank');
 }
 
 async function loadData(file, animate=false){
-    try {
-        const res = await fetch(`json/${file}`);
-        const data = await res.json();
-        document.body.className = data.competition?.includes('Throwdown') ? 'theme-throwdown' : 'theme-swl';
-        el('main-stage').classList.remove('hidden');
-        renderFinals(data, animate);
-    } catch(e) { console.error("Error loading tournament JSON", e); }
+    const res = await fetch(`json/${file}`);
+    const data = await res.json();
+    document.body.className = data.competition?.includes('Throwdown') ? 'theme-throwdown' : 'theme-swl';
+    el('main-stage').classList.remove('hidden');
+    renderFinals(data, animate);
 }
 
 function renderFinals(data, animate){
@@ -143,8 +136,10 @@ function renderFinals(data, animate){
     el('total-players').innerText = players.length;
     el('avg-score').innerText = players.length ? Math.round(players.reduce((s,p)=>s+p.high,0)/players.length).toLocaleString() : 0;
 
+    // Restored Tournament Winner Header
     el('winner-banner').innerHTML = `
         <div class="glass p-6 rounded-[32px] border-4 accent-border text-center shadow-xl">
+            <div class="medieval text-xs accent-text uppercase tracking-widest mb-2">Tournament Winner</div>
             <img src="${AVATAR_BASE}${players[0].name.replace(/\s+/g,'_').toLowerCase()}.gif" class="w-32 h-32 rounded-full mx-auto mb-3 border-4 accent-border shadow-lg" onerror="this.src='https://via.placeholder.com/128?text=?'">
             <div class="text-3xl font-black italic uppercase">${players[0].name}</div>
             <div class="text-xl font-mono text-gray-400 font-bold">${players[0].high.toLocaleString()}</div>
@@ -156,18 +151,25 @@ function renderFinals(data, animate){
     const lb = el('leaderboard');
     lb.innerHTML = players.map((p,i)=>`<div class="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5"><div class="flex items-center gap-4"><span class="text-2xl font-black italic w-8 ${i<3?'accent-text':'text-gray-600'}">${i+1}</span><img src="${AVATAR_BASE}${p.name.replace(/\s+/g,'_').toLowerCase()}.gif" class="w-10 h-10 rounded-full border border-white/10" onerror="this.src='https://via.placeholder.com/40?text=?'"><span class="text-lg font-bold">${p.name}</span></div><span class="text-xl font-mono font-bold">${p.high.toLocaleString()}</span></div>`).join('');
 
+    // Refined Static Scaling Logic
     setTimeout(() => {
-        const dist = -(lb.scrollHeight - el('lb-viewport').offsetHeight + 40);
+        lb.classList.remove('scrolling-content');
+        lb.style.transform = 'scale(1)';
+        const viewportHeight = el('lb-viewport').offsetHeight;
+        const contentHeight = lb.scrollHeight;
+
         if(animate && players.length > 7){
+            const dist = -(contentHeight - viewportHeight + 40);
             document.documentElement.style.setProperty('--scroll-dist', `${dist}px`);
             document.documentElement.style.setProperty('--scroll-speed', `${players.length * 1.5}s`);
             lb.classList.add('scrolling-content');
-        } else {
-            const scale = Math.min(1, el('lb-viewport').offsetHeight / lb.scrollHeight);
+        } else if (contentHeight > viewportHeight) {
+            // Shrink rows and gap if static to fit
+            const scale = (viewportHeight - 20) / contentHeight;
             lb.style.transform = `scale(${scale})`;
             lb.style.transformOrigin = 'top center';
         }
-    }, 100);
+    }, 150);
 }
 
 async function downloadFinalsImage(){
@@ -176,9 +178,8 @@ async function downloadFinalsImage(){
     await loadData(file, false);
     const stage = el('main-stage');
     stage.classList.add('render-mode');
-    // Important: Force a hard background color for the capture tool
     stage.style.background = "#020617";
-    await new Promise(r=>setTimeout(r,600)); 
+    await new Promise(r=>setTimeout(r,800)); 
     const canvas = await html2canvas(stage,{backgroundColor:"#020617", scale: 1, useCORS: true});
     const link=document.createElement('a');
     link.download=file.replace('.json','')+'_Finals.jpg';
