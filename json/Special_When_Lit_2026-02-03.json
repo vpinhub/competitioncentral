@@ -1,16 +1,22 @@
 {
     "competition": "Special_When_Lit",
-    "date_exported": "2026-02-03T19:13:20.195Z",
+    "date_exported": "2026-02-03T19:48:53.000Z",
     "period": "2/1/2026 - 2/8/2026",
     "table": "BUCK ROGERS",
     "awards": {
         "winner": "TheEternalGremmie",
         "fast_draw": "Paladin",
+        "fast_draw_detail": "First Entry",
         "sharpshooter": "Dstructv",
+        "sharpshooter_detail": "Top Average",
         "most_improved": "TheEternalGremmie",
+        "most_improved_detail": "Gap: +674,100",
         "comeback_kid": "TheEternalGremmie",
+        "comeback_kid_detail": "Gain: +674,100",
         "most_played": "Paladin",
-        "burns_award": "Dstructv"
+        "most_played_detail": "4 Games",
+        "burns_award": "Buck Pindragon",
+        "burns_award_detail": "Excellent!"
     },
     "results": [
         {
