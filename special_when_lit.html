@@ -35,10 +35,11 @@
                     <h3 class="text-xl font-bold text-fuchsia-400 mb-6 tracking-tight uppercase border-b border-white/10 pb-2">Rules & Submission</h3>
                     <ul class="text-left space-y-4 text-sm leading-relaxed text-gray-200 mb-8 list-none">
                         <li class="flex gap-3"><span class="text-fuchsia-500">•</span><span>All scores must be submitted via <strong>iScored</strong>.</span></li>
-                        <li class="flex gap-3"><span class="text-fuchsia-500">•</span><span>Manual submissions require a <strong>photo for verification</strong>.</span></li>
-                        <li class="flex gap-3"><span class="text-fuchsia-500">•</span><span>No table or script modifications allowed.</span></li>
-                        <li class="flex gap-3"><span class="text-fuchsia-500">•</span><span>Highest valid score at end of period wins.</span></li>
-                        <li class="flex gap-3"><span class="text-fuchsia-500">•</span><span>Deadline: <strong>Sunday at 2:00 PM EST</strong>.</span></li>
+                        <li class="flex gap-3"><span class="text-fuchsia-500">•</span><span>Manual submissions to iScored require a <strong>photo for verification</strong>.</span></li>
+                        <li class="flex gap-3"><span class="text-fuchsia-500">•</span><span>VPinStudio auto-submissions are permitted, but players are responsible for <strong>verifying their score has posted</strong>.</span></li>
+                        <li class="flex gap-3"><span class="text-fuchsia-500">•</span><span>No table or script modifications that affect gameplay are allowed.</span></li>
+                        <li class="flex gap-3"><span class="text-fuchsia-500">•</span><span>The player with the highest valid score at the end of the event period wins.</span></li>
+                        <li class="flex gap-3"><span class="text-fuchsia-500">•</span><span>The submission deadline is <strong>Sunday at 2:00 PM Eastern Time</strong>.</span></li>
                     </ul>
                     <div class="space-y-3">
                         <a href="https://iscored.info/?mode=public&user=vpinhub" target="_blank" class="block w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg text-center transition-colors shadow-sm uppercase text-sm">Submit Score</a>
@@ -97,14 +98,7 @@
         }
 
         function exportTournamentData(prefix) {
-            const exportObj = { 
-                competition: prefix, 
-                date_exported: new Date().toISOString(), 
-                period: document.getElementById('event-period').innerText, 
-                table: document.querySelector('#table-card h4')?.innerText || 'Unknown', 
-                awards: window.achievementData, 
-                results: window.currentResults || [] 
-            };
+            const exportObj = { competition: prefix, date_exported: new Date().toISOString(), period: document.getElementById('event-period').innerText, table: document.querySelector('#table-card h4')?.innerText || 'Unknown', awards: window.achievementData, results: window.currentResults || [] };
             const blob = new Blob([JSON.stringify(exportObj, null, 4)], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a'); a.href = url; a.download = `${prefix}_${new Date().toISOString().split('T')[0]}.json`;
@@ -137,15 +131,13 @@
                 return p;
             });
 
-            const sorted = playerList.sort((a,b) => b.high - a.high);
-            window.currentResults = sorted;
+            window.currentResults = playerList.sort((a,b) => b.high - a.high);
             const shooter = [...playerList].sort((a,b) => b.avg - a.avg)[0];
             const improved = [...playerList].sort((a,b) => b.improvementGap - a.improvementGap)[0];
             const grinder = [...playerList].sort((a,b) => b.scores.length - a.scores.length)[0];
             const comeback = [...playerList].sort((a,b) => b.comebackGrowth - a.comebackGrowth)[0];
             const burns = playerList[Math.floor(Math.random() * playerList.length)];
 
-            // Achievement Data with detailed string generation
             window.achievementData = {
                 winner: window.currentResults[0]?.name,
                 fast_draw: pioneer.name,
@@ -170,15 +162,7 @@
         }
 
         function renderLeaderboard(players) {
-            document.getElementById('leaderboard').innerHTML = players.map((p, i) => `
-                <div class="flex items-center justify-between px-6 py-4 hover:bg-white/5 transition">
-                    <div class="flex items-center gap-4">
-                        <span class="w-6 font-black text-xl italic ${i < 3 ? 'text-fuchsia-500' : 'text-gray-700'}">${i+1}</span>
-                        <img src="${AVATAR_BASE}${p.name.toLowerCase().replace(/\s+/g, '_')}.gif" class="w-10 h-10 rounded-full border border-white/10" onerror="this.src='https://via.placeholder.com/40?text=?'">
-                        <span class="font-bold text-sm text-gray-200">${p.name}</span>
-                    </div>
-                    <span class="font-mono font-bold ${i === 0 ? 'text-yellow-400' : 'text-gray-400'}">${p.high.toLocaleString()}</span>
-                </div>`).join('');
+            document.getElementById('leaderboard').innerHTML = players.map((p, i) => `<div class="flex items-center justify-between px-6 py-4 hover:bg-white/5 transition"><div class="flex items-center gap-4"><span class="w-6 font-black text-xl italic ${i < 3 ? 'text-fuchsia-500' : 'text-gray-700'}">${i+1}</span><img src="${AVATAR_BASE}${p.name.toLowerCase().replace(/\s+/g, '_')}.gif" class="w-10 h-10 rounded-full border border-white/10" onerror="this.src='https://via.placeholder.com/40?text=?'"><span class="font-bold text-sm text-gray-200">${p.name}</span></div><span class="font-mono font-bold ${i === 0 ? 'text-yellow-400' : 'text-gray-400'}">${p.high.toLocaleString()}</span></div>`).join('');
         }
 
         function renderWinner(winner) {
@@ -188,13 +172,7 @@
 
         function renderAchievements(pioneer, shooter, improved, grinder, comeback, burns) {
             const card = (icon, title, name, detail, color) => `<div class="glass p-4 rounded-xl border-l-4 ${color} achievement-card"><div class="medieval text-[10px] text-gray-400 uppercase">${icon} ${title}</div><div class="font-bold text-sm uppercase italic text-white">${name}</div><div class="text-[10px] text-gray-500">${detail}</div></div>`;
-            document.getElementById('achievements').innerHTML = 
-                card("🔫", "Fast Draw", pioneer.name, "First Entry", "border-red-500") +
-                card("🎯", "Sharpshooter", shooter?.name, "Top Average", "border-fuchsia-500") +
-                card("📈", "Most Improved", improved?.name, `Gap: +${improved?.improvementGap.toLocaleString()}`, "border-green-500") +
-                card("🔄", "Comeback Kid", comeback?.name, `Gain: +${comeback?.comebackGrowth.toLocaleString()}`, "border-purple-500") +
-                card("🕹️", "Most Played", grinder?.name, `${grinder?.scores.length} Games`, "border-blue-500") +
-                card("☢️", "C. Montgomery Burns Award", burns?.name, "Excellent!", "border-fuchsia-500");
+            document.getElementById('achievements').innerHTML = card("🔫", "Fast Draw", pioneer.name, "First Entry", "border-red-500") + card("🎯", "Sharpshooter", shooter?.name, "Top Average", "border-fuchsia-500") + card("📈", "Most Improved", improved?.name, `Gap: +${improved?.improvementGap.toLocaleString()}`, "border-green-500") + card("🔄", "Comeback Kid", comeback?.name, `Gain: +${comeback?.comebackGrowth.toLocaleString()}`, "border-purple-500") + card("🕹️", "Most Played", grinder?.name, `${grinder?.scores.length} Games`, "border-blue-500") + card("☢️", "C. Montgomery Burns Award", burns?.name, "Excellent!", "border-fuchsia-500");
         }
 
         function renderTable(table, fallbackName, gameId, releaseId) {
