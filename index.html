@@ -31,7 +31,7 @@
         <a href="throwdown.html" class="tournament-card glass rounded-3xl p-8 border-t-4 border-orange-500 glow-orange flex flex-col justify-between">
             <div>
                 <div class="flex justify-between items-start mb-6">
-                    <span class="bg-orange-500/20 text-orange-400 text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full">VPINHUB Weekly Series</span>
+                    <span class="bg-orange-500/20 text-orange-400 text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full">Weekly Series</span>
                     <span class="text-gray-500 text-xs font-bold uppercase tracking-widest">iScored</span>
                 </div>
                 <h2 class="text-3xl font-black uppercase italic leading-none mb-2">Thursday<br>Throwdown</h2>
@@ -46,7 +46,7 @@
         <a href="special_when_lit.html" class="tournament-card glass rounded-3xl p-8 border-t-4 border-fuchsia-600 glow-fuchsia flex flex-col justify-between">
             <div>
                 <div class="flex justify-between items-start mb-6">
-                    <span class="bg-fuchsia-500/20 text-fuchsia-400 text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full">VPINHUB Weekly Series</span>
+                    <span class="bg-fuchsia-500/20 text-fuchsia-400 text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full">Weekly Series</span>
                     <span class="text-gray-500 text-xs font-bold uppercase tracking-widest">iScored</span>
                 </div>
                 <h2 class="text-3xl font-black uppercase italic leading-none mb-2">Special<br>When Lit</h2>
@@ -61,7 +61,7 @@
         <a href="competition_corner.html" class="tournament-card glass rounded-3xl p-8 border-t-4 border-indigo-500 glow-indigo flex flex-col justify-between">
             <div>
                 <div class="flex justify-between items-start mb-6">
-                    <span class="bg-indigo-500/20 text-indigo-400 text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full">VPC Community</span>
+                    <span class="bg-indigo-500/20 text-indigo-400 text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full">Community Collab</span>
                     <span class="text-gray-500 text-xs font-bold uppercase tracking-widest">Discord</span>
                 </div>
                 <h2 class="text-3xl font-black uppercase italic leading-none mb-2">Competition<br>Corner</h2>
@@ -98,9 +98,13 @@ function formatTableName(vpsTable, fallback) {
     return `${vpsTable.name} (${vpsTable.manufacturer || "Unknown"} ${vpsTable.year || ""})`;
 }
 
-function renderPreview(targetId, tableName, leader, colorClass, avatarUrl, usernameField="name") {
+// Dynamic rendering with player count inclusion
+function renderPreview(targetId, tableName, leader, colorClass, avatarUrl, playerCount, usernameField="name") {
     document.getElementById(targetId).innerHTML = `
-        <div class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">Current Table</div>
+        <div class="flex justify-between items-end mb-1">
+            <div class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Current Table</div>
+            <div class="text-[10px] ${colorClass} font-black uppercase tracking-widest">${playerCount} Active Players</div>
+        </div>
         <div class="text-sm font-bold leading-snug mb-5 line-clamp-2 break-words">${tableName}</div>
         <div class="flex items-center gap-3 bg-white/5 p-3 rounded-xl border border-white/10">
             <img src="${avatarUrl}" class="w-8 h-8 rounded-full border border-white/10"
@@ -120,12 +124,17 @@ async function fetchIScoredPreview(roomId, targetId, colorClass) {
         if (!r.ok) r = await fetch(PROXY + encodeURIComponent(url));
         const data = await r.json();
         const game = data.find(g => JSON.stringify(g).includes('game=')) || data[0];
+        
+        // Calculate unique active players
+        const uniquePlayers = new Set((game.scores || []).map(s => s.name)).size;
+        
         const vpsTable = getTableDetails(game);
         const tableName = formatTableName(vpsTable, game.longName);
         const leader = [...game.scores].map(s => ({...s, numScore: parseInt(s.score,10)||0}))
             .sort((a,b)=>b.numScore-a.numScore)[0];
         const avatar = `${AVATAR_BASE}${leader.name.toLowerCase().replace(/\s+/g,'_')}.gif`;
-        renderPreview(targetId, tableName, leader, colorClass, avatar);
+        
+        renderPreview(targetId, tableName, leader, colorClass, avatar, uniquePlayers);
     } catch {}
 }
 
@@ -136,7 +145,9 @@ async function fetchVPCPreview() {
         if (!r.ok) r = await fetch(PROXY + encodeURIComponent(url));
         const data = await r.json();
 
-        // FIX: Only append manufacturer/year if not already present in the title
+        // Calculate unique active players
+        const uniquePlayers = new Set((data.scores || []).map(s => s.username)).size;
+
         let tableName = data.table;
         if (!tableName.includes('(')) {
             tableName += ` (${data.manufacturer || "Unknown"} ${data.year || ""})`;
@@ -144,7 +155,8 @@ async function fetchVPCPreview() {
 
         const leader = [...data.scores].map(s=>({...s,numScore:parseInt(s.score,10)||0}))
             .sort((a,b)=>b.numScore-a.numScore)[0];
-        renderPreview('vpc-preview', tableName, leader, 'text-indigo-400', leader.userAvatarUrl, 'username');
+            
+        renderPreview('vpc-preview', tableName, leader, 'text-indigo-400', leader.userAvatarUrl, uniquePlayers, 'username');
     } catch {}
 }
 
