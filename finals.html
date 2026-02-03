@@ -95,13 +95,6 @@ body.is-transparent .glass { background: rgba(0,0,0,0.7); }
                 <select id="json-list" class="admin-select"></select>
             </div>
             <div>
-                <label class="text-[10px] font-black uppercase tracking-widest text-gray-500 block mb-2">Motion</label>
-                <select id="select-animate" class="admin-select">
-                    <option value="false">Static</option>
-                    <option value="true">Animate</option>
-                </select>
-            </div>
-            <div>
                 <label class="text-[10px] font-black uppercase tracking-widest text-gray-500 block mb-2">Background</label>
                 <select id="select-transparent" class="admin-select">
                     <option value="false">Solid</option>
@@ -111,7 +104,7 @@ body.is-transparent .glass { background: rgba(0,0,0,0.7); }
         </div>
 
         <div class="flex flex-col gap-3">
-            <button onclick="launchFromSelector()" class="bg-white text-black font-black py-4 rounded-xl hover:bg-orange-500 hover:text-white uppercase text-xs">Display Finals</button>
+            <button onclick="launchFromSelector()" class="bg-white text-black font-black py-4 rounded-xl uppercase text-xs">Display Finals</button>
             <button onclick="downloadFinalsImage()" class="bg-emerald-600 text-white font-black py-4 rounded-xl uppercase text-xs">📸 Download JPG (1080p)</button>
             <button onclick="downloadFinalsImage(true)" class="bg-blue-600 text-white font-black py-4 rounded-xl uppercase text-xs">🖼️ Download Discord Banner</button>
         </div>
@@ -121,7 +114,7 @@ body.is-transparent .glass { background: rgba(0,0,0,0.7); }
 <div id="main-stage" class="hidden">
     <div class="flex justify-between items-end border-b-2 accent-border pb-4 mb-8">
         <div>
-            <div id="comp-label" class="medieval text-lg accent-text uppercase mb-1">Final Standings</div>
+            <div class="medieval text-lg accent-text uppercase mb-1">Final Standings</div>
             <h1 id="table-name" class="text-6xl xl:text-7xl font-black italic uppercase leading-tight break-words max-w-[900px]">Table</h1>
         </div>
         <div class="text-right">
@@ -133,7 +126,6 @@ body.is-transparent .glass { background: rgba(0,0,0,0.7); }
     <div class="grid grid-cols-12 gap-8 flex-1 overflow-hidden min-h-0">
         <div class="col-span-4 flex flex-col gap-6 min-h-0">
             <div id="winner-banner"></div>
-            <div id="achievements" class="grid grid-cols-2 gap-4"></div>
             <div class="glass rounded-3xl p-8 mt-auto flex justify-around items-center border-t-2 accent-border">
                 <div class="text-center"><div id="total-players" class="text-4xl font-black italic">0</div><div class="text-[9px] uppercase font-bold text-gray-400">Field Size</div></div>
                 <div class="text-center"><div id="avg-score" class="text-4xl font-black italic accent-text">0</div><div class="text-[9px] uppercase font-bold text-gray-400">Average Score</div></div>
@@ -148,69 +140,90 @@ body.is-transparent .glass { background: rgba(0,0,0,0.7); }
 
 <script>
 const AVATAR_BASE = "http://vpinhub.github.io/special-when-lit-leaderboard/img/";
+const el = id => document.getElementById(id);
 
 async function init() {
     const res = await fetch('json/list.json');
     const files = await res.json();
-    json-list.innerHTML = files.map(f => `<option value="${f.name}">${f.name.replace('.json','')}</option>`).join('');
+    el('json-list').innerHTML = files.map(f =>
+        `<option value="${f.name}">${f.name.replace('.json','').replace(/_/g,' ')}</option>`
+    ).join('');
 }
 init();
 
 function launchFromSelector() {
-    selector-overlay.classList.add('hidden');
-    if(select-transparent.value==='true') document.body.classList.add('is-transparent');
-    loadData(json-list.value);
+    const file = el('json-list').value;
+    if (!file) return;
+
+    el('selector-overlay').classList.add('hidden');
+
+    if (el('select-transparent').value === 'true')
+        document.body.classList.add('is-transparent');
+
+    loadData(file);
 }
 
-async function loadData(file){
+async function loadData(file) {
     const res = await fetch(`json/${file}`);
     const data = await res.json();
 
     document.body.classList.remove('theme-throwdown','theme-swl');
-    document.body.classList.add(data.competition.includes('Throwdown') ? 'theme-throwdown':'theme-swl');
+    document.body.classList.add(
+        data.competition?.includes('Throwdown') ? 'theme-throwdown' : 'theme-swl'
+    );
 
-    main-stage.classList.remove('hidden');
+    el('main-stage').classList.remove('hidden');
 
-    table-name.innerText = data.table;
-    event-period.innerText = data.period;
+    const players = data.results || [];
 
-    const players = data.results;
-    total-players.innerText = players.length;
-    avg-score.innerText = Math.round(players.reduce((s,p)=>s+p.high,0)/players.length).toLocaleString();
+    el('table-name').innerText = data.table;
+    el('event-period').innerText = data.period;
+    el('total-players').innerText = players.length;
+    el('avg-score').innerText = players.length ? Math.round(players.reduce((s,p)=>s+p.high,0)/players.length).toLocaleString() : 0;
 
     const winner = players[0];
-    winner-banner.innerHTML = `
+    if (winner) {
+        el('winner-banner').innerHTML = `
         <div class="glass p-8 rounded-[40px] border-4 accent-border text-center">
-            <img src="${AVATAR_BASE}${winner.name.replace(/\s+/g,'_').toLowerCase()}.gif" class="w-40 h-40 rounded-full mx-auto mb-4">
+            <img src="${AVATAR_BASE}${winner.name.replace(/\s+/g,'_').toLowerCase()}.gif"
+                 class="w-40 h-40 rounded-full mx-auto mb-4"
+                 onerror="this.src='https://via.placeholder.com/160?text=?'">
             <div class="text-4xl font-black italic uppercase">${winner.name}</div>
         </div>`;
-    
-    leaderboard.innerHTML = players.map((p,i)=>`
+    }
+
+    el('leaderboard').innerHTML = players.map((p,i)=>`
         <div class="flex items-center justify-between p-4 bg-white/5 rounded-2xl">
             <div class="flex items-center gap-6">
                 <span class="text-3xl font-black italic w-10 ${i<3?'accent-text':'text-gray-600'}">${i+1}</span>
                 <span class="text-xl font-bold">${p.name}</span>
             </div>
             <span class="text-2xl font-mono font-bold">${p.high.toLocaleString()}</span>
-        </div>`).join('');
+        </div>
+    `).join('');
 }
 
 async function downloadFinalsImage(isBanner=false){
-    await loadData(json-list.value);
+    const file = el('json-list').value;
+    if (!file) return;
 
-    main-stage.classList.add('render-mode');
-    if(isBanner) main-stage.classList.add('banner');
+    await loadData(file);
+
+    const stage = el('main-stage');
+    stage.classList.add('render-mode');
+    if (isBanner) stage.classList.add('banner');
 
     await new Promise(r=>setTimeout(r,100));
 
-    const canvas = await html2canvas(main-stage,{backgroundColor:"#020617",scale:1});
+    const canvas = await html2canvas(stage,{backgroundColor:"#020617",scale:1});
     const link=document.createElement('a');
-    link.download='finals.jpg';
+    link.download=file.replace('.json','') + (isBanner?'_banner':'') + '.jpg';
     link.href=canvas.toDataURL("image/jpeg",0.95);
     link.click();
 
-    main-stage.classList.remove('render-mode','banner');
+    stage.classList.remove('render-mode','banner');
 }
 </script>
+
 </body>
 </html>
