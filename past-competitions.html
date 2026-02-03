@@ -144,7 +144,6 @@
             document.getElementById('table-name').innerText = data.table;
             document.getElementById('event-period').innerText = data.period;
 
-            // Update Summary Stats
             const players = data.results || [];
             document.getElementById('total-players').innerText = players.length;
             const totalScore = players.reduce((sum, p) => sum + (p.high || 0), 0);
@@ -171,15 +170,22 @@
                 </div>`;
 
             const a = data.awards || {};
-            const card = (icon, title, name, color) => `<div class="glass p-4 rounded-xl border-l-4 ${color}"><div class="medieval text-[10px] text-gray-500 uppercase">${icon} ${title}</div><div class="font-bold text-sm uppercase italic text-white">${name || 'N/A'}</div></div>`;
+            
+            // Updated Card Template with Details section
+            const card = (icon, title, name, detail, color) => `
+                <div class="glass p-4 rounded-xl border-l-4 ${color}">
+                    <div class="medieval text-[10px] text-gray-500 uppercase">${icon} ${title}</div>
+                    <div class="font-bold text-sm uppercase italic text-white">${name || 'N/A'}</div>
+                    <div class="text-[10px] text-gray-400 mt-1">${detail || ''}</div>
+                </div>`;
             
             document.getElementById('achievements').innerHTML = 
-                card("🔫", "Fast Draw", a.fast_draw, "border-red-500") + 
-                card("🎯", "Sharpshooter", a.sharpshooter, "border-orange-500") + 
-                card("📈", "Most Improved", a.most_improved, "border-green-500") + 
-                card("🔄", "Comeback Kid", a.comeback_kid, "border-purple-500") + 
-                card("🕹️", "Most Played", a.most_played, "border-blue-500") + 
-                card("☢️", "C. Montgomery Burns Award", a.burns_award, "border-yellow-500");
+                card("🔫", "Fast Draw", a.fast_draw, a.fast_draw_detail || "First Entry", "border-red-500") + 
+                card("🎯", "Sharpshooter", a.sharpshooter, a.sharpshooter_detail || "Top Average", "border-orange-500") + 
+                card("📈", "Most Improved", a.most_improved, a.most_improved_detail || "Record Growth", "border-green-500") + 
+                card("🔄", "Comeback Kid", a.comeback_kid, a.comeback_kid_detail || "Growth Gain", "border-purple-500") + 
+                card("🕹️", "Most Played", a.most_played, a.most_played_detail || "Total Games", "border-blue-500") + 
+                card("☢️", "C. Montgomery Burns Award", a.burns_award, a.burns_award_detail || "Excellent!", "border-yellow-500");
 
             document.getElementById('leaderboard').innerHTML = players.map((p, i) => `
                 <div class="flex items-center justify-between px-8 py-4 hover:bg-white/5 transition">
