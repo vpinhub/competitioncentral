@@ -10,7 +10,7 @@
 <style>
     html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: #020617; color: white; font-family: 'Encode Sans', sans-serif; overflow: hidden; }
     body.is-transparent { background: transparent !important; }
-    body.is-transparent .glass { background: rgba(0,0,0,0.8); }
+    body.is-transparent .glass { background: rgba(0,0,0,0.85); }
     .medieval { font-family: 'MedievalSharp', cursive; }
     .glass { background: rgba(255,255,255,0.03); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
     .theme-throwdown { --accent:#f97316; }
@@ -18,7 +18,7 @@
     .accent-text { color: var(--accent,#94a3b8); }
     .accent-border { border-color: var(--accent,#334155); }
     #main-stage { width: 100%; height: 100%; display:flex; flex-direction:column; padding: 40px; box-sizing:border-box; }
-    .render-mode { width:1920px!important; height:1080px!important; position: absolute; top:0; left:0; z-index:-10; }
+    .render-mode { width:1920px!important; height:1080px!important; position: absolute; top:0; left:0; z-index:-10; background:#020617!important; }
     #selector-overlay { position:fixed; inset:0; z-index:100; background:#020617; display:flex; align-items:center; justify-content:center; }
     .admin-select { background:#0f172a; border:1px solid rgba(255,255,255,0.1); color:white; padding:.75rem; border-radius:.75rem; font-size:.875rem; font-weight:700; width:100%; outline:none; }
     @keyframes scrollLoop { 0%,15% { transform:translateY(0); } 85%,100% { transform:translateY(var(--scroll-dist)); } }
@@ -81,7 +81,7 @@
                 <div class="text-center"><div id="avg-score" class="text-4xl font-black italic accent-text">0</div><div class="text-[9px] uppercase font-bold text-gray-400">Average Score</div></div>
             </div>
         </div>
-        <div id="lb-viewport" class="col-span-7 glass rounded-[40px] overflow-hidden">
+        <div id="lb-viewport" class="col-span-7 glass rounded-[40px] overflow-hidden relative">
             <div id="leaderboard" class="p-6 flex flex-col gap-2"></div>
         </div>
     </div>
@@ -91,37 +91,48 @@
 const AVATAR_BASE = "http://vpinhub.github.io/special-when-lit-leaderboard/img/";
 const el = id => document.getElementById(id);
 
-async function init(){
+// Force check on load
+window.onload = function() {
     const params = new URLSearchParams(window.location.search);
     const jsonParam = params.get('json');
     
-    // Improved check: only show selector if NO json param is found
-    if(jsonParam) {
-        el('selector-overlay').classList.add('hidden');
-        if(params.get('transparent') === 'true') document.body.classList.add('is-transparent');
-        await loadData(jsonParam, params.get('animate') === 'true');
+    if (jsonParam) {
+        // Param found - hide selector immediately
+        el('selector-overlay').style.display = 'none';
+        if (params.get('transparent') === 'true') document.body.classList.add('is-transparent');
+        loadData(jsonParam, params.get('animate') === 'true');
     } else {
+        // No param - show selector and populate list
+        el('selector-overlay').style.display = 'flex';
+        populateSelector();
+    }
+};
+
+async function populateSelector() {
+    try {
         const res = await fetch('json/list.json');
         const files = await res.json();
         el('json-list').innerHTML = files.map(f => `<option value="${f.name}">${f.name.replace('.json','').replace(/_/g,' ')}</option>`).join('');
-    }
+    } catch(e) { console.error("Error loading list.json", e); }
 }
 
 function launchNewTab() {
     const file = el('json-list').value;
     const animate = el('select-animate').value;
     const transparent = el('select-transparent').value;
-    // Formats URL correctly for processing by init()
-    const url = `${window.location.pathname}?json=${file}&animate=${animate}&transparent=${transparent}`;
+    // Build the URL to trigger the parameter logic in window.onload
+    const url = window.location.pathname + `?json=${file}&animate=${animate}&transparent=${transparent}`;
     window.open(url, '_blank');
 }
 
 async function loadData(file, animate=false){
-    const res = await fetch(`json/${file}`);
-    const data = await res.json();
-    document.body.className = data.competition?.includes('Throwdown') ? 'theme-throwdown' : 'theme-swl';
-    el('main-stage').classList.remove('hidden');
-    renderFinals(data, animate);
+    try {
+        const res = await fetch(`json/${file}`);
+        const data = await res.json();
+        document.body.className = data.competition?.includes('Throwdown') ? 'theme-throwdown' : 'theme-swl';
+        el('main-stage').classList.remove('hidden');
+        renderFinals(data, animate);
+    } catch(e) { console.error("Error loading tournament JSON", e); }
 }
 
 function renderFinals(data, animate){
@@ -145,16 +156,18 @@ function renderFinals(data, animate){
     const lb = el('leaderboard');
     lb.innerHTML = players.map((p,i)=>`<div class="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5"><div class="flex items-center gap-4"><span class="text-2xl font-black italic w-8 ${i<3?'accent-text':'text-gray-600'}">${i+1}</span><img src="${AVATAR_BASE}${p.name.replace(/\s+/g,'_').toLowerCase()}.gif" class="w-10 h-10 rounded-full border border-white/10" onerror="this.src='https://via.placeholder.com/40?text=?'"><span class="text-lg font-bold">${p.name}</span></div><span class="text-xl font-mono font-bold">${p.high.toLocaleString()}</span></div>`).join('');
 
-    if(animate && players.length > 7){
+    setTimeout(() => {
         const dist = -(lb.scrollHeight - el('lb-viewport').offsetHeight + 40);
-        document.documentElement.style.setProperty('--scroll-dist', `${dist}px`);
-        document.documentElement.style.setProperty('--scroll-speed', `${players.length * 1.5}s`);
-        lb.classList.add('scrolling-content');
-    } else {
-        const scale = Math.min(1, el('lb-viewport').offsetHeight / lb.scrollHeight);
-        lb.style.transform = `scale(${scale})`;
-        lb.style.transformOrigin = 'top center';
-    }
+        if(animate && players.length > 7){
+            document.documentElement.style.setProperty('--scroll-dist', `${dist}px`);
+            document.documentElement.style.setProperty('--scroll-speed', `${players.length * 1.5}s`);
+            lb.classList.add('scrolling-content');
+        } else {
+            const scale = Math.min(1, el('lb-viewport').offsetHeight / lb.scrollHeight);
+            lb.style.transform = `scale(${scale})`;
+            lb.style.transformOrigin = 'top center';
+        }
+    }, 100);
 }
 
 async function downloadFinalsImage(){
@@ -163,13 +176,16 @@ async function downloadFinalsImage(){
     await loadData(file, false);
     const stage = el('main-stage');
     stage.classList.add('render-mode');
-    await new Promise(r=>setTimeout(r,500)); 
-    const canvas = await html2canvas(stage,{backgroundColor:"#020617", scale: 1});
+    // Important: Force a hard background color for the capture tool
+    stage.style.background = "#020617";
+    await new Promise(r=>setTimeout(r,600)); 
+    const canvas = await html2canvas(stage,{backgroundColor:"#020617", scale: 1, useCORS: true});
     const link=document.createElement('a');
     link.download=file.replace('.json','')+'_Finals.jpg';
     link.href=canvas.toDataURL("image/jpeg",0.9);
     link.click();
     stage.classList.remove('render-mode');
+    stage.style.background = "";
 }
 
 async function copyDiscordTemplate() {
@@ -182,8 +198,6 @@ async function copyDiscordTemplate() {
     const template = `**${d.table}**\n\n👑 **Winner!**\n${d.results[0].name}\n${d.results[0].high.toLocaleString()}\n\n🔫 **Fast Draw**: ${a.fast_draw}\n🎯 **Sharpshooter**: ${a.sharpshooter}\n🔄 **Comeback Kid**: ${a.comeback_kid}\n📈 **Most Improved**: ${a.most_improved}\n🕹️ **Most Played**: ${a.most_played}\n☢️ **C. Montgomery Burns**: ${a.burns_award}\n\n💰 **Billionaires Club**\n${bills || 'None'}`;
     navigator.clipboard.writeText(template);
 }
-// Run init on every load
-init();
 </script>
 </body>
 </html>
