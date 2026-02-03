@@ -37,11 +37,17 @@
             </div>
             <div>
                 <label class="text-[10px] font-black uppercase tracking-widest text-gray-500 block mb-2">Motion</label>
-                <select id="select-animate" class="admin-select"><option value="false">Static</option><option value="true">Animate</option></select>
+                <select id="select-animate" class="admin-select">
+                    <option value="false">Static</option>
+                    <option value="true">Animate</option>
+                </select>
             </div>
             <div>
                 <label class="text-[10px] font-black uppercase tracking-widest text-gray-500 block mb-2">Background</label>
-                <select id="select-transparent" class="admin-select"><option value="false">Solid</option><option value="true">Transparent</option></select>
+                <select id="select-transparent" class="admin-select">
+                    <option value="false">Solid</option>
+                    <option value="true">Transparent</option>
+                </select>
             </div>
         </div>
         <div class="flex flex-col gap-3">
@@ -89,6 +95,7 @@ async function init(){
     const params = new URLSearchParams(window.location.search);
     const jsonParam = params.get('json');
     
+    // Improved check: only show selector if NO json param is found
     if(jsonParam) {
         el('selector-overlay').classList.add('hidden');
         if(params.get('transparent') === 'true') document.body.classList.add('is-transparent');
@@ -104,6 +111,7 @@ function launchNewTab() {
     const file = el('json-list').value;
     const animate = el('select-animate').value;
     const transparent = el('select-transparent').value;
+    // Formats URL correctly for processing by init()
     const url = `${window.location.pathname}?json=${file}&animate=${animate}&transparent=${transparent}`;
     window.open(url, '_blank');
 }
@@ -155,7 +163,7 @@ async function downloadFinalsImage(){
     await loadData(file, false);
     const stage = el('main-stage');
     stage.classList.add('render-mode');
-    await new Promise(r=>setTimeout(r,500)); // Allow avatars to load
+    await new Promise(r=>setTimeout(r,500)); 
     const canvas = await html2canvas(stage,{backgroundColor:"#020617", scale: 1});
     const link=document.createElement('a');
     link.download=file.replace('.json','')+'_Finals.jpg';
@@ -174,6 +182,7 @@ async function copyDiscordTemplate() {
     const template = `**${d.table}**\n\n👑 **Winner!**\n${d.results[0].name}\n${d.results[0].high.toLocaleString()}\n\n🔫 **Fast Draw**: ${a.fast_draw}\n🎯 **Sharpshooter**: ${a.sharpshooter}\n🔄 **Comeback Kid**: ${a.comeback_kid}\n📈 **Most Improved**: ${a.most_improved}\n🕹️ **Most Played**: ${a.most_played}\n☢️ **C. Montgomery Burns**: ${a.burns_award}\n\n💰 **Billionaires Club**\n${bills || 'None'}`;
     navigator.clipboard.writeText(template);
 }
+// Run init on every load
 init();
 </script>
 </body>
