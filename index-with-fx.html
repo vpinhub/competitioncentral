@@ -11,9 +11,15 @@
         .medieval { font-family: 'MedievalSharp', cursive; }
         .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.08); }
         .hero-gradient { background: radial-gradient(circle at top, #1e293b 0%, #020617 70%); }
-        .tournament-card { transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .tournament-card { transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative; }
         .tournament-card:hover { transform: translateY(-10px) scale(1.02); border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.06); }
-        /* Custom Accent Glows */
+        
+        /* Live Badge Animation */
+        .live-badge { background: #ef4444; color: white; font-size: 9px; font-weight: 900; padding: 2px 8px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 4px; box-shadow: 0 0 15px rgba(239, 68, 68, 0.4); }
+        .live-dot { height: 6px; width: 6px; background-color: white; border-radius: 50%; display: inline-block; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+
+        /* Glow Accents */
         .glow-orange { box-shadow: 0 0 20px rgba(249, 115, 22, 0.15); }
         .glow-fuchsia { box-shadow: 0 0 20px rgba(217, 70, 239, 0.15); }
         .glow-indigo { box-shadow: 0 0 20px rgba(99, 102, 241, 0.15); }
@@ -83,6 +89,7 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
         <a href="https://twitch.tv/PaladinArcade" target="_blank" class="tournament-card glass rounded-3xl p-8 border-t-4 border-amber-600 glow-amber flex flex-col justify-between">
+            <div id="live-1" class="absolute top-4 right-4 hidden"><div class="live-badge"><span class="live-dot"></span>Live Now</div></div>
             <div>
                 <div class="flex justify-between items-start mb-6">
                     <span class="bg-amber-500/20 text-amber-500 text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full">Mon 8:30PM EST</span>
@@ -90,7 +97,7 @@
                 </div>
                 <h2 class="text-3xl font-black uppercase italic leading-none mb-2">The Open<br>Challenge</h2>
                 <p class="text-gray-400 text-xs font-bold uppercase tracking-tighter mb-4">Host: PaladinArcade</p>
-                <p class="text-gray-500 text-xs italic leading-relaxed">Ducks, Cowboys, Movie /Retro Talk, and Pinball.</p>
+                <p class="text-gray-500 text-xs italic leading-relaxed">Ducks, Cowboys, Movie / Retro Talk, and Pinball.</p>
             </div>
             <div class="mt-8 pt-6 border-t border-white/5 flex justify-between items-center text-amber-500 font-bold uppercase text-xs tracking-widest">
                 <span>Watch Live</span><span>→</span>
@@ -98,6 +105,7 @@
         </a>
 
         <a href="https://twitch.tv/MostlyPirate" target="_blank" class="tournament-card glass rounded-3xl p-8 border-t-4 border-emerald-500 glow-emerald flex flex-col justify-between">
+            <div id="live-2" class="absolute top-4 right-4 hidden"><div class="live-badge"><span class="live-dot"></span>Live Now</div></div>
             <div>
                 <div class="flex justify-between items-start mb-6">
                     <span class="bg-emerald-500/20 text-emerald-400 text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full">Tue 9:00PM EST</span>
@@ -113,6 +121,7 @@
         </a>
 
         <a href="https://twitch.tv/GameClubCentral" target="_blank" class="tournament-card glass rounded-3xl p-8 border-t-4 border-cyan-500 glow-cyan flex flex-col justify-between">
+            <div id="live-3" class="absolute top-4 right-4 hidden"><div class="live-badge"><span class="live-dot"></span>Live Now</div></div>
             <div>
                 <div class="flex justify-between items-start mb-6">
                     <span class="bg-cyan-500/20 text-cyan-400 text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full">Wed 9:00PM EST</span>
@@ -126,12 +135,109 @@
                 <span>Watch Live</span><span>→</span>
             </div>
         </a>
-
     </div>
 </main>
 
 <script>
-// ... (Keeping all your previous fetch scripts for TTD, SWL, and VPC here)
+const AVATAR_BASE = "http://vpinhub.github.io/special-when-lit-leaderboard/img/";
+const PROXY = "https://api.allorigins.win/raw?url=";
+const VPS_DATA = "https://raw.githubusercontent.com/VirtualPinballSpreadsheet/vps-db/main/db/vpsdb.json";
+let vpsDB = [];
+
+async function loadVPS() {
+    const res = await fetch(VPS_DATA);
+    vpsDB = await res.json();
+}
+
+function getTableDetails(gameObj) {
+    const match = JSON.stringify(gameObj).match(/game=([a-zA-Z0-9-]+)[^#]*#([a-zA-Z0-9-]+)/);
+    if (!match) return null;
+    return vpsDB.find(t => t.id === match[1]);
+}
+
+function formatTableName(vpsTable, fallback) {
+    if (!vpsTable) return fallback || "Table Unassigned";
+    return `${vpsTable.name} (${vpsTable.manufacturer || "Unknown"} ${vpsTable.year || ""})`;
+}
+
+function renderPreview(targetId, tableName, leader, colorClass, avatarUrl, playerCount, usernameField="name") {
+    const container = document.getElementById(targetId);
+    if (!container) return;
+    container.innerHTML = `
+        <div class="flex justify-between items-end mb-1">
+            <div class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Current Table</div>
+            <div class="text-[10px] ${colorClass} font-black uppercase tracking-widest">${playerCount} Active Players</div>
+        </div>
+        <div class="text-sm font-bold leading-snug mb-5 line-clamp-2 break-words">${tableName}</div>
+        <div class="flex items-center gap-3 bg-white/5 p-3 rounded-xl border border-white/10">
+            <img src="${avatarUrl}" class="w-8 h-8 rounded-full border border-white/10" onerror="this.src='https://via.placeholder.com/32?text=?'">
+            <div class="overflow-hidden">
+                <div class="text-[9px] text-gray-500 font-bold uppercase tracking-tighter">Leader</div>
+                <div class="text-xs font-black truncate">${leader[usernameField]}</div>
+            </div>
+            <div class="ml-auto ${colorClass} font-mono text-xs font-black">${leader.numScore.toLocaleString()}</div>
+        </div>`;
+}
+
+async function fetchIScoredPreview(roomId, targetId, colorClass) {
+    const url = `https://virtualpinballchat.com/vpc/api/v1/iscored?roomId=${roomId}`;
+    try {
+        let r = await fetch(url);
+        if (!r.ok) r = await fetch(PROXY + encodeURIComponent(url));
+        const data = await r.json();
+        const game = data.find(g => JSON.stringify(g).includes('game=')) || data[0];
+        const uniquePlayers = new Set((game.scores || []).map(s => s.name)).size;
+        const vpsTable = getTableDetails(game);
+        const tableName = formatTableName(vpsTable, game.longName);
+        const leader = [...game.scores].map(s => ({...s, numScore: parseInt(s.score,10)||0})).sort((a,b)=>b.numScore-a.numScore)[0];
+        const avatar = `${AVATAR_BASE}${leader.name.toLowerCase().replace(/\s+/g,'_')}.gif`;
+        renderPreview(targetId, tableName, leader, colorClass, avatar, uniquePlayers);
+    } catch (err) {}
+}
+
+async function fetchVPCPreview() {
+    const url = 'https://virtualpinballchat.com/vpc/api/v1/currentWeek?channelName=competition-corner';
+    try {
+        let r = await fetch(url);
+        if (!r.ok) r = await fetch(PROXY + encodeURIComponent(url));
+        const data = await r.json();
+        const uniquePlayers = new Set((data.scores || []).map(s => s.username)).size;
+        let tableName = data.table;
+        if (!tableName.includes('(')) { tableName += ` (${data.manufacturer || "Unknown"} ${data.year || ""})`; }
+        const leader = [...data.scores].map(s=>({...s,numScore:parseInt(s.score,10)||0})).sort((a,b)=>b.numScore-a.numScore)[0];
+        renderPreview('vpc-preview', tableName, leader, 'text-indigo-400', leader.userAvatarUrl, uniquePlayers, 'username');
+    } catch (err) {}
+}
+
+function checkLiveStatus() {
+    // Current time in EST
+    const now = new Date(new Date().toLocaleString("en-US", {timeZone: "America/New_York"}));
+    const day = now.getDay(); // 0=Sun, 1=Mon, 2=Tue, 3=Wed, etc.
+    const hour = now.getHours();
+    const min = now.getMinutes();
+    const currentTimeVal = hour + (min / 60);
+
+    // Monday: Open Challenge @ 8:30PM (20.5)
+    if (day === 1 && currentTimeVal >= 20.5 && currentTimeVal <= 23.5) {
+        document.getElementById('live-1').classList.remove('hidden');
+    }
+    // Tuesday: Pindemonium @ 9:00PM (21.0)
+    if (day === 2 && currentTimeVal >= 21 && currentTimeVal <= 23.9) {
+        document.getElementById('live-2').classList.remove('hidden');
+    }
+    // Wednesday: Drain Freeze @ 9:00PM (21.0)
+    if (day === 3 && currentTimeVal >= 21 && currentTimeVal <= 23.9) {
+        document.getElementById('live-3').classList.remove('hidden');
+    }
+}
+
+(async () => {
+    await loadVPS();
+    fetchIScoredPreview('700', 'ttd-preview', 'text-orange-500');
+    fetchIScoredPreview('1011', 'swl-preview', 'text-fuchsia-500');
+    fetchVPCPreview();
+    checkLiveStatus();
+})();
 </script>
 
 </body>
