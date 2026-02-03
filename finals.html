@@ -21,7 +21,6 @@ html, body {
     font-family: 'Encode Sans', sans-serif;
     overflow: hidden;
 }
-
 body.is-transparent { background: transparent !important; }
 body.is-transparent .glass { background: rgba(0,0,0,0.7); }
 
@@ -32,53 +31,52 @@ body.is-transparent .glass { background: rgba(0,0,0,0.7); }
     border: 1px solid rgba(255,255,255,0.1);
 }
 
-.theme-throwdown { --accent: #f97316; }
-.theme-swl { --accent: #d946ef; }
-
+.theme-throwdown { --accent:#f97316; }
+.theme-swl { --accent:#d946ef; }
 .accent-text { color: var(--accent,#94a3b8); }
 .accent-border { border-color: var(--accent,#334155); }
 
 #main-stage {
     width: 100%;
     height: 100%;
-    display: flex;
-    flex-direction: column;
+    display:flex;
+    flex-direction:column;
     padding: clamp(24px,3vh,60px);
-    box-sizing: border-box;
+    box-sizing:border-box;
 }
-#main-stage * { min-height: 0; }
+#main-stage * { min-height:0; }
 
-.render-mode {
-    width: 1920px !important;
-    height: 1080px !important;
-    padding: 60px !important;
-}
-.render-mode.banner {
-    width: 1200px !important;
-    height: 630px !important;
-    padding: 40px !important;
-}
+.render-mode { width:1920px!important; height:1080px!important; padding:60px!important; }
+.render-mode.banner { width:1200px!important; height:630px!important; padding:40px!important; }
 
 #selector-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 100;
-    background: #020617;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    position:fixed;
+    inset:0;
+    z-index:100;
+    background:#020617;
+    display:flex;
+    align-items:center;
+    justify-content:center;
 }
 
 .admin-select {
-    background-color: #0f172a;
-    border: 1px solid rgba(255,255,255,0.1);
-    color: white;
-    padding: 0.75rem;
-    border-radius: 0.75rem;
-    font-size: 0.875rem;
-    font-weight: 700;
-    width: 100%;
-    outline: none;
+    background:#0f172a;
+    border:1px solid rgba(255,255,255,0.1);
+    color:white;
+    padding:.75rem;
+    border-radius:.75rem;
+    font-size:.875rem;
+    font-weight:700;
+    width:100%;
+    outline:none;
+}
+
+@keyframes scrollLoop {
+    0%,15% { transform:translateY(0); }
+    85%,100% { transform:translateY(var(--scroll-dist)); }
+}
+.scrolling-content {
+    animation: scrollLoop var(--scroll-speed) ease-in-out infinite alternate;
 }
 </style>
 </head>
@@ -95,6 +93,13 @@ body.is-transparent .glass { background: rgba(0,0,0,0.7); }
                 <select id="json-list" class="admin-select"></select>
             </div>
             <div>
+                <label class="text-[10px] font-black uppercase tracking-widest text-gray-500 block mb-2">Motion</label>
+                <select id="select-animate" class="admin-select">
+                    <option value="false">Static</option>
+                    <option value="true">Animate</option>
+                </select>
+            </div>
+            <div>
                 <label class="text-[10px] font-black uppercase tracking-widest text-gray-500 block mb-2">Background</label>
                 <select id="select-transparent" class="admin-select">
                     <option value="false">Solid</option>
@@ -105,8 +110,8 @@ body.is-transparent .glass { background: rgba(0,0,0,0.7); }
 
         <div class="flex flex-col gap-3">
             <button onclick="launchFromSelector()" class="bg-white text-black font-black py-4 rounded-xl uppercase text-xs">Display Finals</button>
-            <button onclick="downloadFinalsImage()" class="bg-emerald-600 text-white font-black py-4 rounded-xl uppercase text-xs">📸 Download JPG (1080p)</button>
-            <button onclick="downloadFinalsImage(true)" class="bg-blue-600 text-white font-black py-4 rounded-xl uppercase text-xs">🖼️ Download Discord Banner</button>
+            <button onclick="downloadFinalsImage()" class="bg-emerald-600 text-white font-black py-4 rounded-xl uppercase text-xs">📸 Download JPG</button>
+            <button onclick="downloadFinalsImage(true)" class="bg-blue-600 text-white font-black py-4 rounded-xl uppercase text-xs">🖼️ Discord Banner</button>
         </div>
     </div>
 </div>
@@ -142,7 +147,7 @@ body.is-transparent .glass { background: rgba(0,0,0,0.7); }
 const AVATAR_BASE = "http://vpinhub.github.io/special-when-lit-leaderboard/img/";
 const el = id => document.getElementById(id);
 
-async function init() {
+async function init(){
     const res = await fetch('json/list.json');
     const files = await res.json();
     el('json-list').innerHTML = files.map(f =>
@@ -151,19 +156,21 @@ async function init() {
 }
 init();
 
-function launchFromSelector() {
+async function launchFromSelector(){
     const file = el('json-list').value;
-    if (!file) return;
+    if(!file) return;
+
+    const animate = el('select-animate').value === 'true';
 
     el('selector-overlay').classList.add('hidden');
 
-    if (el('select-transparent').value === 'true')
+    if(el('select-transparent').value === 'true')
         document.body.classList.add('is-transparent');
 
-    loadData(file);
+    await loadData(file, animate);
 }
 
-async function loadData(file) {
+async function loadData(file, animate=false){
     const res = await fetch(`json/${file}`);
     const data = await res.json();
 
@@ -173,16 +180,18 @@ async function loadData(file) {
     );
 
     el('main-stage').classList.remove('hidden');
+    renderFinals(data, animate);
+}
 
+function renderFinals(data, animate){
     const players = data.results || [];
-
     el('table-name').innerText = data.table;
     el('event-period').innerText = data.period;
     el('total-players').innerText = players.length;
     el('avg-score').innerText = players.length ? Math.round(players.reduce((s,p)=>s+p.high,0)/players.length).toLocaleString() : 0;
 
     const winner = players[0];
-    if (winner) {
+    if(winner){
         el('winner-banner').innerHTML = `
         <div class="glass p-8 rounded-[40px] border-4 accent-border text-center">
             <img src="${AVATAR_BASE}${winner.name.replace(/\s+/g,'_').toLowerCase()}.gif"
@@ -192,7 +201,13 @@ async function loadData(file) {
         </div>`;
     }
 
-    el('leaderboard').innerHTML = players.map((p,i)=>`
+    const lb = el('leaderboard');
+    const viewport = el('lb-viewport');
+    lb.classList.remove('scrolling-content');
+    lb.style.transform = '';
+    lb.style.transformOrigin = 'top center';
+
+    lb.innerHTML = players.map((p,i)=>`
         <div class="flex items-center justify-between p-4 bg-white/5 rounded-2xl">
             <div class="flex items-center gap-6">
                 <span class="text-3xl font-black italic w-10 ${i<3?'accent-text':'text-gray-600'}">${i+1}</span>
@@ -201,17 +216,33 @@ async function loadData(file) {
             <span class="text-2xl font-mono font-bold">${p.high.toLocaleString()}</span>
         </div>
     `).join('');
+
+    requestAnimationFrame(()=>{
+        const contentHeight = lb.scrollHeight;
+        const viewportHeight = viewport.offsetHeight;
+
+        if(animate && players.length > 7){
+            const dist = -(contentHeight - viewportHeight + 40);
+            document.documentElement.style.setProperty('--scroll-dist', `${dist}px`);
+            document.documentElement.style.setProperty('--scroll-speed', `${players.length * 1.4}s`);
+            lb.classList.add('scrolling-content');
+            return;
+        }
+
+        const scale = Math.min(1, viewportHeight / contentHeight);
+        lb.style.transform = `scale(${scale})`;
+    });
 }
 
 async function downloadFinalsImage(isBanner=false){
     const file = el('json-list').value;
-    if (!file) return;
+    if(!file) return;
 
-    await loadData(file);
+    await loadData(file,false);
 
     const stage = el('main-stage');
     stage.classList.add('render-mode');
-    if (isBanner) stage.classList.add('banner');
+    if(isBanner) stage.classList.add('banner');
 
     await new Promise(r=>setTimeout(r,100));
 
