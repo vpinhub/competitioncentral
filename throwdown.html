@@ -12,7 +12,7 @@
         .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
         .ttd-accent { border-color: #f97316; box-shadow: 0 0 15px rgba(249, 115, 22, 0.2); }
         .achievement-card { transition: all 0.3s ease; }
-        .achievement-card:hover { transform: translateY(-2px); background: rgba(255, 255, 255, 0.12); }
+        .achievement-card:hover { transform: translateY(-2px); background: rgba(255,255,255,0.12); }
     </style>
 </head>
 <body class="min-h-screen pb-12">
@@ -36,10 +36,10 @@
                     <ul class="text-left space-y-4 text-sm leading-relaxed text-gray-200 mb-8 list-none">
                         <li class="flex gap-3"><span class="text-orange-500">•</span><span>All scores must be submitted via <strong>iScored</strong>.</span></li>
                         <li class="flex gap-3"><span class="text-orange-500">•</span><span>Manual submissions to iScored require a <strong>photo for verification</strong>.</span></li>
-                        <li class="flex gap-3"><span class="text-orange-500">•</span><span>VPinStudio auto-submissions are permitted, but players are responsible for <strong>verifying their score has posted</strong>.</span></li>
-                        <li class="flex gap-3"><span class="text-orange-500">•</span><span>No table or script modifications that affect gameplay are allowed.</span></li>
-                        <li class="flex gap-3"><span class="text-orange-500">•</span><span>The player with the highest valid score at the end of the event period wins.</span></li>
-                        <li class="flex gap-3"><span class="text-orange-500">•</span><span>The submission deadline is <strong>Thursday at 2:00 PM Eastern Time</strong>.</span></li>
+                        <li class="flex gap-3"><span class="text-orange-500">•</span><span>VPinStudio auto-submissions are permitted; players must verify posts.</span></li>
+                        <li class="flex gap-3"><span class="text-orange-500">•</span><span>No table or script modifications allowed.</span></li>
+                        <li class="flex gap-3"><span class="text-orange-500">•</span><span>Highest valid score at end of period wins.</span></li>
+                        <li class="flex gap-3"><span class="text-orange-500">•</span><span>Deadline: <strong>Thursday at 2:00 PM EST</strong>.</span></li>
                     </ul>
                     <div class="space-y-3">
                         <a href="https://iscored.info/?mode=public&user=smaug" target="_blank" class="block w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg text-center transition-colors shadow-sm uppercase text-sm">Submit Score</a>
@@ -98,7 +98,14 @@
         }
 
         function exportTournamentData(prefix) {
-            const exportObj = { competition: prefix, date_exported: new Date().toISOString(), period: document.getElementById('event-period').innerText, table: document.querySelector('#table-card h4')?.innerText || 'Unknown', awards: window.achievementData, results: window.currentResults || [] };
+            const exportObj = { 
+                competition: prefix, 
+                date_exported: new Date().toISOString(), 
+                period: document.getElementById('event-period').innerText, 
+                table: document.querySelector('#table-card h4')?.innerText || 'Unknown', 
+                awards: window.achievementData, 
+                results: window.currentResults || [] 
+            };
             const blob = new Blob([JSON.stringify(exportObj, null, 4)], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a'); a.href = url; a.download = `${prefix}_${new Date().toISOString().split('T')[0]}.json`;
@@ -109,17 +116,20 @@
             const playerStats = {};
             let tournamentGame = data.find(g => JSON.stringify(g).includes('game=')) || data[0];
             let pioneer = { name: "N/A", date: Infinity };
+
             tournamentGame.scores.forEach(s => {
                 const val = parseInt(s.score, 10);
                 const rawDate = s.date_added || s.date || s.timestamp;
                 const time = rawDate ? new Date(rawDate).getTime() : Date.now();
                 if (time < pioneer.date) { pioneer = { name: s.name, date: time }; }
                 if (!playerStats[s.name]) playerStats[s.name] = { name: s.name, scores: [], rawEntries: [], high: 0, low: Infinity, total: 0 };
-                playerStats[s.name].scores.push(val); playerStats[s.name].total += val;
+                playerStats[s.name].scores.push(val); 
+                playerStats[s.name].total += val;
                 playerStats[s.name].rawEntries.push({ val, time });
                 if (val > playerStats[s.name].high) playerStats[s.name].high = val;
                 if (val < playerStats[s.name].low) playerStats[s.name].low = val;
             });
+
             const playerList = Object.values(playerStats).map(p => {
                 p.avg = p.total / p.scores.length;
                 p.rawEntries.sort((a,b) => a.time - b.time);
@@ -127,13 +137,32 @@
                 p.improvementGap = p.high - p.low;
                 return p;
             });
-            window.currentResults = playerList.sort((a,b) => b.high - a.high);
+
+            const sorted = playerList.sort((a,b) => b.high - a.high);
+            window.currentResults = sorted;
             const shooter = [...playerList].sort((a,b) => b.avg - a.avg)[0];
             const improved = [...playerList].sort((a,b) => b.improvementGap - a.improvementGap)[0];
             const grinder = [...playerList].sort((a,b) => b.scores.length - a.scores.length)[0];
             const comeback = [...playerList].sort((a,b) => b.comebackGrowth - a.comebackGrowth)[0];
             const burns = playerList[Math.floor(Math.random() * playerList.length)];
-            window.achievementData = { winner: window.currentResults[0]?.name, fast_draw: pioneer.name, sharpshooter: shooter?.name, most_improved: improved?.name, comeback_kid: comeback?.name, most_played: grinder?.name, burns_award: burns?.name };
+
+            // Achievement Data with detailed string generation
+            window.achievementData = {
+                winner: window.currentResults[0]?.name,
+                fast_draw: pioneer.name,
+                fast_draw_detail: "First Entry",
+                sharpshooter: shooter?.name,
+                sharpshooter_detail: "Top Average",
+                most_improved: improved?.name,
+                most_improved_detail: `Gap: +${improved?.improvementGap.toLocaleString()}`,
+                comeback_kid: comeback?.name,
+                comeback_kid_detail: `Gain: +${comeback?.comebackGrowth.toLocaleString()}`,
+                most_played: grinder?.name,
+                most_played_detail: `${grinder?.scores.length} Games`,
+                burns_award: burns?.name,
+                burns_award_detail: "Excellent!"
+            };
+
             renderLeaderboard(window.currentResults);
             renderWinner(window.currentResults[0]);
             renderAchievements(pioneer, shooter, improved, grinder, comeback, burns);
@@ -160,7 +189,13 @@
 
         function renderAchievements(pioneer, shooter, improved, grinder, comeback, burns) {
             const card = (icon, title, name, detail, color) => `<div class="glass p-4 rounded-xl border-l-4 ${color} achievement-card"><div class="medieval text-[10px] text-gray-400 uppercase">${icon} ${title}</div><div class="font-bold text-sm uppercase italic text-white">${name}</div><div class="text-[10px] text-gray-500">${detail}</div></div>`;
-            document.getElementById('achievements').innerHTML = card("🔫", "Fast Draw", pioneer.name, "First Entry", "border-red-500") + card("🎯", "Sharpshooter", shooter?.name, "Top Average", "border-orange-500") + card("📈", "Most Improved", improved?.name, `Gap: +${improved?.improvementGap.toLocaleString()}`, "border-green-500") + card("🔄", "Comeback Kid", comeback?.name, `Gain: +${comeback?.comebackGrowth.toLocaleString()}`, "border-purple-500") + card("🕹️", "Most Played", grinder?.name, `${grinder?.scores.length} Games`, "border-blue-500") + card("☢️", "C. Montgomery Burns Award", burns?.name, "Excellent!", "border-orange-500");
+            document.getElementById('achievements').innerHTML = 
+                card("🔫", "Fast Draw", pioneer.name, "First Entry", "border-red-500") +
+                card("🎯", "Sharpshooter", shooter?.name, "Top Average", "border-orange-500") +
+                card("📈", "Most Improved", improved?.name, `Gap: +${improved?.improvementGap.toLocaleString()}`, "border-green-500") +
+                card("🔄", "Comeback Kid", comeback?.name, `Gain: +${comeback?.comebackGrowth.toLocaleString()}`, "border-purple-500") +
+                card("🕹️", "Most Played", grinder?.name, `${grinder?.scores.length} Games`, "border-blue-500") +
+                card("☢️", "C. Montgomery Burns Award", burns?.name, "Excellent!", "border-orange-500");
         }
 
         function renderTable(table, fallbackName, gameId, releaseId) {
