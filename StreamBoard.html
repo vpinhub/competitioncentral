@@ -9,103 +9,110 @@
 <link href="https://fonts.googleapis.com/css2?family=Encode+Sans:wght@400;700;900&family=MedievalSharp&display=swap" rel="stylesheet">
 
 <style>
-html, body {
-    margin:0; padding:0;
-    width:100%; height:100%;
-    background:#020617; color:white;
-    font-family:'Encode Sans', sans-serif;
-    overflow:hidden;
-}
+html,body{margin:0;padding:0;width:100%;height:100%;background:#020617;color:white;font-family:'Encode Sans',sans-serif;overflow:hidden}
+body.is-transparent{background:transparent!important}
+body.is-transparent .glass{background:rgba(0,0,0,.85)}
 
-/* ---------- SCOREBOARD TYPE SYSTEM ---------- */
 :root{
-    --title-size: clamp(48px,5.2vh,110px);
-    --section-label: clamp(12px,1.2vh,18px);
-    --player-name: clamp(20px,2.2vh,34px);
-    --score-size: clamp(22px,2.4vh,38px);
-    --rank-size: clamp(26px,2.6vh,42px);
+ --title-size:clamp(48px,5.2vh,110px);
+ --section-label:clamp(12px,1.2vh,18px);
+ --player-name:clamp(20px,2.2vh,34px);
+ --score-size:clamp(22px,2.4vh,38px);
+ --rank-size:clamp(26px,2.6vh,42px);
 }
 
-.medieval{font-family:'MedievalSharp',cursive;}
+.medieval{font-family:'MedievalSharp',cursive}
+.glass{background:rgba(255,255,255,.04);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.12)}
+.theme-throwdown{--accent:#f97316}
+.theme-swl{--accent:#d946ef}
+.accent-text{color:var(--accent,#94a3b8)}
+.accent-border{border-color:var(--accent,#334155)}
 
-.glass{
-    background:rgba(255,255,255,0.04);
-    backdrop-filter:blur(14px);
-    border:1px solid rgba(255,255,255,0.12);
-}
-
-.theme-throwdown{--accent:#f97316;}
-.theme-swl{--accent:#d946ef;}
-
-.accent-text{color:var(--accent,#94a3b8);}
-.accent-border{border-color:var(--accent,#334155);}
-
-#main-stage{
-    width:100%; height:100%;
-    display:flex; flex-direction:column;
-    padding:3vh; box-sizing:border-box;
-}
-
-.render-mode{
-    width:1920px!important;
-    height:1080px!important;
-    position:absolute; top:0; left:0;
-    z-index:-10; background:#020617!important;
-}
+#main-stage{width:100%;height:100%;display:flex;flex-direction:column;padding:3vh;box-sizing:border-box}
+.render-mode{width:1920px!important;height:1080px!important;position:absolute;top:0;left:0;z-index:-10;background:#020617!important}
 
 /* Medal highlights */
-.rank-1{background:linear-gradient(90deg,rgba(255,215,0,0.15),transparent);}
-.rank-2{background:linear-gradient(90deg,rgba(192,192,192,0.15),transparent);}
-.rank-3{background:linear-gradient(90deg,rgba(205,127,50,0.15),transparent);}
+.rank-1{background:linear-gradient(90deg,rgba(255,215,0,.15),transparent)}
+.rank-2{background:linear-gradient(90deg,rgba(192,192,192,.15),transparent)}
+.rank-3{background:linear-gradient(90deg,rgba(205,127,50,.15),transparent)}
 
-@keyframes scrollLoop{
-    0%,15%{transform:translateY(0);}
-    85%,100%{transform:translateY(var(--scroll-dist));}
-}
-.scrolling-content{animation:scrollLoop var(--scroll-speed) ease-in-out infinite alternate;}
+@keyframes scrollLoop{0%,15%{transform:translateY(0)}85%,100%{transform:translateY(var(--scroll-dist))}}
+.scrolling-content{animation:scrollLoop var(--scroll-speed) ease-in-out infinite alternate}
+
+.admin-select{background:#0f172a;border:1px solid rgba(255,255,255,.1);color:white;padding:.75rem;border-radius:.75rem;font-weight:700;width:100%}
+#selector-overlay{position:fixed;inset:0;z-index:100;background:#020617;display:flex;align-items:center;justify-content:center}
 </style>
 </head>
+
 <body>
 
+<!-- SELECTOR -->
+<div id="selector-overlay">
+ <div class="glass p-10 rounded-[40px] w-full max-w-2xl border-2 border-white/10 shadow-2xl">
+  <h2 class="medieval text-3xl accent-text uppercase mb-8 text-center">Tournament Finals Selector</h2>
+  <div class="grid grid-cols-2 gap-4 mb-8">
+   <div class="col-span-2">
+    <label class="text-xs uppercase text-gray-400 mb-2 block">Record Selection</label>
+    <select id="json-list" class="admin-select"></select>
+   </div>
+   <div>
+    <label class="text-xs uppercase text-gray-400 mb-2 block">Motion</label>
+    <select id="select-animate" class="admin-select">
+     <option value="false">Static</option>
+     <option value="true">Animate</option>
+    </select>
+   </div>
+   <div>
+    <label class="text-xs uppercase text-gray-400 mb-2 block">Background</label>
+    <select id="select-transparent" class="admin-select">
+     <option value="false">Solid</option>
+     <option value="true">Transparent</option>
+    </select>
+   </div>
+  </div>
+
+  <div class="flex gap-3">
+   <button onclick="launchNewTab()" class="flex-1 bg-white text-black font-black py-4 rounded-xl uppercase text-xs">Display Finals</button>
+   <button onclick="downloadFinalsImage(this)" class="flex-1 bg-emerald-600 text-white font-black py-4 rounded-xl uppercase text-xs">Download JPG</button>
+  </div>
+ </div>
+</div>
+
+<!-- MAIN STAGE -->
 <div id="main-stage" class="hidden">
 
-<!-- HEADER -->
 <div class="flex justify-between items-end border-b-2 accent-border pb-4 mb-4">
-    <div>
-        <div class="medieval uppercase accent-text mb-1" style="font-size:var(--section-label)">Final Standings</div>
-        <h1 id="table-name" class="font-black italic uppercase leading-tight" style="font-size:var(--title-size)">Table</h1>
-    </div>
-    <div class="text-right">
-        <p id="event-period" class="text-gray-400 font-bold" style="font-size:clamp(14px,1.5vh,22px)"></p>
-        <div class="text-[11px] font-black uppercase tracking-widest bg-white/10 px-4 py-1 rounded-full inline-block mt-2">Official Result</div>
-    </div>
+ <div>
+  <div class="medieval uppercase accent-text mb-1" style="font-size:var(--section-label)">Final Standings</div>
+  <h1 id="table-name" class="font-black italic uppercase leading-tight" style="font-size:var(--title-size)">Table</h1>
+ </div>
+ <div class="text-right">
+  <p id="event-period" class="text-gray-400 font-bold" style="font-size:clamp(14px,1.5vh,22px)"></p>
+  <div class="text-[11px] font-black uppercase tracking-widest bg-white/10 px-4 py-1 rounded-full inline-block mt-2">Official Result</div>
+ </div>
 </div>
 
 <div class="grid grid-cols-12 gap-6 flex-1 overflow-hidden">
 
-    <!-- LEFT PANEL -->
-    <div class="col-span-5 flex flex-col gap-4 overflow-hidden">
+<div class="col-span-5 flex flex-col gap-4 overflow-hidden">
+ <div id="winner-banner"></div>
+ <div id="achievements" class="grid grid-cols-2 gap-3"></div>
+ <div class="glass rounded-3xl p-6 mt-auto flex justify-around items-center border-t-2 accent-border">
+  <div class="text-center">
+   <div id="total-players" style="font-size:clamp(32px,3vh,50px)" class="font-black italic">0</div>
+   <div class="text-xs uppercase font-bold text-gray-400">Field Size</div>
+  </div>
+  <div class="text-center">
+   <div id="avg-score" style="font-size:clamp(32px,3vh,50px)" class="font-black italic accent-text">0</div>
+   <div class="text-xs uppercase font-bold text-gray-400">Average Score</div>
+  </div>
+ </div>
+</div>
 
-        <div id="winner-banner"></div>
+<div id="lb-viewport" class="col-span-7 glass rounded-[40px] overflow-hidden relative">
+ <div id="leaderboard" class="p-6 flex flex-col gap-2"></div>
+</div>
 
-        <div id="achievements" class="grid grid-cols-2 gap-3"></div>
-
-        <div class="glass rounded-3xl p-6 mt-auto flex justify-around items-center border-t-2 accent-border">
-            <div class="text-center">
-                <div id="total-players" class="font-black italic" style="font-size:clamp(32px,3vh,50px)">0</div>
-                <div class="text-xs uppercase font-bold text-gray-400">Field Size</div>
-            </div>
-            <div class="text-center">
-                <div id="avg-score" class="font-black italic accent-text" style="font-size:clamp(32px,3vh,50px)">0</div>
-                <div class="text-xs uppercase font-bold text-gray-400">Average Score</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- LEADERBOARD -->
-    <div id="lb-viewport" class="col-span-7 glass rounded-[40px] overflow-hidden relative">
-        <div id="leaderboard" class="p-6 flex flex-col gap-2"></div>
-    </div>
 </div>
 </div>
 
@@ -113,60 +120,84 @@ html, body {
 const AVATAR_BASE="http://vpinhub.github.io/special-when-lit-leaderboard/img/";
 const el=id=>document.getElementById(id);
 
-async function loadData(){
-    const res=await fetch("json/sample.json"); // change to your file
-    const data=await res.json();
-    document.body.className=data.competition?.includes('Throwdown')?'theme-throwdown':'theme-swl';
-    el('main-stage').classList.remove('hidden');
-    renderFinals(data,false);
+window.onload=()=>{
+ const params=new URLSearchParams(window.location.search);
+ const jsonParam=params.get('json');
+
+ if(jsonParam){
+  el('selector-overlay').style.display='none';
+  if(params.get('transparent')==='true')document.body.classList.add('is-transparent');
+  loadData(jsonParam,params.get('animate')==='true');
+ }else populateSelector();
+};
+
+async function populateSelector(){
+ const res=await fetch('json/list.json');
+ const files=await res.json();
+ el('json-list').innerHTML=files.map(f=>`<option value="${f.name}">${f.name.replace('.json','').replace(/_/g,' ')}</option>`).join('');
+}
+
+function launchNewTab(){
+ const file=el('json-list').value;
+ const animate=el('select-animate').value;
+ const transparent=el('select-transparent').value;
+ window.open(`${window.location.pathname}?json=${file}&animate=${animate}&transparent=${transparent}`,'_blank');
+}
+
+async function loadData(file,animate){
+ const res=await fetch(`json/${file}`);
+ const data=await res.json();
+ document.body.className=data.competition?.includes('Throwdown')?'theme-throwdown':'theme-swl';
+ el('main-stage').classList.remove('hidden');
+ renderFinals(data,animate);
 }
 
 function renderFinals(data,animate){
-    const players=data.results||[];
-    const a=data.awards||{};
-    el('table-name').innerText=data.table;
-    el('event-period').innerText=data.period;
-    el('total-players').innerText=players.length;
-    el('avg-score').innerText=Math.round(players.reduce((s,p)=>s+p.high,0)/players.length).toLocaleString();
+ const players=data.results||[];
+ el('table-name').innerText=data.table;
+ el('event-period').innerText=data.period;
+ el('total-players').innerText=players.length;
+ el('avg-score').innerText=Math.round(players.reduce((s,p)=>s+p.high,0)/players.length).toLocaleString();
 
-    /* WINNER */
-    el('winner-banner').innerHTML=`
-    <div class="glass p-6 rounded-[32px] border-4 accent-border text-center shadow-xl">
-        <div class="medieval accent-text uppercase tracking-widest mb-2" style="font-size:var(--section-label)">Tournament Winner</div>
-        <img src="${AVATAR_BASE}${players[0].name.replace(/\s+/g,'_').toLowerCase()}.gif"
-             class="w-40 h-40 rounded-full mx-auto mb-3 border-4 accent-border shadow-lg"
-             onerror="this.src='https://via.placeholder.com/160?text=?'">
-        <div class="font-black italic uppercase" style="font-size:clamp(28px,3vh,50px)">${players[0].name}</div>
-        <div class="font-mono font-bold text-gray-300" style="font-size:clamp(22px,2.5vh,40px)">${players[0].high.toLocaleString()}</div>
-    </div>`;
+ const lb=el('leaderboard');
+ lb.innerHTML=players.map((p,i)=>`
+ <div class="flex items-center justify-between px-4 py-3 rounded-xl border border-white/5 ${i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':'bg-white/5'}">
+  <div class="flex items-center gap-4">
+   <span style="font-size:var(--rank-size)" class="font-black italic w-10 text-center ${i<3?'accent-text':'text-gray-600'}">${i+1}</span>
+   <img src="${AVATAR_BASE}${p.name.replace(/\s+/g,'_').toLowerCase()}.gif" class="w-12 h-12 rounded-full border border-white/10">
+   <span class="font-bold uppercase tracking-wide" style="font-size:var(--player-name)">${p.name}</span>
+  </div>
+  <span class="font-mono font-black accent-text" style="font-size:var(--score-size)">${p.high.toLocaleString()}</span>
+ </div>`).join('');
 
-    /* LEADERBOARD */
-    const lb=el('leaderboard');
-    lb.innerHTML=players.map((p,i)=>`
-    <div class="flex items-center justify-between px-4 py-3 rounded-xl border border-white/5
-        ${i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':'bg-white/5'}">
-        <div class="flex items-center gap-4">
-            <span style="font-size:var(--rank-size)" class="font-black italic w-10 text-center ${i<3?'accent-text':'text-gray-600'}">${i+1}</span>
-            <img src="${AVATAR_BASE}${p.name.replace(/\s+/g,'_').toLowerCase()}.gif"
-                 class="w-12 h-12 rounded-full border border-white/10"
-                 onerror="this.src='https://via.placeholder.com/48?text=?'">
-            <span class="font-bold uppercase tracking-wide" style="font-size:var(--player-name)">${p.name}</span>
-        </div>
-        <span class="font-mono font-black accent-text" style="font-size:var(--score-size)">${p.high.toLocaleString()}</span>
-    </div>`).join('');
-
-    setTimeout(()=>{
-        const vh=el('lb-viewport').offsetHeight;
-        const ch=lb.scrollHeight;
-        if(ch>vh){
-            const scale=Math.max(0.82,(vh-10)/ch);
-            lb.style.transform=`scale(${scale})`;
-            lb.style.transformOrigin='top center';
-        }
-    },150);
+ setTimeout(()=>{
+  const vh=el('lb-viewport').offsetHeight;
+  const ch=lb.scrollHeight;
+  if(animate&&players.length>7){
+   document.documentElement.style.setProperty('--scroll-dist',`${-(ch-vh+40)}px`);
+   document.documentElement.style.setProperty('--scroll-speed',`${players.length*1.4}s`);
+   lb.classList.add('scrolling-content');
+  }else if(ch>vh){
+   const scale=Math.max(.82,(vh-10)/ch);
+   lb.style.transform=`scale(${scale})`;
+   lb.style.transformOrigin='top center';
+  }
+ },150);
 }
 
-loadData();
+async function downloadFinalsImage(btn){
+ const file=el('json-list').value;
+ await loadData(file,false);
+ const stage=el('main-stage');
+ stage.classList.add('render-mode');
+ await new Promise(r=>setTimeout(r,600));
+ const canvas=await html2canvas(stage,{backgroundColor:"#020617",scale:1,useCORS:true});
+ const link=document.createElement('a');
+ link.download=file.replace('.json','')+'_Finals.jpg';
+ link.href=canvas.toDataURL("image/jpeg",.9);
+ link.click();
+ stage.classList.remove('render-mode');
+}
 </script>
 </body>
 </html>
