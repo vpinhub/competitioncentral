@@ -18,7 +18,7 @@
     .accent-text { color: var(--accent,#94a3b8); }
     .accent-border { border-color: var(--accent,#334155); }
     
-    #main-stage { width: 100%; height: 100%; display:flex; flex-direction:column; padding: 20px; box-sizing:border-box; }
+    #main-stage { width: 100%; height: 100%; display:flex; flex-direction:column; padding: 30px; box-sizing:border-box; }
     .render-mode { width:1920px!important; height:1080px!important; position: absolute; top:0; left:0; z-index:-10; background:#020617!important; }
     #selector-overlay { position:fixed; inset:0; z-index:100; background:#020617; display:flex; align-items:center; justify-content:center; }
     .admin-select { background:#0f172a; border:1px solid rgba(255,255,255,0.1); color:white; padding:.75rem; border-radius:.75rem; font-size:.875rem; font-weight:700; width:100%; outline:none; }
@@ -26,7 +26,7 @@
     #leaderboard { 
         display: grid; 
         grid-template-columns: repeat(3, 1fr); 
-        gap: 6px; 
+        gap: 10px; 
         align-content: start;
     }
 
@@ -34,29 +34,30 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 4px 10px;
-        background: rgba(255,255,255,0.04);
-        border-radius: 8px;
-        border: 1px solid rgba(255,255,255,0.03);
+        padding: 8px 12px;
+        background: rgba(255,255,255,0.05);
+        border-radius: 12px;
+        border: 1px solid rgba(255,255,255,0.05);
     }
 
     .first-place-row {
-        background: linear-gradient(90deg, rgba(249,115,22,0.15) 0%, rgba(255,255,255,0.05) 100%);
+        background: linear-gradient(90deg, rgba(249,115,22,0.2) 0%, rgba(255,255,255,0.05) 100%);
         border: 1px solid var(--accent);
     }
 
     @keyframes scrollLoop { 0%,15% { transform:translateY(0); } 85%,100% { transform:translateY(var(--scroll-dist)); } }
     .scrolling-content { animation: scrollLoop var(--scroll-speed) ease-in-out infinite alternate; }
 
-    .achievement-card { min-height: 48px; display: flex; flex-direction: column; justify-content: center; }
-    .card-red { background: rgba(239, 68, 68, 0.06); border-left: 4px solid #ef4444; }
-    .card-orange { background: rgba(249, 115, 22, 0.06); border-left: 4px solid #f97316; }
-    .card-green { background: rgba(34, 197, 94, 0.06); border-left: 4px solid #22c55e; }
-    .card-purple { background: rgba(168, 85, 247, 0.06); border-left: 4px solid #a855f7; }
-    .card-blue { background: rgba(59, 130, 246, 0.06); border-left: 4px solid #3b82f6; }
-    .card-yellow { background: rgba(234, 179, 8, 0.06); border-left: 4px solid #eab308; }
-    .card-gold { background: rgba(255, 215, 0, 0.1); border-left: 4px solid #ffd700; animation: pulse-gold 2s infinite alternate; }
-    @keyframes pulse-gold { from { box-shadow: 0 0 4px rgba(255, 215, 0, 0.15); } to { box-shadow: 0 0 12px rgba(255, 215, 0, 0.3); } }
+    /* Achievement Card Styling */
+    .achievement-card { min-height: 52px; display: flex; flex-direction: column; justify-content: center; }
+    .card-red { background: rgba(239, 68, 68, 0.08); border-left: 4px solid #ef4444; }
+    .card-orange { background: rgba(249, 115, 22, 0.08); border-left: 4px solid #f97316; }
+    .card-green { background: rgba(34, 197, 94, 0.08); border-left: 4px solid #22c55e; }
+    .card-purple { background: rgba(168, 85, 247, 0.08); border-left: 4px solid #a855f7; }
+    .card-blue { background: rgba(59, 130, 246, 0.08); border-left: 4px solid #3b82f6; }
+    .card-yellow { background: rgba(234, 179, 8, 0.08); border-left: 4px solid #eab308; }
+    .card-gold { background: rgba(255, 215, 0, 0.12); border-left: 4px solid #ffd700; animation: pulse-gold 2s infinite alternate; }
+    @keyframes pulse-gold { from { box-shadow: 0 0 5px rgba(255, 215, 0, 0.2); } to { box-shadow: 0 0 15px rgba(255, 215, 0, 0.4); } }
 </style>
 </head>
 <body>
@@ -95,27 +96,27 @@
 </div>
 
 <div id="main-stage" class="hidden">
-    <div class="flex justify-between items-end border-b-2 accent-border pb-2 mb-3">
+    <div class="flex justify-between items-end border-b-2 accent-border pb-4 mb-4">
         <div>
-            <div class="medieval text-base accent-text uppercase mb-0.5">Final Standings</div>
-            <h1 id="table-name" class="text-4xl font-black italic uppercase leading-tight">Table</h1>
+            <div class="medieval text-lg accent-text uppercase mb-1">Final Standings</div>
+            <h1 id="table-name" class="text-5xl font-black italic uppercase leading-tight">Table</h1>
         </div>
         <div class="text-right">
-            <p id="event-period" class="text-lg text-gray-500 font-bold"></p>
-            <div class="text-[9px] font-black uppercase tracking-widest bg-white/10 px-3 py-0.5 rounded-full inline-block mt-1">Official Result</div>
+            <p id="event-period" class="text-xl text-gray-500 font-bold"></p>
+            <div class="text-[10px] font-black uppercase tracking-widest bg-white/10 px-4 py-1 rounded-full inline-block mt-2">Official Result</div>
         </div>
     </div>
 
-    <div class="grid grid-cols-12 gap-5 flex-1 overflow-hidden">
-        <div class="col-span-4 flex flex-col gap-3 h-full overflow-hidden">
+    <div class="grid grid-cols-12 gap-6 flex-1 overflow-hidden">
+        <div class="col-span-4 flex flex-col gap-4">
             <div id="winner-banner"></div>
             <div id="achievements" class="grid grid-cols-2 gap-2"></div>
-            <div class="glass rounded-2xl p-3 mt-auto flex justify-around items-center border-t-2 accent-border">
-                <div class="text-center"><div id="total-players" class="text-2xl font-black italic">0</div><div class="text-[8px] uppercase font-bold text-gray-400">Field Size</div></div>
-                <div class="text-center"><div id="avg-score" class="text-2xl font-black italic accent-text">0</div><div class="text-[8px] uppercase font-bold text-gray-400">Average Score</div></div>
+            <div class="glass rounded-3xl p-4 mt-auto flex justify-around items-center border-t-2 accent-border">
+                <div class="text-center"><div id="total-players" class="text-3xl font-black italic">0</div><div class="text-[9px] uppercase font-bold text-gray-400">Field Size</div></div>
+                <div class="text-center"><div id="avg-score" class="text-3xl font-black italic accent-text">0</div><div class="text-[9px] uppercase font-bold text-gray-400">Average Score</div></div>
             </div>
         </div>
-        <div id="lb-viewport" class="col-span-8 glass rounded-[24px] p-4 overflow-hidden relative">
+        <div id="lb-viewport" class="col-span-8 glass rounded-[30px] p-6 overflow-hidden relative">
             <div id="leaderboard"></div>
         </div>
     </div>
@@ -171,21 +172,21 @@ function renderFinals(data, animate){
     el('avg-score').innerText = players.length ? Math.round(players.reduce((s,p)=>s+p.high,0)/players.length).toLocaleString() : 0;
 
     el('winner-banner').innerHTML = `
-        <div class="glass p-3 rounded-[24px] border-4 accent-border text-center shadow-xl">
-            <div class="medieval text-[9px] accent-text uppercase tracking-widest mb-1.5">Tournament Champion</div>
-            <div class="relative w-16 h-16 mx-auto mb-1.5">
-                <img src="${AVATAR_BASE}${players[0].name.replace(/\s+/g,'_').toLowerCase()}.gif" class="w-16 h-16 rounded-full border-4 accent-border shadow-lg" onerror="this.src='https://via.placeholder.com/128?text=?'">
-                <span class="absolute -top-3 -right-3 text-3xl">👑</span>
+        <div class="glass p-4 rounded-[32px] border-4 accent-border text-center shadow-xl">
+            <div class="medieval text-[10px] accent-text uppercase tracking-widest mb-2">Tournament Champion</div>
+            <div class="relative w-24 h-24 mx-auto mb-3">
+                <img src="${AVATAR_BASE}${players[0].name.replace(/\s+/g,'_').toLowerCase()}.gif" class="w-24 h-24 rounded-full border-4 accent-border shadow-lg" onerror="this.src='https://via.placeholder.com/128?text=?'">
+                <span class="absolute -top-3 -right-3 text-4xl">👑</span>
             </div>
-            <div class="text-xl font-black italic uppercase leading-tight mb-0.5">${players[0].name}</div>
-            <div class="text-base font-mono text-gray-400 font-bold">${players[0].high.toLocaleString()}</div>
+            <div class="text-2xl font-black italic uppercase">${players[0].name}</div>
+            <div class="text-lg font-mono text-gray-400 font-bold">${players[0].high.toLocaleString()}</div>
         </div>`;
 
     const card = (icon, title, name, detail, colorClass) => `
-        <div class="glass p-1.5 rounded-lg achievement-card ${colorClass}">
-            <div class="text-[7px] uppercase text-gray-400 mb-0.5 leading-tight">${icon} ${title}</div>
-            <div class="font-bold text-[9px] uppercase italic truncate text-white leading-tight">${name || 'N/A'}</div>
-            <div class="text-[7px] text-gray-400 truncate leading-tight">${detail || ''}</div>
+        <div class="glass p-2 rounded-xl achievement-card ${colorClass}">
+            <div class="text-[8px] uppercase text-gray-400 mb-0.5 leading-tight">${icon} ${title}</div>
+            <div class="font-bold text-[10px] uppercase italic truncate text-white leading-tight">${name || 'N/A'}</div>
+            <div class="text-[8px] text-gray-400 truncate leading-tight">${detail || ''}</div>
         </div>`;
     
     let achHtml = card("🔫","Fast Draw", a.fast_draw, a.fast_draw_detail, "card-red") + 
@@ -208,12 +209,12 @@ function renderFinals(data, animate){
 
     lb.innerHTML = players.map((p,i)=>`
         <div class="lb-row ${i === 0 ? 'first-place-row' : ''}">
-            <div class="flex items-center gap-2 truncate">
-                <span class="text-sm font-black italic w-4 ${i<3?'accent-text':'text-gray-600'}">${i+1}</span>
-                <img src="${AVATAR_BASE}${p.name.replace(/\s+/g,'_').toLowerCase()}.gif" class="w-6 h-6 rounded-full border border-white/10" onerror="this.src='https://via.placeholder.com/40?text=?'">
-                <span class="text-[11px] font-bold truncate">${p.name}</span>
+            <div class="flex items-center gap-3 truncate">
+                <span class="text-lg font-black italic w-6 ${i<3?'accent-text':'text-gray-600'}">${i+1}</span>
+                <img src="${AVATAR_BASE}${p.name.replace(/\s+/g,'_').toLowerCase()}.gif" class="w-8 h-8 rounded-full border border-white/10" onerror="this.src='https://via.placeholder.com/40?text=?'">
+                <span class="text-sm font-bold truncate">${p.name}</span>
             </div>
-            <span class="text-[11px] font-mono font-bold ml-1">${p.high.toLocaleString()}</span>
+            <span class="text-sm font-mono font-bold ml-2">${p.high.toLocaleString()}</span>
         </div>`).join('');
 
     setTimeout(() => {
@@ -228,7 +229,7 @@ function renderFinals(data, animate){
             document.documentElement.style.setProperty('--scroll-speed', `${players.length * 1.5}s`);
             lb.classList.add('scrolling-content');
         } else if (contentHeight > viewportHeight) {
-            const scale = (viewportHeight - 20) / contentHeight;
+            const scale = (viewportHeight - 40) / contentHeight;
             lb.style.transform = `scale(${scale})`;
             lb.style.transformOrigin = 'top center';
         }
