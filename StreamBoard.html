@@ -47,6 +47,16 @@
 
     @keyframes scrollLoop { 0%,15% { transform:translateY(0); } 85%,100% { transform:translateY(var(--scroll-dist)); } }
     .scrolling-content { animation: scrollLoop var(--scroll-speed) ease-in-out infinite alternate; }
+
+    /* Achievement Color Variations */
+    .card-red { background: rgba(239, 68, 68, 0.07); border-left: 4px solid #ef4444; }
+    .card-orange { background: rgba(249, 115, 22, 0.07); border-left: 4px solid #f97316; }
+    .card-green { background: rgba(34, 197, 94, 0.07); border-left: 4px solid #22c55e; }
+    .card-purple { background: rgba(168, 85, 247, 0.07); border-left: 4px solid #a855f7; }
+    .card-blue { background: rgba(59, 130, 246, 0.07); border-left: 4px solid #3b82f6; }
+    .card-yellow { background: rgba(234, 179, 8, 0.07); border-left: 4px solid #eab308; }
+    .card-gold { background: rgba(255, 215, 0, 0.1); border-left: 4px solid #ffd700; animation: pulse-gold 2s infinite alternate; }
+    @keyframes pulse-gold { from { box-shadow: 0 0 5px rgba(255, 215, 0, 0.2); } to { box-shadow: 0 0 15px rgba(255, 215, 0, 0.4); } }
 </style>
 </head>
 <body>
@@ -97,7 +107,7 @@
     </div>
 
     <div class="grid grid-cols-12 gap-6 flex-1 overflow-hidden">
-        <div class="col-span-4 flex flex-col gap-4">
+        <div class="col-span-4 flex flex-col gap-3">
             <div id="winner-banner"></div>
             <div id="achievements" class="grid grid-cols-2 gap-2"></div>
             <div class="glass rounded-3xl p-4 mt-auto flex justify-around items-center border-t-2 accent-border">
@@ -171,14 +181,28 @@ function renderFinals(data, animate){
             <div class="text-lg font-mono text-gray-400 font-bold">${players[0].high.toLocaleString()}</div>
         </div>`;
 
-    const card = (icon, title, name, detail, color) => `<div class="glass p-2 rounded-xl border-l-4 ${color}"><div class="text-[8px] uppercase text-gray-500 mb-0.5">${icon} ${title}</div><div class="font-bold text-[10px] uppercase italic truncate">${name || 'N/A'}</div><div class="text-[8px] text-gray-400 truncate">${detail || ''}</div></div>`;
+    const card = (icon, title, name, detail, colorClass) => `
+        <div class="glass p-2 rounded-xl ${colorClass}">
+            <div class="text-[8px] uppercase text-gray-400 mb-0.5">${icon} ${title}</div>
+            <div class="font-bold text-[10px] uppercase italic truncate text-white">${name || 'N/A'}</div>
+            <div class="text-[8px] text-gray-400 truncate">${detail || ''}</div>
+        </div>`;
     
-    el('achievements').innerHTML = card("🔫","Fast Draw", a.fast_draw, a.fast_draw_detail, "border-red-500") + 
-                                    card("🎯","Sharpshooter", a.sharpshooter, a.sharpshooter_detail, "border-orange-500") + 
-                                    card("📈","Most Improved", a.most_improved, a.most_improved_detail, "border-green-500") + 
-                                    card("🔄","Comeback Kid", a.comeback_kid, a.comeback_kid_detail, "border-purple-500") + 
-                                    card("🕹️","Most Played", a.most_played, a.most_played_detail, "border-blue-500") + 
-                                    card("☢️","C. Montgomery Burns Award", a.burns_award, a.burns_award_detail, "border-yellow-500");
+    let achHtml = card("🔫","Fast Draw", a.fast_draw, a.fast_draw_detail, "card-red") + 
+                  card("🎯","Sharpshooter", a.sharpshooter, a.sharpshooter_detail, "card-orange") + 
+                  card("📈","Most Improved", a.most_improved, a.most_improved_detail, "card-green") + 
+                  card("🔄","Comeback Kid", a.comeback_kid, a.comeback_kid_detail, "card-purple") + 
+                  card("🕹️","Most Played", a.most_played, a.most_played_detail, "card-blue") + 
+                  card("☢️","C. Montgomery Burns Award", a.burns_award, a.burns_award_detail, "card-yellow");
+
+    // Dynamic Billionaires Club Card
+    const billionaires = players.filter(p => p.high >= 1000000000);
+    if (billionaires.length > 0) {
+        const bNames = billionaires.map(p => p.name).join(', ');
+        achHtml += card("💰","Billionaires Club", bNames, `${billionaires.length} Total`, "card-gold");
+    }
+
+    el('achievements').innerHTML = achHtml;
 
     const lb = el('leaderboard');
     lb.style.display = animate ? 'flex' : 'grid';
@@ -239,7 +263,41 @@ async function copyDiscordTemplate(btn) {
         const d = await res.json();
         const a = d.awards || {};
         const bills = d.results.filter(p => p.high >= 1000000000).map(p => `${p.name}`).join('\n');
-        const template = `**${d.table}**\n\n👑 **Winner!**\n${d.results[0].name}\n${d.results[0].high.toLocaleString()}\n\n🔫 **Fast Draw**: ${a.fast_draw}\n🎯 **Sharpshooter**: ${a.sharpshooter}\n🔄 **Comeback Kid**: ${a.comeback_kid}\n📈 **Most Improved**: ${a.most_improved}\n🕹️ **Most Played**: ${a.most_played}\n☢️ **C. Montgomery Burns**: ${a.burns_award}\n\n💰 **Billionaires Club**\n${bills || 'None'}`;
+        
+        let template = `**${d.table}**
+
+👑 **Winner!**
+${d.results[0].name}
+${d.results[0].high.toLocaleString()}
+
+🔫 **Fast Draw**
+${a.fast_draw || 'N/A'}
+${a.fast_draw_detail || ''}
+
+🎯 **Sharpshooter**
+${a.sharpshooter || 'N/A'}
+${a.sharpshooter_detail || ''}
+
+📈 **Most Improved**
+${a.most_improved || 'N/A'}
+${a.most_improved_detail || ''}
+
+🔄 **Comeback Kid**
+${a.comeback_kid || 'N/A'}
+${a.comeback_kid_detail || ''}
+
+🕹️ **Most Played**
+${a.most_played || 'N/A'}
+${a.most_played_detail || ''}
+
+☢️ **C. Montgomery Burns**
+${a.burns_award || 'N/A'}
+${a.burns_award_detail || ''}`;
+
+        if (bills) {
+            template += `\n\n💰 **Billionaires Club**\n${bills}`;
+        }
+
         await navigator.clipboard.writeText(template);
         const oldText = btn.innerText;
         btn.innerText = "Copied!";
