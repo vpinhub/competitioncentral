@@ -160,7 +160,6 @@ function renderFinals(data, animate){
     el('total-players').innerText = players.length;
     el('avg-score').innerText = players.length ? Math.round(players.reduce((s,p)=>s+p.high,0)/players.length).toLocaleString() : 0;
 
-    // Winner Banner with Crown Overlay
     el('winner-banner').innerHTML = `
         <div class="glass p-4 rounded-[32px] border-4 accent-border text-center shadow-xl">
             <div class="medieval text-[10px] accent-text uppercase tracking-widest mb-2">Tournament Champion</div>
@@ -172,15 +171,14 @@ function renderFinals(data, animate){
             <div class="text-lg font-mono text-gray-400 font-bold">${players[0].high.toLocaleString()}</div>
         </div>`;
 
-    const card = (icon, title, name, detail, color) => `<div class="glass p-2 rounded-xl border-l-4 ${color}"><div class="text-[8px] uppercase text-gray-500 mb-0.5">${icon} ${title}</div><div class="font-bold text-[11px] uppercase italic truncate">${name || 'N/A'}</div><div class="text-[8px] text-gray-400 truncate">${detail || ''}</div></div>`;
+    const card = (icon, title, name, detail, color) => `<div class="glass p-2 rounded-xl border-l-4 ${color}"><div class="text-[8px] uppercase text-gray-500 mb-0.5">${icon} ${title}</div><div class="font-bold text-[10px] uppercase italic truncate">${name || 'N/A'}</div><div class="text-[8px] text-gray-400 truncate">${detail || ''}</div></div>`;
     
-    // Burns Award Simplified
     el('achievements').innerHTML = card("🔫","Fast Draw", a.fast_draw, a.fast_draw_detail, "border-red-500") + 
                                     card("🎯","Sharpshooter", a.sharpshooter, a.sharpshooter_detail, "border-orange-500") + 
                                     card("📈","Most Improved", a.most_improved, a.most_improved_detail, "border-green-500") + 
                                     card("🔄","Comeback Kid", a.comeback_kid, a.comeback_kid_detail, "border-purple-500") + 
                                     card("🕹️","Most Played", a.most_played, a.most_played_detail, "border-blue-500") + 
-                                    card("☢️","Burns Award", a.burns_award, a.burns_award_detail, "border-yellow-500");
+                                    card("☢️","C. Montgomery Burns Award", a.burns_award, a.burns_award_detail, "border-yellow-500");
 
     const lb = el('leaderboard');
     lb.style.display = animate ? 'flex' : 'grid';
@@ -241,8 +239,7 @@ async function copyDiscordTemplate(btn) {
         const d = await res.json();
         const a = d.awards || {};
         const bills = d.results.filter(p => p.high >= 1000000000).map(p => `${p.name}`).join('\n');
-        // Simplified Burns Award for Discord
-        const template = `**${d.table}**\n\n👑 **Winner!**\n${d.results[0].name}\n${d.results[0].high.toLocaleString()}\n\n🔫 **Fast Draw**: ${a.fast_draw}\n🎯 **Sharpshooter**: ${a.sharpshooter}\n🔄 **Comeback Kid**: ${a.comeback_kid}\n📈 **Most Improved**: ${a.most_improved}\n🕹️ **Most Played**: ${a.most_played}\n☢️ **Burns Award**: ${a.burns_award}\n\n💰 **Billionaires Club**\n${bills || 'None'}`;
+        const template = `**${d.table}**\n\n👑 **Winner!**\n${d.results[0].name}\n${d.results[0].high.toLocaleString()}\n\n🔫 **Fast Draw**: ${a.fast_draw}\n🎯 **Sharpshooter**: ${a.sharpshooter}\n🔄 **Comeback Kid**: ${a.comeback_kid}\n📈 **Most Improved**: ${a.most_improved}\n🕹️ **Most Played**: ${a.most_played}\n☢️ **C. Montgomery Burns**: ${a.burns_award}\n\n💰 **Billionaires Club**\n${bills || 'None'}`;
         await navigator.clipboard.writeText(template);
         const oldText = btn.innerText;
         btn.innerText = "Copied!";
