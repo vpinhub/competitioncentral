@@ -17,7 +17,6 @@
         .card-hover:hover { transform: translateY(-5px); background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.2); }
         .resource-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem; }
         
-        /* Search Input */
         .search-input {
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -43,7 +42,8 @@
                 <a href="#build" class="nav-link">Build</a>
                 <a href="#learn" class="nav-link">Learn</a>
             </div>
-            <a href="https://discord.com/invite/virtual-pinball-chat-652274650524418078" target="_blank" class="bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-lg transition-colors">Join Discord</a>
+            <!-- Updated Discord Link [cite: 1.1] -->
+            <a href="https://discord.gg/rnaRKNgCjB" target="_blank" class="bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-lg transition-colors">Join Discord</a>
         </div>
     </nav>
 
@@ -92,11 +92,11 @@
         </div>
     </section>
 
-    <!-- NEW: Table Hunter Section [cite: index.html] -->
+    <!-- Latest Tables & Mods Section [cite: 1.2] -->
     <section id="tables" class="py-20 bg-white/5">
         <div class="container mx-auto px-6">
             <div class="text-center mb-12">
-                <h2 class="text-4xl font-black italic uppercase mb-4">Table Hunter</h2>
+                <h2 class="text-4xl font-black italic uppercase mb-4">Latest Tables & Mods</h2>
                 <p class="text-gray-400 max-w-xl mx-auto mb-8">Search the entire Virtual Pinball Spreadsheet database to find tables, backglasses, and ROMs.</p>
                 
                 <div class="max-w-2xl mx-auto relative">
@@ -108,8 +108,8 @@
             </div>
 
             <div id="table-results" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <!-- Results will be injected here via JS -->
-                <div class="col-span-full text-center text-gray-500 py-12 italic">Type above to search 1,500+ virtual pinball tables...</div>
+                <!-- Results injected here -->
+                <div class="col-span-full text-center text-gray-500 italic py-12">Loading latest releases...</div>
             </div>
             
             <div class="text-center mt-12">
@@ -118,6 +118,7 @@
         </div>
     </section>
 
+    <!-- Build & Learn Section (Unchanged) -->
     <section id="build" class="py-20 border-t border-white/5">
         <div class="container mx-auto px-6">
             <div class="text-center mb-16">
@@ -146,13 +147,15 @@
         </div>
     </section>
 
+    <!-- Footer -->
     <footer class="py-12 border-t border-white/10 text-center">
         <h2 class="text-2xl font-black italic tracking-tighter uppercase mb-4">VPIN<span class="text-orange-500">HUB</span></h2>
         <div class="flex justify-center gap-6 mb-8 text-xs font-bold uppercase tracking-widest text-gray-500">
             <a href="#" class="hover:text-white transition-colors">Home</a>
             <a href="index.html" class="hover:text-white transition-colors">Competitions</a>
             <a href="archive_viewer.html" class="hover:text-white transition-colors">Archive</a>
-            <a href="https://virtualpinballchat.com" target="_blank" class="hover:text-white transition-colors">VPC</a>
+            <!-- Updated Footer Discord Link -->
+            <a href="https://discord.gg/rnaRKNgCjB" target="_blank" class="hover:text-white transition-colors">Discord</a>
         </div>
         <p class="text-[10px] text-gray-600 uppercase tracking-widest">© 2026 VPINHUB. All rights reserved.</p>
     </footer>
@@ -161,17 +164,15 @@
         const VPS_DATA = "https://raw.githubusercontent.com/VirtualPinballSpreadsheet/vps-db/main/db/vpsdb.json";
         let vpsDB = [];
 
-        // Load VPS Data
         async function init() {
             const res = await fetch(VPS_DATA);
             vpsDB = await res.json();
             
-            // Show random selection on load
-            const random = vpsDB.sort(() => 0.5 - Math.random()).slice(0, 4);
-            renderResults(random, true);
+            // Sort by updated_at date (Newest First) [cite: 1.2]
+            const latest = vpsDB.sort((a, b) => (b.updated_at || 0) - (a.updated_at || 0)).slice(0, 8);
+            renderResults(latest, true);
         }
 
-        // Search Logic
         const searchInput = document.getElementById('table-search');
         let debounceTimer;
 
@@ -184,7 +185,7 @@
                 const results = vpsDB.filter(t => 
                     t.name.toLowerCase().includes(query) || 
                     (t.manufacturer && t.manufacturer.toLowerCase().includes(query))
-                ).slice(0, 8); // Limit to 8 results
+                ).slice(0, 8);
                 
                 renderResults(results);
             }, 300);
@@ -198,7 +199,6 @@
             }
 
             container.innerHTML = tables.map(t => {
-                // Find a valid image from b2s or table files
                 let img = "https://via.placeholder.com/400x200?text=No+Image";
                 if (t.b2sFiles && t.b2sFiles.length > 0 && t.b2sFiles[0].imgUrl) img = t.b2sFiles[0].imgUrl;
                 else if (t.tableFiles && t.tableFiles.length > 0 && t.tableFiles[0].imgUrl) img = t.tableFiles[0].imgUrl;
@@ -207,11 +207,11 @@
                 <div class="glass rounded-2xl overflow-hidden group hover:border-orange-500/50 transition-colors">
                     <div class="relative h-40 overflow-hidden">
                         <img src="${img}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
-                        ${isFeature ? '<div class="absolute top-2 right-2 bg-orange-500 text-white text-[10px] font-bold px-2 py-1 rounded uppercase">Featured</div>' : ''}
+                        ${isFeature ? '<div class="absolute top-2 right-2 bg-orange-500 text-white text-[10px] font-bold px-2 py-1 rounded uppercase">New</div>' : ''}
                     </div>
                     <div class="p-5">
                         <h4 class="font-bold text-lg leading-tight mb-1 truncate">${t.name}</h4>
-                        <p class="text-xs text-gray-500 uppercase tracking-wider mb-4">${t.manufacturer} • ${t.year}</p>
+                        <p class="text-xs text-gray-500 uppercase tracking-wider mb-4">${t.manufacturer || 'Unknown'} • ${t.year || ''}</p>
                         <a href="https://virtualpinballspreadsheet.github.io/vps-db/#${t.id}" target="_blank" class="block w-full bg-white/10 hover:bg-white/20 text-center py-2 rounded-lg text-xs font-bold uppercase transition-colors">
                             View on VPS
                         </a>
