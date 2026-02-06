@@ -145,6 +145,43 @@
             const comeback = [...playerList].sort((a,b) => b.comebackGrowth - a.comebackGrowth)[0];
             const burns = playerList[Math.floor(Math.random() * playerList.length)];
 
+            // --- WOODEN SPOON LOGIC (Single Player: Lowest Rank of Improvers) ---
+            let wooden = null;
+            if (window.currentResults.length > 2) {
+                // Filter excluding 1st and Last
+                const spoonCandidates = window.currentResults
+                    .slice(1, window.currentResults.length - 1)
+                    .filter(p => p.improvementGap > 0);
+                
+                // Select the last one (lowest rank)
+                if (spoonCandidates.length > 0) {
+                    wooden = spoonCandidates[spoonCandidates.length - 1];
+                }
+            }
+
+            // --- PRICE IS RIGHT LOGIC (Single Player: Closest Margin) ---
+            let pir = null;
+            let closestPIRMargin = 2.0; // Start threshold at 2%
+            
+            for (let i = 1; i < window.currentResults.length; i++) {
+                const pAhead = window.currentResults[i-1];
+                const pCurr = window.currentResults[i];
+                
+                if (pAhead.high > 0) {
+                    const diff = pAhead.high - pCurr.high;
+                    const margin = (diff / pAhead.high) * 100;
+                    
+                    // Finds the smallest margin <= 2%
+                    if (margin <= 2.0 && margin < closestPIRMargin) {
+                        closestPIRMargin = margin;
+                        pir = { 
+                            name: pCurr.name, 
+                            detail: `Within ${margin.toFixed(2)}% of Rank #${i}` 
+                        };
+                    }
+                }
+            }
+
             window.achievementData = {
                 winner: window.currentResults[0]?.name,
                 fast_draw: pioneer.name,
@@ -158,13 +195,18 @@
                 most_played: grinder?.name,
                 most_played_detail: `${grinder?.scores.length} Games`,
                 burns_award: burns?.name,
-                burns_award_detail: "Excellent!"
+                burns_award_detail: "Excellent!",
+                wooden_spoon: wooden?.name,
+                wooden_spoon_detail: "I'm a lumberjack!", 
+                price_is_right: pir?.name,
+                price_is_right_detail: pir?.detail
             };
 
             renderLeaderboard(window.currentResults);
             renderWinner(window.currentResults[0]);
-            renderAchievements(pioneer, shooter, improved, grinder, comeback, burns);
-            const tagMatch = JSON.stringify(tournamentGame).match(/game=([a-zA-Z0-9-]+)[^#]*#([a-zA-Z0-9-]+)/);
+            renderAchievements(pioneer, shooter, improved, grinder, comeback, burns, wooden, pir);
+            
+            const tagMatch = JSON.stringify(tournamentGame).match(/game=([a-zA-Z0-9-_]+)[^#]*#([a-zA-Z0-9-_]+)/);
             renderTable(tagMatch ? vpsDB.find(t => t.id === tagMatch[1]) : null, tournamentGame.longName, tagMatch?.[1], tagMatch?.[2]);
         }
 
@@ -185,15 +227,20 @@
             document.getElementById('winner-banner').innerHTML = `<div class="glass p-6 rounded-2xl border-2 border-yellow-500 flex items-center justify-between shadow-[0_0_20px_rgba(234,179,8,0.2)]"><div class="flex items-center gap-6"><div class="relative"><img src="${AVATAR_BASE}${winner.name.toLowerCase().replace(/\s+/g, '_')}.gif" class="w-20 h-20 rounded-full border-4 border-yellow-500" onerror="this.src='https://via.placeholder.com/80?text=?'"><span class="absolute -top-2 -right-2 text-3xl">👑</span></div><div><div class="medieval text-xs text-yellow-500 uppercase tracking-widest">Current Champion</div><div class="text-3xl font-black italic uppercase">${winner.name}</div></div></div><div class="text-right"><div class="text-xs text-gray-400 font-bold uppercase">Record Score</div><div class="text-2xl font-mono font-bold text-yellow-400">${winner.high.toLocaleString()}</div></div></div>`;
         }
 
-        function renderAchievements(pioneer, shooter, improved, grinder, comeback, burns) {
-            const card = (icon, title, name, detail, color) => `<div class="glass p-4 rounded-xl border-l-4 ${color} achievement-card"><div class="medieval text-[10px] text-gray-400 uppercase">${icon} ${title}</div><div class="font-bold text-sm uppercase italic text-white">${name}</div><div class="text-[10px] text-gray-500">${detail}</div></div>`;
+        function renderAchievements(pioneer, shooter, improved, grinder, comeback, burns, wooden, pir) {
+            const card = (icon, title, name, detail, color) => {
+                if (!name) return ''; 
+                return `<div class="glass p-4 rounded-xl border-l-4 ${color} achievement-card"><div class="medieval text-[10px] text-gray-400 uppercase">${icon} ${title}</div><div class="font-bold text-sm uppercase italic text-white">${name}</div><div class="text-[10px] text-gray-500">${detail}</div></div>`;
+            };
             document.getElementById('achievements').innerHTML = 
                 card("🔫", "Fast Draw", pioneer.name, "First Entry", "border-red-500") +
                 card("🎯", "Sharpshooter", shooter?.name, "Top Average", "border-orange-500") +
                 card("📈", "Most Improved", improved?.name, `Gap: +${improved?.improvementGap.toLocaleString()}`, "border-green-500") +
                 card("🔄", "Comeback Kid", comeback?.name, `Gain: +${comeback?.comebackGrowth.toLocaleString()}`, "border-purple-500") +
                 card("🕹️", "Most Played", grinder?.name, `${grinder?.scores.length} Games`, "border-blue-500") +
-                card("☢️", "C. Montgomery Burns Award", burns?.name, "Excellent!", "border-orange-500");
+                card("☢️", "Montgomery Burns", burns?.name, "Excellent!", "border-pink-500") +
+                card("🥄", "Wooden Spoon", wooden?.name, "I'm a lumberjack!", "border-stone-500") +
+                card("🏷️", "Price is Right", pir?.name, pir?.detail, "border-yellow-400");
         }
 
         function renderTable(table, fallbackName, gameId, releaseId) {
