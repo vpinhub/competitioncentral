@@ -55,7 +55,9 @@
     .card-green { background: rgba(34, 197, 94, 0.08); border-left: 4px solid #22c55e; }
     .card-purple { background: rgba(168, 85, 247, 0.08); border-left: 4px solid #a855f7; }
     .card-blue { background: rgba(59, 130, 246, 0.08); border-left: 4px solid #3b82f6; }
+    .card-pink { background: rgba(236, 72, 153, 0.08); border-left: 4px solid #ec4899; }
     .card-yellow { background: rgba(234, 179, 8, 0.08); border-left: 4px solid #eab308; }
+    .card-stone { background: rgba(120, 113, 108, 0.15); border-left: 4px solid #78716c; } /* Wooden Spoon */
     .card-gold { background: rgba(255, 215, 0, 0.12); border-left: 4px solid #ffd700; animation: pulse-gold 2s infinite alternate; }
     @keyframes pulse-gold { from { box-shadow: 0 0 5px rgba(255, 215, 0, 0.2); } to { box-shadow: 0 0 15px rgba(255, 215, 0, 0.4); } }
 </style>
@@ -110,7 +112,7 @@
     <div class="grid grid-cols-12 gap-6 flex-1 overflow-hidden">
         <div class="col-span-4 flex flex-col gap-4">
             <div id="winner-banner"></div>
-            <div id="achievements" class="grid grid-cols-2 gap-2"></div>
+            <div id="achievements" class="grid grid-cols-2 gap-2 overflow-y-auto max-h-[600px] pr-2"></div>
             <div class="glass rounded-3xl p-4 mt-auto flex justify-around items-center border-t-2 accent-border">
                 <div class="text-center"><div id="total-players" class="text-3xl font-black italic">0</div><div class="text-[9px] uppercase font-bold text-gray-400">Field Size</div></div>
                 <div class="text-center"><div id="avg-score" class="text-3xl font-black italic accent-text">0</div><div class="text-[9px] uppercase font-bold text-gray-400">Average Score</div></div>
@@ -182,23 +184,32 @@ function renderFinals(data, animate){
             <div class="text-lg font-mono text-gray-400 font-bold">${players[0].high.toLocaleString()}</div>
         </div>`;
 
-    const card = (icon, title, name, detail, colorClass) => `
-        <div class="glass p-2 rounded-xl achievement-card ${colorClass}">
+    const card = (icon, title, name, detail, colorClass) => {
+        if (!name) return ''; // Don't render empty awards
+        return `<div class="glass p-2 rounded-xl achievement-card ${colorClass}">
             <div class="text-[8px] uppercase text-gray-400 mb-0.5 leading-tight">${icon} ${title}</div>
-            <div class="font-bold text-[10px] uppercase italic truncate text-white leading-tight">${name || 'N/A'}</div>
+            <div class="font-bold text-[10px] uppercase italic truncate text-white leading-tight">${name}</div>
             <div class="text-[8px] text-gray-400 truncate leading-tight">${detail || ''}</div>
         </div>`;
+    };
     
+    // Updated Logic: Uses new awards from JSON (Wooden Spoon, Price is Right, Billionaire)
     let achHtml = card("🔫","Fast Draw", a.fast_draw, a.fast_draw_detail, "card-red") + 
                   card("🎯","Sharpshooter", a.sharpshooter, a.sharpshooter_detail, "card-orange") + 
                   card("📈","Most Improved", a.most_improved, a.most_improved_detail, "card-green") + 
                   card("🔄","Comeback Kid", a.comeback_kid, a.comeback_kid_detail, "card-purple") + 
                   card("🕹️","Most Played", a.most_played, a.most_played_detail, "card-blue") + 
-                  card("☢️","C. Montgomery Burns Award", a.burns_award, a.burns_award_detail, "card-yellow");
+                  card("💰","Billionaires Club", a.billionaire, a.billionaire_detail, "card-gold") +
+                  card("☢️","C. Montgomery Burns", a.burns_award, a.burns_award_detail, "card-pink") +
+                  card("🥄","Wooden Spoon", a.wooden_spoon, a.wooden_spoon_detail, "card-stone") +
+                  card("🏷️","Price is Right", a.price_is_right, a.price_is_right_detail, "card-yellow");
 
-    const billionaires = players.filter(p => p.high >= 1000000000);
-    if (billionaires.length > 0) {
-        achHtml += card("💰","Billionaires Club", billionaires.map(p => p.name).join(', '), `${billionaires.length} Total`, "card-gold");
+    // Fallback: If JSON is old and lacks 'billionaire' field but has scores > 1B, calculate locally
+    if (!a.billionaire) {
+        const billionaires = players.filter(p => p.high >= 1000000000);
+        if (billionaires.length > 0) {
+            achHtml += card("💰","Billionaires Club", billionaires.map(p => p.name).join(', '), `${billionaires.length} Total`, "card-gold");
+        }
     }
 
     el('achievements').innerHTML = achHtml;
@@ -261,9 +272,25 @@ async function copyDiscordTemplate(btn) {
         const res = await fetch(`json/${file}`);
         const d = await res.json();
         const a = d.awards || {};
-        const bills = d.results.filter(p => p.high >= 1000000000).map(p => `${p.name}`).join('\n');
+        
         let template = `**${d.table}**\n\n👑 **Winner!**\n${d.results[0].name}\n${d.results[0].high.toLocaleString()}\n\n🔫 **Fast Draw**\n${a.fast_draw || 'N/A'}\n${a.fast_draw_detail || ''}\n\n🎯 **Sharpshooter**\n${a.sharpshooter || 'N/A'}\n${a.sharpshooter_detail || ''}\n\n📈 **Most Improved**\n${a.most_improved || 'N/A'}\n${a.most_improved_detail || ''}\n\n🔄 **Comeback Kid**\n${a.comeback_kid || 'N/A'}\n${a.comeback_kid_detail || ''}\n\n🕹️ **Most Played**\n${a.most_played || 'N/A'}\n${a.most_played_detail || ''}\n\n☢️ **C. Montgomery Burns**\n${a.burns_award || 'N/A'}\n${a.burns_award_detail || ''}`;
-        if (bills) template += `\n\n💰 **Billionaires Club**\n${bills}`;
+        
+        if (a.billionaire) {
+            template += `\n\n💰 **Billionaires Club**\n${a.billionaire}\n${a.billionaire_detail}`;
+        } else {
+             // Fallback for old JSONs
+            const bills = d.results.filter(p => p.high >= 1000000000).map(p => `${p.name}`).join('\n');
+            if (bills) template += `\n\n💰 **Billionaires Club**\n${bills}`;
+        }
+        
+        if (a.wooden_spoon) {
+            template += `\n\n🥄 **Wooden Spoon**\n${a.wooden_spoon}\n${a.wooden_spoon_detail}`;
+        }
+        
+        if (a.price_is_right) {
+            template += `\n\n🏷️ **Price is Right**\n${a.price_is_right}\n${a.price_is_right_detail}`;
+        }
+
         await navigator.clipboard.writeText(template);
         const oldText = btn.innerText;
         btn.innerText = "Copied!";
