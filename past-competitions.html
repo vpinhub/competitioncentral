@@ -26,6 +26,17 @@
             appearance: none; 
         }
         select option { background-color: #0f172a; color: white; padding: 10px; }
+
+        /* Achievement Colors */
+        .card-red { border-left-color: #ef4444; }
+        .card-orange { border-left-color: #f97316; }
+        .card-green { border-left-color: #22c55e; }
+        .card-purple { border-left-color: #a855f7; }
+        .card-blue { border-left-color: #3b82f6; }
+        .card-pink { border-left-color: #ec4899; } /* Burns */
+        .card-stone { border-left-color: #78716c; } /* Spoon */
+        .card-yellow { border-left-color: #eab308; } /* Price is Right */
+        .card-gold { border-left-color: #ffd700; background: rgba(255, 215, 0, 0.05); } /* Billionaire */
     </style>
 </head>
 <body class="min-h-screen">
@@ -190,20 +201,36 @@
                 </div>`;
 
             const a = data.awards || {};
-            const card = (icon, title, name, detail, color) => `
-                <div class="glass p-4 rounded-xl border-l-4 ${color}">
+            const card = (icon, title, name, detail, colorClass) => {
+                if (!name) return '';
+                return `<div class="glass p-4 rounded-xl border-l-4 ${colorClass}">
                     <div class="medieval text-[10px] text-gray-500 uppercase">${icon} ${title}</div>
-                    <div class="font-bold text-sm uppercase italic text-white">${name || 'N/A'}</div>
+                    <div class="font-bold text-sm uppercase italic text-white">${name}</div>
                     <div class="text-[10px] text-gray-400 mt-1">${detail || ''}</div>
                 </div>`;
+            };
             
-            document.getElementById('achievements').innerHTML = 
-                card("🔫", "Fast Draw", a.fast_draw, a.fast_draw_detail, "border-red-500") + 
-                card("🎯", "Sharpshooter", a.sharpshooter, a.sharpshooter_detail, "border-orange-500") + 
-                card("📈", "Most Improved", a.most_improved, a.most_improved_detail, "border-green-500") + 
-                card("🔄", "Comeback Kid", a.comeback_kid, a.comeback_kid_detail, "border-purple-500") + 
-                card("🕹️", "Most Played", a.most_played, a.most_played_detail, "border-blue-500") + 
-                card("☢️", "C. Montgomery Burns Award", a.burns_award, a.burns_award_detail, "border-yellow-500");
+            // Generate Awards HTML
+            let achHtml = 
+                card("🔫", "Fast Draw", a.fast_draw, a.fast_draw_detail, "card-red") + 
+                card("🎯", "Sharpshooter", a.sharpshooter, a.sharpshooter_detail, "card-orange") + 
+                card("📈", "Most Improved", a.most_improved, a.most_improved_detail, "card-green") + 
+                card("🔄", "Comeback Kid", a.comeback_kid, a.comeback_kid_detail, "card-purple") + 
+                card("🕹️", "Most Played", a.most_played, a.most_played_detail, "card-blue") +
+                card("💰", "Billionaires Club", a.billionaire, a.billionaire_detail, "card-gold") + 
+                card("☢️", "C. Montgomery Burns", a.burns_award, a.burns_award_detail, "card-pink") +
+                card("🥄", "Wooden Spoon", a.wooden_spoon, a.wooden_spoon_detail, "card-stone") +
+                card("🏷️", "Price is Right", a.price_is_right, a.price_is_right_detail, "card-yellow");
+
+            // Backward Compatibility: Calculate Billionaires Club if not present in JSON
+            if (!a.billionaire) {
+                const billionaires = players.filter(p => p.high >= 1000000000);
+                if (billionaires.length > 0) {
+                    achHtml += card("💰", "Billionaires Club", billionaires.map(p => p.name).join(', '), `${billionaires.length} Total`, "card-gold");
+                }
+            }
+
+            document.getElementById('achievements').innerHTML = achHtml;
 
             document.getElementById('leaderboard').innerHTML = players.map((p, i) => `
                 <div class="flex items-center justify-between px-8 py-4 hover:bg-white/5 transition">
