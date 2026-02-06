@@ -5,99 +5,208 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VPINHUB | Thursday Throwdown</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Encode+Sans:wght@400;700;900&family=MedievalSharp&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Encode+Sans:wght@400;700&family=MedievalSharp&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Encode Sans', sans-serif; background: #0c0a09; color: white; }
+        body { font-family: 'Encode Sans', sans-serif; background: #0f172a; color: white; }
         .medieval { font-family: 'MedievalSharp', cursive; }
-        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
-        .accent-text { color: #f97316; }
-        .accent-border { border-color: #f97316; }
-        .hero-bg { background: radial-gradient(circle at top right, #f9731633 0%, #0c0a09 60%); }
+        .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
+        .ttd-accent { border-color: #f97316; box-shadow: 0 0 15px rgba(249, 115, 22, 0.2); }
+        .achievement-card { transition: all 0.3s ease; }
+        .achievement-card:hover { transform: translateY(-2px); background: rgba(255,255,255,0.12); }
     </style>
 </head>
-<body class="min-h-screen hero-bg flex flex-col">
-
-    <nav class="glass border-b border-white/10 p-6 sticky top-0 z-50">
-        <div class="container mx-auto flex justify-between items-center">
-            <div class="flex items-center gap-4">
-                <a href="index.html" class="bg-white/10 hover:bg-white/20 p-2 rounded-lg transition-colors">🏠</a>
-                <div>
-                    <h1 class="text-2xl font-black italic tracking-tighter uppercase leading-none">THURSDAY <span class="text-orange-500">THROWDOWN</span></h1>
-                    <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mt-1">Weekly Challenge Series</p>
-                </div>
-            </div>
-            <a href="archive_viewer.html?type=Thursday_Throwdown" class="text-xs font-bold uppercase tracking-widest text-gray-500 hover:text-white transition-colors">View Archive</a>
+<body class="min-h-screen pb-12">
+    <header class="bg-orange-500 shadow-md sticky top-0 z-40">
+        <div class="container mx-auto px-4 py-4 flex justify-center">
+            <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight text-white uppercase italic text-center">Thursday Throwdown</h1>
         </div>
-    </nav>
-
-    <main class="flex-grow container mx-auto px-6 py-12 flex flex-col md:flex-row gap-12 items-center">
-        <div class="flex-1 space-y-8">
-            <div>
-                <div class="inline-block px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-orange-500/20 text-orange-500 mb-4 border border-orange-500/20">Current Table</div>
-                <h2 id="table-name" class="text-6xl font-black italic uppercase leading-none mb-2">Loading...</h2>
-                <p id="event-period" class="text-xl text-gray-400 font-bold"></p>
-            </div>
-
-            <div class="grid grid-cols-2 gap-4">
-                <div class="glass p-6 rounded-2xl border-l-4 border-orange-500">
-                    <div class="medieval text-xs text-gray-500 uppercase">Game Type</div>
-                    <div class="text-xl font-bold uppercase italic">Weekly</div>
-                </div>
-                <div class="glass p-6 rounded-2xl border-l-4 border-orange-500">
-                    <div class="medieval text-xs text-gray-500 uppercase">Scoring</div>
-                    <div class="text-xl font-bold uppercase italic">iScored</div>
-                </div>
-            </div>
-
-            <div class="flex flex-wrap gap-4">
-                <button id="download-btn" class="hidden bg-white text-black hover:bg-orange-500 hover:text-white font-black py-4 px-8 rounded-xl uppercase text-xs tracking-widest transition-all">
-                    Download Table Files
-                </button>
-                <a href="https://iscored.info/?mode=public&user=smaug" target="_blank" class="glass hover:bg-white/10 text-white font-bold py-4 px-8 rounded-xl uppercase text-xs tracking-widest transition-all border border-white/10">
-                    Submit Score
-                </a>
+    </header>
+    <main class="container mx-auto px-4 mt-8 max-w-6xl">
+        <div class="mb-6 text-center">
+            <div class="inline-block glass px-6 py-2 rounded-full border border-orange-500/30">
+                <span class="text-xs font-bold text-gray-400 uppercase tracking-widest mr-2">Current Event Period:</span>
+                <span id="event-period" class="text-sm font-bold text-orange-400 tracking-tight">Calculating...</span>
             </div>
         </div>
-
-        <div class="flex-1 w-full max-w-xl">
-            <div class="glass rounded-3xl overflow-hidden shadow-2xl border border-white/10">
-                <div class="bg-orange-500/10 px-8 py-6 border-b border-white/10 flex justify-between items-center">
-                    <h3 class="text-lg font-black italic uppercase">Live Standings</h3>
-                    <div class="flex items-center gap-2">
-                        <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                        <span class="text-[10px] font-bold uppercase tracking-widest text-green-500">Live</span>
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <div class="lg:col-span-5 space-y-6">
+                <div id="table-card" class="glass rounded-2xl p-6 ttd-accent min-h-[300px]"></div>
+                <div class="glass rounded-2xl p-6">
+                    <h3 class="text-xl font-bold text-orange-400 mb-6 tracking-tight uppercase border-b border-white/10 pb-2">Rules & Submission</h3>
+                    <ul class="text-left space-y-4 text-sm leading-relaxed text-gray-200 mb-8 list-none">
+                        <li class="flex gap-3"><span class="text-orange-500">•</span><span>All scores must be submitted via <strong>iScored</strong>.</span></li>
+                        <li class="flex gap-3"><span class="text-orange-500">•</span><span>Manual submissions require a <strong>photo for verification</strong>.</span></li>
+                        <li class="flex gap-3"><span class="text-orange-500">•</span><span>VPinStudio auto-submissions are permitted; please verify your posts.</span></li>
+                        <li class="flex gap-3"><span class="text-orange-500">•</span><span>No table or script modifications allowed.</span></li>
+                        <li class="flex gap-3"><span class="text-orange-500">•</span><span>Highest valid score at end of period wins.</span></li>
+                        <li class="flex gap-3"><span class="text-orange-500">•</span><span>Deadline: <strong>Thursday at 2:00 PM EST</strong>.</span></li>
+                    </ul>
+                    <div class="space-y-3">
+                        <a href="https://iscored.info/?mode=public&user=smaug" target="_blank" class="block w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg text-center transition-colors shadow-sm uppercase text-sm">Submit Score</a>
+                        <button onclick="copyToClipboard('https://www.iScored.info/SMAUG', this)" class="block w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 rounded-lg text-center transition-colors shadow-sm text-xs">Copy VPinStudio iScored Link</button>
                     </div>
                 </div>
-                <div class="aspect-[4/5] w-full bg-black/50">
-                    <iframe src="https://iscored.info/?mode=embed&user=smaug" width="100%" height="100%" frameborder="0" class="w-full h-full"></iframe>
+            </div>
+            <div class="lg:col-span-7 space-y-6">
+                <div id="achievement-zone" class="space-y-6 hidden">
+                    <div id="winner-banner"></div>
+                    <div id="achievements" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+                </div>
+                <div class="glass rounded-2xl overflow-hidden shadow-2xl">
+                    <div id="leaderboard" class="divide-y divide-white/5 max-h-[1200px] overflow-y-auto"></div>
                 </div>
             </div>
         </div>
     </main>
-
     <script>
+        const AVATAR_BASE = "http://vpinhub.github.io/special-when-lit-leaderboard/img/";
+        const ROOM_ID = "700";
+        const PRIMARY_API = `https://virtualpinballchat.com/vpc/api/v1/iscored?roomId=${ROOM_ID}`;
+        const VPS_DATA = "https://raw.githubusercontent.com/VirtualPinballSpreadsheet/vps-db/main/db/vpsdb.json";
+        let vpsDB = [];
+        window.achievementData = {};
+
         async function init() {
+            calculateTTDPeriod();
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('showachievements')) { document.getElementById('achievement-zone').classList.remove('hidden'); }
             try {
-                const res = await fetch('json/Thursday_Throwdown_Current.json');
-                const data = await res.json();
+                const dbRes = await fetch(VPS_DATA); vpsDB = await dbRes.json();
+                const scoreRes = await fetch(PRIMARY_API);
+                const scoreData = await scoreRes.json();
+                if (scoreData) processTournament(scoreData);
+                if (urlParams.has('savejson')) { setTimeout(() => exportTournamentData('Thursday_Throwdown'), 2000); }
+            } catch (err) { console.error(err); }
+        }
 
-                document.getElementById('table-name').innerText = data.table;
-                document.getElementById('event-period').innerText = data.period;
+        function calculateTTDPeriod() {
+            const cutoffDay = 4, cutoffHour = 14;
+            const nowTZ = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/New_York' }));
+            let endDate = new Date(nowTZ); endDate.setHours(cutoffHour, 0, 0, 0);
+            const daysToAdd = (cutoffDay - nowTZ.getDay() + 7) % 7;
+            endDate.setDate(endDate.getDate() + daysToAdd);
+            if (daysToAdd === 0 && nowTZ.getHours() >= cutoffHour) endDate.setDate(endDate.getDate() + 7);
+            let startDate = new Date(endDate); startDate.setDate(startDate.getDate() - 7);
+            document.getElementById('event-period').innerText = `${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}`;
+        }
 
-                // DOWNLOAD BUTTON FIX
-                const dlBtn = document.getElementById('download-btn');
-                if (data.table_id) {
-                    dlBtn.onclick = function() {
-                        // Pass raw release ID to preserve underscores
-                        window.open(`showcase.html?tableId=${data.table_id}&releaseId=${data.release_id || ''}&ttd`, '_blank');
-                    };
-                    dlBtn.style.display = 'inline-block';
-                }
+        function copyToClipboard(text, btnElement) {
+            navigator.clipboard.writeText(text).then(() => {
+                const originalText = btnElement.innerText; btnElement.innerText = 'Copied!';
+                setTimeout(() => { btnElement.innerText = originalText; }, 2000);
+            });
+        }
 
-            } catch (err) {
-                console.error("Error loading competition data", err);
-                document.getElementById('table-name').innerText = "Data Unavailable";
-            }
+        function exportTournamentData(prefix) {
+            const exportObj = { 
+                competition: prefix, 
+                date_exported: new Date().toISOString(), 
+                period: document.getElementById('event-period').innerText, 
+                table: document.querySelector('#table-card h4')?.innerText || 'Unknown', 
+                awards: window.achievementData, 
+                results: window.currentResults || [] 
+            };
+            const blob = new Blob([JSON.stringify(exportObj, null, 4)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url; a.download = `${prefix}_${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        }
+
+        function processTournament(data) {
+            const playerStats = {};
+            let tournamentGame = data.find(g => JSON.stringify(g).includes('game=')) || data[0];
+            let pioneer = { name: "N/A", date: Infinity };
+
+            tournamentGame.scores.forEach(s => {
+                const val = parseInt(s.score, 10);
+                const rawDate = s.date_added || s.date || s.timestamp;
+                const time = rawDate ? new Date(rawDate).getTime() : Date.now();
+                if (time < pioneer.date) { pioneer = { name: s.name, date: time }; }
+                if (!playerStats[s.name]) playerStats[s.name] = { name: s.name, scores: [], rawEntries: [], high: 0, low: Infinity, total: 0 };
+                playerStats[s.name].scores.push(val); 
+                playerStats[s.name].total += val;
+                playerStats[s.name].rawEntries.push({ val, time });
+                if (val > playerStats[s.name].high) playerStats[s.name].high = val;
+                if (val < playerStats[s.name].low) playerStats[s.name].low = val;
+            });
+
+            const playerList = Object.values(playerStats).map(p => {
+                p.avg = p.total / p.scores.length;
+                p.rawEntries.sort((a,b) => a.time - b.time);
+                p.comebackGrowth = p.rawEntries.length > 1 ? p.rawEntries[p.rawEntries.length-1].val - p.rawEntries[0].val : 0;
+                p.improvementGap = p.high - p.low;
+                return p;
+            });
+
+            window.currentResults = playerList.sort((a,b) => b.high - a.high);
+            const shooter = [...playerList].sort((a,b) => b.avg - a.avg)[0];
+            const improved = [...playerList].sort((a,b) => b.improvementGap - a.improvementGap)[0];
+            const grinder = [...playerList].sort((a,b) => b.scores.length - a.scores.length)[0];
+            const comeback = [...playerList].sort((a,b) => b.comebackGrowth - a.comebackGrowth)[0];
+            const burns = playerList[Math.floor(Math.random() * playerList.length)];
+
+            window.achievementData = {
+                winner: window.currentResults[0]?.name,
+                fast_draw: pioneer.name,
+                fast_draw_detail: "First Entry",
+                sharpshooter: shooter?.name,
+                sharpshooter_detail: "Top Average",
+                most_improved: improved?.name,
+                most_improved_detail: `Gap: +${improved?.improvementGap.toLocaleString()}`,
+                comeback_kid: comeback?.name,
+                comeback_kid_detail: `Gain: +${comeback?.comebackGrowth.toLocaleString()}`,
+                most_played: grinder?.name,
+                most_played_detail: `${grinder?.scores.length} Games`,
+                burns_award: burns?.name,
+                burns_award_detail: "Excellent!"
+            };
+
+            renderLeaderboard(window.currentResults);
+            renderWinner(window.currentResults[0]);
+            renderAchievements(pioneer, shooter, improved, grinder, comeback, burns);
+            const tagMatch = JSON.stringify(tournamentGame).match(/game=([a-zA-Z0-9-]+)[^#]*#([a-zA-Z0-9-]+)/);
+            renderTable(tagMatch ? vpsDB.find(t => t.id === tagMatch[1]) : null, tournamentGame.longName, tagMatch?.[1], tagMatch?.[2]);
+        }
+
+        function renderLeaderboard(players) {
+            document.getElementById('leaderboard').innerHTML = players.map((p, i) => `
+                <div class="flex items-center justify-between px-6 py-4 hover:bg-white/5 transition">
+                    <div class="flex items-center gap-4">
+                        <span class="w-6 font-black text-xl italic ${i < 3 ? 'text-orange-500' : 'text-gray-700'}">${i+1}</span>
+                        <img src="${AVATAR_BASE}${p.name.toLowerCase().replace(/\s+/g, '_')}.gif" class="w-10 h-10 rounded-full border border-white/10" onerror="this.src='https://via.placeholder.com/40?text=?'">
+                        <span class="font-bold text-sm text-gray-200">${p.name}</span>
+                    </div>
+                    <span class="font-mono font-bold ${i === 0 ? 'text-yellow-400' : 'text-gray-400'}">${p.high.toLocaleString()}</span>
+                </div>`).join('');
+        }
+
+        function renderWinner(winner) {
+            if (!winner) return;
+            document.getElementById('winner-banner').innerHTML = `<div class="glass p-6 rounded-2xl border-2 border-yellow-500 flex items-center justify-between shadow-[0_0_20px_rgba(234,179,8,0.2)]"><div class="flex items-center gap-6"><div class="relative"><img src="${AVATAR_BASE}${winner.name.toLowerCase().replace(/\s+/g, '_')}.gif" class="w-20 h-20 rounded-full border-4 border-yellow-500" onerror="this.src='https://via.placeholder.com/80?text=?'"><span class="absolute -top-2 -right-2 text-3xl">👑</span></div><div><div class="medieval text-xs text-yellow-500 uppercase tracking-widest">Current Champion</div><div class="text-3xl font-black italic uppercase">${winner.name}</div></div></div><div class="text-right"><div class="text-xs text-gray-400 font-bold uppercase">Record Score</div><div class="text-2xl font-mono font-bold text-yellow-400">${winner.high.toLocaleString()}</div></div></div>`;
+        }
+
+        function renderAchievements(pioneer, shooter, improved, grinder, comeback, burns) {
+            const card = (icon, title, name, detail, color) => `<div class="glass p-4 rounded-xl border-l-4 ${color} achievement-card"><div class="medieval text-[10px] text-gray-400 uppercase">${icon} ${title}</div><div class="font-bold text-sm uppercase italic text-white">${name}</div><div class="text-[10px] text-gray-500">${detail}</div></div>`;
+            document.getElementById('achievements').innerHTML = 
+                card("🔫", "Fast Draw", pioneer.name, "First Entry", "border-red-500") +
+                card("🎯", "Sharpshooter", shooter?.name, "Top Average", "border-orange-500") +
+                card("📈", "Most Improved", improved?.name, `Gap: +${improved?.improvementGap.toLocaleString()}`, "border-green-500") +
+                card("🔄", "Comeback Kid", comeback?.name, `Gain: +${comeback?.comebackGrowth.toLocaleString()}`, "border-purple-500") +
+                card("🕹️", "Most Played", grinder?.name, `${grinder?.scores.length} Games`, "border-blue-500") +
+                card("☢️", "C. Montgomery Burns Award", burns?.name, "Excellent!", "border-orange-500");
+        }
+
+        function renderTable(table, fallbackName, gameId, releaseId) {
+            const img = table?.b2sFiles?.[0]?.imgUrl || "https://via.placeholder.com/400x200";
+            document.getElementById('table-card').innerHTML = `
+                <div class="relative rounded-xl overflow-hidden border border-white/10 shadow-2xl">
+                    <img src="${img}" class="w-full h-52 object-cover">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent flex flex-col justify-end p-4">
+                        <h4 class="text-2xl font-black italic uppercase tracking-tighter">${table ? table.name : fallbackName}</h4>
+                        <p class="text-[10px] text-orange-400 font-bold uppercase tracking-widest">${table ? table.manufacturer : 'Tournament Table'}</p>
+                    </div>
+                </div>
+                <a href="https://vpinhub.github.io/tournamenthelper/?tableId=${gameId}&releaseId=${releaseId}&ttd" target="_blank" class="block w-full bg-white text-black text-center py-4 rounded-xl font-black text-xs hover:bg-orange-500 transition mt-4 uppercase">Download Table Files</a>`;
         }
         init();
     </script>
