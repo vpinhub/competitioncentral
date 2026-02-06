@@ -1,6 +1,6 @@
 {
     "competition": "Special_When_Lit",
-    "date_exported": "2026-02-03T19:48:53.000Z",
+    "date_exported": "2026-02-06T20:45:35.885Z",
     "period": "2/1/2026 - 2/8/2026",
     "table": "BUCK ROGERS",
     "awards": {
@@ -11,12 +11,17 @@
         "sharpshooter_detail": "Top Average",
         "most_improved": "TheEternalGremmie",
         "most_improved_detail": "Gap: +674,100",
-        "comeback_kid": "TheEternalGremmie",
-        "comeback_kid_detail": "Gain: +674,100",
+        "comeback_kid": "TheWife",
+        "comeback_kid_detail": "Gain: +384,700",
         "most_played": "Paladin",
         "most_played_detail": "4 Games",
-        "burns_award": "Buck Pindragon",
-        "burns_award_detail": "Excellent!"
+        "burns_award": "That16bitGuy",
+        "burns_award_detail": "Excellent!",
+        "wooden_spoon": "RUS",
+        "wooden_spoon_detail": "I'm a lumberjack!",
+        "price_is_right": "DJ DFRAG",
+        "price_is_right_detail": "Closest to Izz",
+        "billionaire_detail": "Score > 1,000,000,000"
     },
     "results": [
         {
@@ -99,6 +104,24 @@
             "improvementGap": 384700
         },
         {
+            "name": "racerRecords",
+            "scores": [
+                425490
+            ],
+            "rawEntries": [
+                {
+                    "val": 425490,
+                    "time": 1770240631000
+                }
+            ],
+            "high": 425490,
+            "low": 425490,
+            "total": 425490,
+            "avg": 425490,
+            "comebackGrowth": 0,
+            "improvementGap": 0
+        },
+        {
             "name": "LexOnTilt",
             "scores": [
                 411850
@@ -133,6 +156,29 @@
             "avg": 390810,
             "comebackGrowth": 0,
             "improvementGap": 0
+        },
+        {
+            "name": "lminimart",
+            "scores": [
+                347220,
+                251080
+            ],
+            "rawEntries": [
+                {
+                    "val": 251080,
+                    "time": 1769989264000
+                },
+                {
+                    "val": 347220,
+                    "time": 1770289507000
+                }
+            ],
+            "high": 347220,
+            "low": 251080,
+            "total": 598300,
+            "avg": 299150,
+            "comebackGrowth": 96140,
+            "improvementGap": 96140
         },
         {
             "name": "Paladin",
@@ -186,20 +232,20 @@
             "improvementGap": 0
         },
         {
-            "name": "lminimart",
+            "name": "Wileywade",
             "scores": [
-                251080
+                257730
             ],
             "rawEntries": [
                 {
-                    "val": 251080,
-                    "time": 1769989264000
+                    "val": 257730,
+                    "time": 1770355901000
                 }
             ],
-            "high": 251080,
-            "low": 251080,
-            "total": 251080,
-            "avg": 251080,
+            "high": 257730,
+            "low": 257730,
+            "total": 257730,
+            "avg": 257730,
             "comebackGrowth": 0,
             "improvementGap": 0
         },
@@ -273,6 +319,29 @@
             "improvementGap": 71060
         },
         {
+            "name": "RUS",
+            "scores": [
+                210520,
+                208180
+            ],
+            "rawEntries": [
+                {
+                    "val": 208180,
+                    "time": 1770319889000
+                },
+                {
+                    "val": 210520,
+                    "time": 1770326943000
+                }
+            ],
+            "high": 210520,
+            "low": 208180,
+            "total": 418700,
+            "avg": 209350,
+            "comebackGrowth": 2340,
+            "improvementGap": 2340
+        },
+        {
             "name": "Scottie_doesnt",
             "scores": [
                 174410
@@ -287,6 +356,24 @@
             "low": 174410,
             "total": 174410,
             "avg": 174410,
+            "comebackGrowth": 0,
+            "improvementGap": 0
+        },
+        {
+            "name": "JRVirtual34",
+            "scores": [
+                127830
+            ],
+            "rawEntries": [
+                {
+                    "val": 127830,
+                    "time": 1770222542000
+                }
+            ],
+            "high": 127830,
+            "low": 127830,
+            "total": 127830,
+            "avg": 127830,
             "comebackGrowth": 0,
             "improvementGap": 0
         },
