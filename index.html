@@ -150,7 +150,8 @@ async function loadVPS() {
 }
 
 function getTableDetails(gameObj) {
-    const match = JSON.stringify(gameObj).match(/game=([a-zA-Z0-9-]+)[^#]*#([a-zA-Z0-9-]+)/);
+    // Regex updated to include underscores: [a-zA-Z0-9-_]
+    const match = JSON.stringify(gameObj).match(/game=([a-zA-Z0-9-_]+)[^#]*#([a-zA-Z0-9-_]+)/);
     if (!match) return null;
     return vpsDB.find(t => t.id === match[1]);
 }
