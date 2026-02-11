@@ -48,7 +48,6 @@
     @keyframes scrollLoop { 0%,15% { transform:translateY(0); } 85%,100% { transform:translateY(var(--scroll-dist)); } }
     .scrolling-content { animation: scrollLoop var(--scroll-speed) ease-in-out infinite alternate; }
 
-    /* Achievement Card Styling */
     .achievement-card { min-height: 52px; display: flex; flex-direction: column; justify-content: center; }
     .card-red { background: rgba(239, 68, 68, 0.08); border-left: 4px solid #ef4444; }
     .card-orange { background: rgba(249, 115, 22, 0.08); border-left: 4px solid #f97316; }
@@ -57,7 +56,7 @@
     .card-blue { background: rgba(59, 130, 246, 0.08); border-left: 4px solid #3b82f6; }
     .card-pink { background: rgba(236, 72, 153, 0.08); border-left: 4px solid #ec4899; }
     .card-yellow { background: rgba(234, 179, 8, 0.08); border-left: 4px solid #eab308; }
-    .card-stone { background: rgba(120, 113, 108, 0.15); border-left: 4px solid #78716c; } /* Wooden Spoon */
+    .card-stone { background: rgba(120, 113, 108, 0.15); border-left: 4px solid #78716c; } 
     .card-gold { background: rgba(255, 215, 0, 0.12); border-left: 4px solid #ffd700; animation: pulse-gold 2s infinite alternate; }
     @keyframes pulse-gold { from { box-shadow: 0 0 5px rgba(255, 215, 0, 0.2); } to { box-shadow: 0 0 15px rgba(255, 215, 0, 0.4); } }
 </style>
@@ -169,7 +168,14 @@ function renderFinals(data, animate){
     const players = data.results || [];
     const a = data.awards || {};
     el('table-name').innerText = data.table;
-    el('event-period').innerText = data.period;
+    
+    // Updated Logic: Use date_exported instead of active time frame period
+    if (data.date_exported) {
+        el('event-period').innerText = data.date_exported.split('T')[0];
+    } else {
+        el('event-period').innerText = data.period;
+    }
+
     el('total-players').innerText = players.length;
     el('avg-score').innerText = players.length ? Math.round(players.reduce((s,p)=>s+p.high,0)/players.length).toLocaleString() : 0;
 
@@ -185,7 +191,7 @@ function renderFinals(data, animate){
         </div>`;
 
     const card = (icon, title, name, detail, colorClass) => {
-        if (!name) return ''; // Don't render empty awards
+        if (!name) return ''; 
         return `<div class="glass p-2 rounded-xl achievement-card ${colorClass}">
             <div class="text-[8px] uppercase text-gray-400 mb-0.5 leading-tight">${icon} ${title}</div>
             <div class="font-bold text-[10px] uppercase italic truncate text-white leading-tight">${name}</div>
@@ -193,7 +199,6 @@ function renderFinals(data, animate){
         </div>`;
     };
     
-    // Updated Logic: Uses new awards from JSON (Wooden Spoon, Price is Right, Billionaire)
     let achHtml = card("🔫","Fast Draw", a.fast_draw, a.fast_draw_detail, "card-red") + 
                   card("🎯","Sharpshooter", a.sharpshooter, a.sharpshooter_detail, "card-orange") + 
                   card("📈","Most Improved", a.most_improved, a.most_improved_detail, "card-green") + 
@@ -204,7 +209,6 @@ function renderFinals(data, animate){
                   card("🥄","Wooden Spoon", a.wooden_spoon, a.wooden_spoon_detail, "card-stone") +
                   card("🏷️","Price is Right", a.price_is_right, a.price_is_right_detail, "card-yellow");
 
-    // Fallback: If JSON is old and lacks 'billionaire' field but has scores > 1B, calculate locally
     if (!a.billionaire) {
         const billionaires = players.filter(p => p.high >= 1000000000);
         if (billionaires.length > 0) {
@@ -278,7 +282,6 @@ async function copyDiscordTemplate(btn) {
         if (a.billionaire) {
             template += `\n\n💰 **Billionaires Club**\n${a.billionaire}\n${a.billionaire_detail}`;
         } else {
-             // Fallback for old JSONs
             const bills = d.results.filter(p => p.high >= 1000000000).map(p => `${p.name}`).join('\n');
             if (bills) template += `\n\n💰 **Billionaires Club**\n${bills}`;
         }
