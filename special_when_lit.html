@@ -74,8 +74,11 @@
                 const dbRes = await fetch(VPS_DATA); vpsDB = await dbRes.json();
                 const scoreRes = await fetch(PRIMARY_API);
                 const scoreData = await scoreRes.json();
-                if (scoreData) processTournament(scoreData);
-                if (urlParams.has('savejson')) { setTimeout(() => exportTournamentData('Special_When_Lit'), 2000); }
+                if (scoreData) {
+                    processTournament(scoreData);
+                    // Ensure processTournament fully builds the DOM before exporting
+                    if (urlParams.has('savejson')) { setTimeout(() => exportTournamentData('Special_When_Lit'), 500); }
+                }
             } catch (err) { console.error(err); }
         }
 
@@ -98,6 +101,8 @@
         }
 
         function exportTournamentData(prefix) {
+            const tableName = document.querySelector('#table-card h4')?.innerText || 'Unknown_Table';
+            const safeTableName = tableName.replace(/[^a-zA-Z0-9]/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, '');
             const exportObj = { 
                 competition: prefix, 
                 date_exported: new Date().toISOString(), 
@@ -108,7 +113,8 @@
             };
             const blob = new Blob([JSON.stringify(exportObj, null, 4)], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
-            const a = document.createElement('a'); a.href = url; a.download = `${prefix}_${new Date().toISOString().split('T')[0]}.json`;
+            const a = document.createElement('a'); a.href = url; 
+            a.download = `${prefix}_${new Date().toISOString().split('T')[0]}_${safeTableName}.json`;
             document.body.appendChild(a); a.click(); document.body.removeChild(a);
         }
 
