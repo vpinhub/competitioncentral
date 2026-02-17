@@ -65,18 +65,25 @@
         const VPS_DATA = "https://raw.githubusercontent.com/VirtualPinballSpreadsheet/vps-db/main/db/vpsdb.json";
         let vpsDB = [];
         window.achievementData = {};
+        window.compOverride = null;
 
         async function init() {
             calculateSWLPeriod();
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.has('showachievements')) { document.getElementById('achievement-zone').classList.remove('hidden'); }
+            
             try {
+                try {
+                    const overrideRes = await fetch('override.json');
+                    const allOverrides = await overrideRes.json();
+                    window.compOverride = allOverrides.swl;
+                } catch(e) { console.log("No override.json found or invalid format."); }
+
                 const dbRes = await fetch(VPS_DATA); vpsDB = await dbRes.json();
                 const scoreRes = await fetch(PRIMARY_API);
                 const scoreData = await scoreRes.json();
                 if (scoreData) {
                     processTournament(scoreData);
-                    // Ensure processTournament fully builds the DOM before exporting
                     if (urlParams.has('savejson')) { setTimeout(() => exportTournamentData('Special_When_Lit'), 500); }
                 }
             } catch (err) { console.error(err); }
@@ -149,35 +156,26 @@
             const grinder = [...playerList].sort((a,b) => b.scores.length - a.scores.length)[0];
             const burns = playerList[Math.floor(Math.random() * playerList.length)];
 
-            // --- IMPROVED & COMEBACK (Collision Check) ---
             const improvedList = [...playerList].sort((a,b) => b.improvementGap - a.improvementGap);
             const comebackList = [...playerList].sort((a,b) => b.comebackGrowth - a.comebackGrowth);
             
             let improved = improvedList[0];
             let comeback = comebackList[0];
 
-            // If the same person won both, give Improved priority, and bump Comeback to runner-up
             if (improved && comeback && improved.name === comeback.name) {
-                if (comebackList.length > 1) {
-                    comeback = comebackList[1];
-                }
+                if (comebackList.length > 1) { comeback = comebackList[1]; }
             }
 
-            // --- WOODEN SPOON LOGIC ---
             let wooden = null;
             if (window.currentResults.length > 2) {
                 const spoonCandidates = window.currentResults
                     .slice(1, window.currentResults.length - 1)
                     .filter(p => p.improvementGap > 0);
-                if (spoonCandidates.length > 0) {
-                    wooden = spoonCandidates[spoonCandidates.length - 1];
-                }
+                if (spoonCandidates.length > 0) { wooden = spoonCandidates[spoonCandidates.length - 1]; }
             }
 
-            // --- BILLIONAIRES CLUB LOGIC ---
             const billionaire = window.currentResults.find(p => p.high >= 1000000000);
 
-            // --- PRICE IS RIGHT LOGIC ---
             let pir = null;
             let closestPIRMargin = 5.0; 
             
@@ -189,10 +187,7 @@
                     const margin = (diff / pAhead.high) * 100;
                     if (margin <= 5.0 && margin < closestPIRMargin) {
                         closestPIRMargin = margin;
-                        pir = { 
-                            name: pCurr.name, 
-                            detail: `Closest to ${pAhead.name}`
-                        };
+                        pir = { name: pCurr.name, detail: `Closest to ${pAhead.name}` };
                     }
                 }
             }
@@ -223,7 +218,6 @@
             renderWinner(window.currentResults[0]);
             renderAchievements(pioneer, shooter, improved, grinder, comeback, burns, wooden, pir, billionaire);
             
-            // FIXED REGEX: Added underscore to allowed characters [a-zA-Z0-9-_]
             const tagMatch = JSON.stringify(tournamentGame).match(/game=([a-zA-Z0-9-_]+)[^#]*#([a-zA-Z0-9-_]+)/);
             renderTable(tagMatch ? vpsDB.find(t => t.id === tagMatch[1]) : null, tournamentGame.longName, tagMatch?.[1], tagMatch?.[2]);
         }
@@ -263,16 +257,32 @@
         }
 
         function renderTable(table, fallbackName, gameId, releaseId) {
-            const img = table?.b2sFiles?.[0]?.imgUrl || "https://via.placeholder.com/400x200";
+            let img = table?.b2sFiles?.[0]?.imgUrl || "https://via.placeholder.com/400x200";
+            let displayTableName = table ? table.name : fallbackName;
+            let displayManufacturer = table ? table.manufacturer : 'Premier Table';
+            let downloadUrl = `https://vpinhub.github.io/tournamenthelper/?tableId=${gameId}&releaseId=${releaseId}&swl`;
+            let noteHtml = '';
+
+            if (window.compOverride) {
+                if (window.compOverride.imgUrl) img = window.compOverride.imgUrl;
+                if (window.compOverride.tableName) displayTableName = window.compOverride.tableName;
+                if (window.compOverride.manufacturer) displayManufacturer = window.compOverride.manufacturer;
+                if (window.compOverride.url) downloadUrl = window.compOverride.url;
+                if (window.compOverride.note) {
+                    noteHtml = `<div class="mt-4 p-3 bg-fuchsia-500/10 border border-fuchsia-500/30 rounded-xl text-sm text-fuchsia-200 leading-relaxed shadow-[0_0_15px_rgba(217,70,239,0.1)]"><strong>📌 OVERRIDE NOTE:</strong> ${window.compOverride.note}</div>`;
+                }
+            }
+
             document.getElementById('table-card').innerHTML = `
                 <div class="relative rounded-xl overflow-hidden border border-white/10 shadow-2xl">
                     <img src="${img}" class="w-full h-52 object-cover">
                     <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent flex flex-col justify-end p-4">
-                        <h4 class="text-2xl font-black italic uppercase tracking-tighter">${table ? table.name : fallbackName}</h4>
-                        <p class="text-[10px] text-fuchsia-400 font-bold uppercase tracking-widest">${table ? table.manufacturer : 'Premier Table'}</p>
+                        <h4 class="text-2xl font-black italic uppercase tracking-tighter">${displayTableName}</h4>
+                        <p class="text-[10px] text-fuchsia-400 font-bold uppercase tracking-widest">${displayManufacturer}</p>
                     </div>
                 </div>
-                <a href="https://vpinhub.github.io/tournamenthelper/?tableId=${gameId}&releaseId=${releaseId}&swl" target="_blank" class="block w-full bg-white text-black text-center py-4 rounded-xl font-black text-xs hover:bg-fuchsia-500 transition mt-4 uppercase">Download Table Files</a>`;
+                ${noteHtml}
+                <a href="${downloadUrl}" target="_blank" class="block w-full bg-white text-black text-center py-4 rounded-xl font-black text-xs hover:bg-fuchsia-500 transition mt-4 uppercase shadow-lg">Download Table Files</a>`;
         }
         init();
     </script>
