@@ -146,6 +146,7 @@ const AVATAR_BASE = "http://vpinhub.github.io/special-when-lit-leaderboard/img/"
 const PROXY = "https://api.allorigins.win/raw?url=";
 const VPS_DATA = "https://raw.githubusercontent.com/VirtualPinballSpreadsheet/vps-db/main/db/vpsdb.json";
 let vpsDB = [];
+let compOverrides = null;
 
 async function loadVPS() {
     const res = await fetch(VPS_DATA);
@@ -153,7 +154,6 @@ async function loadVPS() {
 }
 
 function getTableDetails(gameObj) {
-    // Regex updated to include underscores: [a-zA-Z0-9-_]
     const match = JSON.stringify(gameObj).match(/game=([a-zA-Z0-9-_]+)[^#]*#([a-zA-Z0-9-_]+)/);
     if (!match) return null;
     return vpsDB.find(t => t.id === match[1]);
@@ -183,7 +183,7 @@ function renderPreview(targetId, tableName, leader, colorClass, avatarUrl, playe
         </div>`;
 }
 
-async function fetchIScoredPreview(roomId, targetId, colorClass) {
+async function fetchIScoredPreview(roomId, targetId, colorClass, overrideKey) {
     const url = `https://virtualpinballchat.com/vpc/api/v1/iscored?roomId=${roomId}`;
     try {
         let r = await fetch(url);
@@ -191,8 +191,19 @@ async function fetchIScoredPreview(roomId, targetId, colorClass) {
         const data = await r.json();
         const game = data.find(g => JSON.stringify(g).includes('game=')) || data[0];
         const uniquePlayers = new Set((game.scores || []).map(s => s.name)).size;
-        const vpsTable = getTableDetails(game);
-        const tableName = formatTableName(vpsTable, game.longName);
+        
+        let tableName = "";
+        
+        if (compOverrides && compOverrides[overrideKey] && compOverrides[overrideKey].tableName) {
+            tableName = compOverrides[overrideKey].tableName;
+            if (compOverrides[overrideKey].manufacturer) {
+                tableName += ` (${compOverrides[overrideKey].manufacturer})`;
+            }
+        } else {
+            const vpsTable = getTableDetails(game);
+            tableName = formatTableName(vpsTable, game.longName);
+        }
+
         const leader = [...game.scores].map(s => ({...s, numScore: parseInt(s.score,10)||0})).sort((a,b)=>b.numScore-a.numScore)[0];
         const avatar = `${AVATAR_BASE}${leader.name.toLowerCase().replace(/\s+/g,'_')}.gif`;
         renderPreview(targetId, tableName, leader, colorClass, avatar, uniquePlayers);
@@ -214,31 +225,32 @@ async function fetchVPCPreview() {
 }
 
 function checkLiveStatus() {
-    // Current time in EST
     const now = new Date(new Date().toLocaleString("en-US", {timeZone: "America/New_York"}));
-    const day = now.getDay(); // 0=Sun, 1=Mon, 2=Tue, 3=Wed, etc.
+    const day = now.getDay(); 
     const hour = now.getHours();
     const min = now.getMinutes();
     const currentTimeVal = hour + (min / 60);
 
-    // Monday: Open Challenge @ 8:30PM (20.5)
     if (day === 1 && currentTimeVal >= 20.5 && currentTimeVal <= 23.5) {
         document.getElementById('live-1').classList.remove('hidden');
     }
-    // Tuesday: Pindemonium @ 9:00PM (21.0)
     if (day === 2 && currentTimeVal >= 21 && currentTimeVal <= 23.9) {
         document.getElementById('live-2').classList.remove('hidden');
     }
-    // Wednesday: Drain Freeze @ 9:00PM (21.0)
     if (day === 3 && currentTimeVal >= 21 && currentTimeVal <= 23.9) {
         document.getElementById('live-3').classList.remove('hidden');
     }
 }
 
 (async () => {
+    try {
+        const overrideRes = await fetch('override.json');
+        compOverrides = await overrideRes.json();
+    } catch(e) { console.log("No override.json found or invalid format."); }
+
     await loadVPS();
-    fetchIScoredPreview('700', 'ttd-preview', 'text-orange-500');
-    fetchIScoredPreview('1011', 'swl-preview', 'text-fuchsia-500');
+    fetchIScoredPreview('700', 'ttd-preview', 'text-orange-500', 'ttd');
+    fetchIScoredPreview('1011', 'swl-preview', 'text-fuchsia-500', 'swl');
     fetchVPCPreview();
     checkLiveStatus();
 })();
