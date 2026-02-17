@@ -79,7 +79,7 @@
                     <h2 id="table-name" class="text-4xl font-black uppercase italic mb-2">Table Name</h2>
                     
                     <div class="flex items-center justify-center gap-3">
-                        <p id="event-period" class="text-gray-400 font-bold"></p>
+                        <p id="event-period" class="text-gray-300 font-bold"></p>
                         <button id="share-btn" class="bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg px-3 py-1 text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2">
                             <span>🔗</span> <span id="share-btn-text">Share</span>
                         </button>
@@ -173,7 +173,9 @@
             
             document.getElementById('comp-label').innerText = data.competition.replace(/_/g, ' ');
             document.getElementById('table-name').innerText = data.table;
-            document.getElementById('event-period').innerText = data.period;
+            
+            // Format to explicitly show it is pulling the saved date from the JSON
+            document.getElementById('event-period').innerHTML = `<span class="text-[10px] uppercase tracking-widest text-gray-500 mr-2">Archive Date:</span> ${data.period || 'Unknown Dates'}`;
 
             const players = data.results || [];
             document.getElementById('total-players').innerText = players.length;
