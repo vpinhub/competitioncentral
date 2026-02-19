@@ -401,7 +401,7 @@
             "improvementGap": 0
         },
         {
-            "name": "JRVirtual34 | [JRV]",
+            "name": "JRVirtual34",
             "scores": [
                 47168290
             ],
@@ -415,24 +415,6 @@
             "low": 47168290,
             "total": 47168290,
             "avg": 47168290,
-            "comebackGrowth": 0,
-            "improvementGap": 0
-        },
-        {
-            "name": "JRVirtual34",
-            "scores": [
-                39468180
-            ],
-            "rawEntries": [
-                {
-                    "val": 39468180,
-                    "time": 1771459280000
-                }
-            ],
-            "high": 39468180,
-            "low": 39468180,
-            "total": 39468180,
-            "avg": 39468180,
             "comebackGrowth": 0,
             "improvementGap": 0
         },
