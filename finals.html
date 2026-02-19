@@ -17,12 +17,48 @@
     .theme-swl { --accent:#d946ef; }
     .accent-text { color: var(--accent,#94a3b8); }
     .accent-border { border-color: var(--accent,#334155); }
-    #main-stage { width: 100%; height: 100%; display:flex; flex-direction:column; padding: 40px; box-sizing:border-box; }
+    
+    #main-stage { width: 100%; height: 100%; display:flex; flex-direction:column; padding: 30px; box-sizing:border-box; }
     .render-mode { width:1920px!important; height:1080px!important; position: absolute; top:0; left:0; z-index:-10; background:#020617!important; }
     #selector-overlay { position:fixed; inset:0; z-index:100; background:#020617; display:flex; align-items:center; justify-content:center; }
     .admin-select { background:#0f172a; border:1px solid rgba(255,255,255,0.1); color:white; padding:.75rem; border-radius:.75rem; font-size:.875rem; font-weight:700; width:100%; outline:none; }
+    
+    #leaderboard { 
+        display: grid; 
+        grid-template-columns: repeat(3, 1fr); 
+        gap: 10px; 
+        align-content: start;
+    }
+
+    .lb-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 8px 12px;
+        background: rgba(255,255,255,0.05);
+        border-radius: 12px;
+        border: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .first-place-row {
+        background: linear-gradient(90deg, rgba(249,115,22,0.2) 0%, rgba(255,255,255,0.05) 100%);
+        border: 1px solid var(--accent);
+    }
+
     @keyframes scrollLoop { 0%,15% { transform:translateY(0); } 85%,100% { transform:translateY(var(--scroll-dist)); } }
     .scrolling-content { animation: scrollLoop var(--scroll-speed) ease-in-out infinite alternate; }
+
+    .achievement-card { min-height: 52px; display: flex; flex-direction: column; justify-content: center; }
+    .card-red { background: rgba(239, 68, 68, 0.08); border-left: 4px solid #ef4444; }
+    .card-orange { background: rgba(249, 115, 22, 0.08); border-left: 4px solid #f97316; }
+    .card-green { background: rgba(34, 197, 94, 0.08); border-left: 4px solid #22c55e; }
+    .card-purple { background: rgba(168, 85, 247, 0.08); border-left: 4px solid #a855f7; }
+    .card-blue { background: rgba(59, 130, 246, 0.08); border-left: 4px solid #3b82f6; }
+    .card-pink { background: rgba(236, 72, 153, 0.08); border-left: 4px solid #ec4899; }
+    .card-yellow { background: rgba(234, 179, 8, 0.08); border-left: 4px solid #eab308; }
+    .card-stone { background: rgba(120, 113, 108, 0.15); border-left: 4px solid #78716c; } 
+    .card-gold { background: rgba(255, 215, 0, 0.12); border-left: 4px solid #ffd700; animation: pulse-gold 2s infinite alternate; }
+    @keyframes pulse-gold { from { box-shadow: 0 0 5px rgba(255, 215, 0, 0.2); } to { box-shadow: 0 0 15px rgba(255, 215, 0, 0.4); } }
 </style>
 </head>
 <body>
@@ -38,8 +74,8 @@
             <div>
                 <label class="text-[10px] font-black uppercase tracking-widest text-gray-500 block mb-2">Motion</label>
                 <select id="select-animate" class="admin-select">
-                    <option value="false">Static</option>
-                    <option value="true">Animate</option>
+                    <option value="false">Static Grid</option>
+                    <option value="true">Animated Scroll</option>
                 </select>
             </div>
             <div>
@@ -61,10 +97,10 @@
 </div>
 
 <div id="main-stage" class="hidden">
-    <div class="flex justify-between items-end border-b-2 accent-border pb-4 mb-6">
+    <div class="flex justify-between items-end border-b-2 accent-border pb-4 mb-4">
         <div>
             <div class="medieval text-lg accent-text uppercase mb-1">Final Standings</div>
-            <h1 id="table-name" class="text-6xl font-black italic uppercase leading-tight">Table</h1>
+            <h1 id="table-name" class="text-5xl font-black italic uppercase leading-tight">Table</h1>
         </div>
         <div class="text-right">
             <p id="event-period" class="text-xl text-gray-500 font-bold"></p>
@@ -73,16 +109,16 @@
     </div>
 
     <div class="grid grid-cols-12 gap-6 flex-1 overflow-hidden">
-        <div class="col-span-5 flex flex-col gap-4 overflow-hidden">
+        <div class="col-span-4 flex flex-col gap-4">
             <div id="winner-banner"></div>
-            <div id="achievements" class="grid grid-cols-2 gap-3"></div>
-            <div class="glass rounded-3xl p-6 mt-auto flex justify-around items-center border-t-2 accent-border">
-                <div class="text-center"><div id="total-players" class="text-4xl font-black italic">0</div><div class="text-[9px] uppercase font-bold text-gray-400">Field Size</div></div>
-                <div class="text-center"><div id="avg-score" class="text-4xl font-black italic accent-text">0</div><div class="text-[9px] uppercase font-bold text-gray-400">Average Score</div></div>
+            <div id="achievements" class="grid grid-cols-2 gap-2 overflow-y-auto max-h-[600px] pr-2"></div>
+            <div class="glass rounded-3xl p-4 mt-auto flex justify-around items-center border-t-2 accent-border">
+                <div class="text-center"><div id="total-players" class="text-3xl font-black italic">0</div><div class="text-[9px] uppercase font-bold text-gray-400">Field Size</div></div>
+                <div class="text-center"><div id="avg-score" class="text-3xl font-black italic accent-text">0</div><div class="text-[9px] uppercase font-bold text-gray-400">Average Score</div></div>
             </div>
         </div>
-        <div id="lb-viewport" class="col-span-7 glass rounded-[40px] overflow-hidden relative">
-            <div id="leaderboard" class="p-6 flex flex-col gap-2"></div>
+        <div id="lb-viewport" class="col-span-8 glass rounded-[30px] p-6 overflow-hidden relative">
+            <div id="leaderboard"></div>
         </div>
     </div>
 </div>
@@ -108,7 +144,7 @@ async function populateSelector() {
     try {
         const res = await fetch('json/list.json');
         const files = await res.json();
-        el('json-list').innerHTML = files.map(f => `<option value="${f.name}">${f.name.replace('.json','').replace(/_/g,' ')}</option>`).join('');
+        el('json-list').innerHTML = files.reverse().map(f => `<option value="${f.name}">${f.name.replace('.json','').replace(/_/g,' ')}</option>`).join('');
     } catch(e) { console.error(e); }
 }
 
@@ -132,23 +168,69 @@ function renderFinals(data, animate){
     const players = data.results || [];
     const a = data.awards || {};
     el('table-name').innerText = data.table;
-    el('event-period').innerText = data.period;
+    
+    // Updated Logic: Use date_exported instead of active time frame period
+    if (data.date_exported) {
+        el('event-period').innerText = data.date_exported.split('T')[0];
+    } else {
+        el('event-period').innerText = data.period;
+    }
+
     el('total-players').innerText = players.length;
     el('avg-score').innerText = players.length ? Math.round(players.reduce((s,p)=>s+p.high,0)/players.length).toLocaleString() : 0;
 
     el('winner-banner').innerHTML = `
-        <div class="glass p-6 rounded-[32px] border-4 accent-border text-center shadow-xl">
-            <div class="medieval text-xs accent-text uppercase tracking-widest mb-2">Tournament Winner</div>
-            <img src="${AVATAR_BASE}${players[0].name.replace(/\s+/g,'_').toLowerCase()}.gif" class="w-32 h-32 rounded-full mx-auto mb-3 border-4 accent-border shadow-lg" onerror="this.src='https://via.placeholder.com/128?text=?'">
-            <div class="text-3xl font-black italic uppercase">${players[0].name}</div>
-            <div class="text-xl font-mono text-gray-400 font-bold">${players[0].high.toLocaleString()}</div>
+        <div class="glass p-4 rounded-[32px] border-4 accent-border text-center shadow-xl">
+            <div class="medieval text-[10px] accent-text uppercase tracking-widest mb-2">Tournament Champion</div>
+            <div class="relative w-24 h-24 mx-auto mb-3">
+                <img src="${AVATAR_BASE}${players[0].name.replace(/\s+/g,'_').toLowerCase()}.gif" class="w-24 h-24 rounded-full border-4 accent-border shadow-lg" onerror="this.src='https://via.placeholder.com/128?text=?'">
+                <span class="absolute -top-3 -right-3 text-4xl">👑</span>
+            </div>
+            <div class="text-2xl font-black italic uppercase">${players[0].name}</div>
+            <div class="text-lg font-mono text-gray-400 font-bold">${players[0].high.toLocaleString()}</div>
         </div>`;
 
-    const card = (icon, title, name, detail, color) => `<div class="glass p-3 rounded-xl border-l-4 ${color}"><div class="text-[9px] uppercase text-gray-500 mb-0.5">${icon} ${title}</div><div class="font-bold text-xs uppercase italic truncate">${name || 'N/A'}</div><div class="text-[9px] text-gray-400 truncate">${detail || ''}</div></div>`;
-    el('achievements').innerHTML = card("🔫","Fast Draw", a.fast_draw, a.fast_draw_detail, "border-red-500") + card("🎯","Sharpshooter", a.sharpshooter, a.sharpshooter_detail, "border-orange-500") + card("📈","Most Improved", a.most_improved, a.most_improved_detail, "border-green-500") + card("🔄","Comeback Kid", a.comeback_kid, a.comeback_kid_detail, "border-purple-500") + card("🕹️","Most Played", a.most_played, a.most_played_detail, "border-blue-500") + card("☢️","Burns Award", a.burns_award, a.burns_award_detail, "border-yellow-500");
+    const card = (icon, title, name, detail, colorClass) => {
+        if (!name) return ''; 
+        return `<div class="glass p-2 rounded-xl achievement-card ${colorClass}">
+            <div class="text-[8px] uppercase text-gray-400 mb-0.5 leading-tight">${icon} ${title}</div>
+            <div class="font-bold text-[10px] uppercase italic truncate text-white leading-tight">${name}</div>
+            <div class="text-[8px] text-gray-400 truncate leading-tight">${detail || ''}</div>
+        </div>`;
+    };
+    
+    let achHtml = card("🔫","Fast Draw", a.fast_draw, a.fast_draw_detail, "card-red") + 
+                  card("🎯","Sharpshooter", a.sharpshooter, a.sharpshooter_detail, "card-orange") + 
+                  card("📈","Most Improved", a.most_improved, a.most_improved_detail, "card-green") + 
+                  card("🔄","Comeback Kid", a.comeback_kid, a.comeback_kid_detail, "card-purple") + 
+                  card("🕹️","Most Played", a.most_played, a.most_played_detail, "card-blue") + 
+                  card("💰","Billionaires Club", a.billionaire, a.billionaire_detail, "card-gold") +
+                  card("☢️","C. Montgomery Burns", a.burns_award, a.burns_award_detail, "card-pink") +
+                  card("🥄","Wooden Spoon", a.wooden_spoon, a.wooden_spoon_detail, "card-stone") +
+                  card("🏷️","Price is Right", a.price_is_right, a.price_is_right_detail, "card-yellow");
+
+    if (!a.billionaire) {
+        const billionaires = players.filter(p => p.high >= 1000000000);
+        if (billionaires.length > 0) {
+            achHtml += card("💰","Billionaires Club", billionaires.map(p => p.name).join(', '), `${billionaires.length} Total`, "card-gold");
+        }
+    }
+
+    el('achievements').innerHTML = achHtml;
 
     const lb = el('leaderboard');
-    lb.innerHTML = players.map((p,i)=>`<div class="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5"><div class="flex items-center gap-4"><span class="text-2xl font-black italic w-8 ${i<3?'accent-text':'text-gray-600'}">${i+1}</span><img src="${AVATAR_BASE}${p.name.replace(/\s+/g,'_').toLowerCase()}.gif" class="w-10 h-10 rounded-full border border-white/10" onerror="this.src='https://via.placeholder.com/40?text=?'"><span class="text-lg font-bold">${p.name}</span></div><span class="text-xl font-mono font-bold">${p.high.toLocaleString()}</span></div>`).join('');
+    lb.style.display = animate ? 'flex' : 'grid';
+    lb.style.flexDirection = animate ? 'column' : '';
+
+    lb.innerHTML = players.map((p,i)=>`
+        <div class="lb-row ${i === 0 ? 'first-place-row' : ''}">
+            <div class="flex items-center gap-3 truncate">
+                <span class="text-lg font-black italic w-6 ${i<3?'accent-text':'text-gray-600'}">${i+1}</span>
+                <img src="${AVATAR_BASE}${p.name.replace(/\s+/g,'_').toLowerCase()}.gif" class="w-8 h-8 rounded-full border border-white/10" onerror="this.src='https://via.placeholder.com/40?text=?'">
+                <span class="text-sm font-bold truncate">${p.name}</span>
+            </div>
+            <span class="text-sm font-mono font-bold ml-2">${p.high.toLocaleString()}</span>
+        </div>`).join('');
 
     setTimeout(() => {
         lb.classList.remove('scrolling-content');
@@ -156,13 +238,13 @@ function renderFinals(data, animate){
         const viewportHeight = el('lb-viewport').offsetHeight;
         const contentHeight = lb.scrollHeight;
 
-        if(animate && players.length > 7){
+        if(animate){
             const dist = -(contentHeight - viewportHeight + 40);
             document.documentElement.style.setProperty('--scroll-dist', `${dist}px`);
             document.documentElement.style.setProperty('--scroll-speed', `${players.length * 1.5}s`);
             lb.classList.add('scrolling-content');
         } else if (contentHeight > viewportHeight) {
-            const scale = (viewportHeight - 20) / contentHeight;
+            const scale = (viewportHeight - 40) / contentHeight;
             lb.style.transform = `scale(${scale})`;
             lb.style.transformOrigin = 'top center';
         }
@@ -174,44 +256,49 @@ async function downloadFinalsImage(btn){
     if(!file) return;
     const oldText = btn.innerText;
     btn.innerText = "Generating...";
-    
     await loadData(file, false);
     const stage = el('main-stage');
     stage.classList.add('render-mode');
-    stage.style.background = "#020617";
-    
     await new Promise(r=>setTimeout(r,800)); 
     const canvas = await html2canvas(stage,{backgroundColor:"#020617", scale: 1, useCORS: true});
     const link=document.createElement('a');
     link.download=file.replace('.json','')+'_Finals.jpg';
     link.href=canvas.toDataURL("image/jpeg",0.9);
     link.click();
-    
     stage.classList.remove('render-mode');
-    stage.style.background = "";
     btn.innerText = oldText;
 }
 
-// Fixed Discord function
 async function copyDiscordTemplate(btn) {
     const file = el('json-list').value;
     if(!file) return;
-    
     try {
         const res = await fetch(`json/${file}`);
         const d = await res.json();
         const a = d.awards || {};
-        const bills = d.results.filter(p => p.high >= 1000000000).map(p => `${p.name}`).join('\n');
         
-        const template = `**${d.table}**\n\n👑 **Winner!**\n${d.results[0].name}\n${d.results[0].high.toLocaleString()}\n\n🔫 **Fast Draw**: ${a.fast_draw}\n🎯 **Sharpshooter**: ${a.sharpshooter}\n🔄 **Comeback Kid**: ${a.comeback_kid}\n📈 **Most Improved**: ${a.most_improved}\n🕹️ **Most Played**: ${a.most_played}\n☢️ **C. Montgomery Burns**: ${a.burns_award}\n\n💰 **Billionaires Club**\n${bills || 'None'}`;
+        let template = `**${d.table}**\n\n👑 **Winner!**\n${d.results[0].name}\n${d.results[0].high.toLocaleString()}\n\n🔫 **Fast Draw**\n${a.fast_draw || 'N/A'}\n${a.fast_draw_detail || ''}\n\n🎯 **Sharpshooter**\n${a.sharpshooter || 'N/A'}\n${a.sharpshooter_detail || ''}\n\n📈 **Most Improved**\n${a.most_improved || 'N/A'}\n${a.most_improved_detail || ''}\n\n🔄 **Comeback Kid**\n${a.comeback_kid || 'N/A'}\n${a.comeback_kid_detail || ''}\n\n🕹️ **Most Played**\n${a.most_played || 'N/A'}\n${a.most_played_detail || ''}\n\n☢️ **C. Montgomery Burns**\n${a.burns_award || 'N/A'}\n${a.burns_award_detail || ''}`;
         
+        if (a.billionaire) {
+            template += `\n\n💰 **Billionaires Club**\n${a.billionaire}\n${a.billionaire_detail}`;
+        } else {
+            const bills = d.results.filter(p => p.high >= 1000000000).map(p => `${p.name}`).join('\n');
+            if (bills) template += `\n\n💰 **Billionaires Club**\n${bills}`;
+        }
+        
+        if (a.wooden_spoon) {
+            template += `\n\n🥄 **Wooden Spoon**\n${a.wooden_spoon}\n${a.wooden_spoon_detail}`;
+        }
+        
+        if (a.price_is_right) {
+            template += `\n\n🏷️ **Price is Right**\n${a.price_is_right}\n${a.price_is_right_detail}`;
+        }
+
         await navigator.clipboard.writeText(template);
         const oldText = btn.innerText;
         btn.innerText = "Copied!";
         setTimeout(() => btn.innerText = oldText, 2000);
-    } catch (err) { 
-        console.error("Discord copy failed", err); 
-    }
+    } catch (err) { console.error("Discord copy failed", err); }
 }
 </script>
 </body>
