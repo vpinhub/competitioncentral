@@ -1,0 +1,215 @@
+{
+    "competition": "Special_When_Lit",
+    "date_exported": "2026-03-01T18:48:06.976Z",
+    "period": "2/22/2026 - 3/1/2026",
+    "table": "PLAYBOY 35TH ANNIVERSARY",
+    "awards": {
+        "winner": "Paladin",
+        "fast_draw": "Paladin",
+        "fast_draw_detail": "First Entry",
+        "sharpshooter": "LucaSanDiego",
+        "sharpshooter_detail": "Top Average",
+        "most_improved": "Paladin",
+        "most_improved_detail": "Gap: +7,911,680",
+        "comeback_kid": "LucaSanDiego",
+        "comeback_kid_detail": "Gain: +3,948,830",
+        "most_played": "LucaSanDiego",
+        "most_played_detail": "3 Games",
+        "burns_award": "Wileywade",
+        "burns_award_detail": "Excellent!",
+        "wooden_spoon": "Arthur After Dark",
+        "wooden_spoon_detail": "I'm a lumberjack!",
+        "price_is_right": "Nellz",
+        "price_is_right_detail": "Closest to Arthur After Dark",
+        "billionaire_detail": "Score > 1,000,000,000"
+    },
+    "results": [
+        {
+            "name": "Paladin",
+            "scores": [
+                10997980,
+                3086300
+            ],
+            "rawEntries": [
+                {
+                    "val": 3086300,
+                    "time": 1771791233000
+                },
+                {
+                    "val": 10997980,
+                    "time": 1771810676000
+                }
+            ],
+            "high": 10997980,
+            "low": 3086300,
+            "total": 14084280,
+            "avg": 7042140,
+            "comebackGrowth": 7911680,
+            "improvementGap": 7911680
+        },
+        {
+            "name": "LucaSanDiego",
+            "scores": [
+                9843040,
+                8083000,
+                5894210
+            ],
+            "rawEntries": [
+                {
+                    "val": 5894210,
+                    "time": 1771799785000
+                },
+                {
+                    "val": 8083000,
+                    "time": 1771800978000
+                },
+                {
+                    "val": 9843040,
+                    "time": 1771801714000
+                }
+            ],
+            "high": 9843040,
+            "low": 5894210,
+            "total": 23820250,
+            "avg": 7940083.333333333,
+            "comebackGrowth": 3948830,
+            "improvementGap": 3948830
+        },
+        {
+            "name": "JRVirtual34",
+            "scores": [
+                3210000
+            ],
+            "rawEntries": [
+                {
+                    "val": 3210000,
+                    "time": 1772056353000
+                }
+            ],
+            "high": 3210000,
+            "low": 3210000,
+            "total": 3210000,
+            "avg": 3210000,
+            "comebackGrowth": 0,
+            "improvementGap": 0
+        },
+        {
+            "name": "Lroy",
+            "scores": [
+                2998860,
+                2126990
+            ],
+            "rawEntries": [
+                {
+                    "val": 2126990,
+                    "time": 1771878258000
+                },
+                {
+                    "val": 2998860,
+                    "time": 1771959979000
+                }
+            ],
+            "high": 2998860,
+            "low": 2126990,
+            "total": 5125850,
+            "avg": 2562925,
+            "comebackGrowth": 871870,
+            "improvementGap": 871870
+        },
+        {
+            "name": "LexOnTilt",
+            "scores": [
+                2658310
+            ],
+            "rawEntries": [
+                {
+                    "val": 2658310,
+                    "time": 1771934306000
+                }
+            ],
+            "high": 2658310,
+            "low": 2658310,
+            "total": 2658310,
+            "avg": 2658310,
+            "comebackGrowth": 0,
+            "improvementGap": 0
+        },
+        {
+            "name": "Arthur After Dark",
+            "scores": [
+                2377950,
+                184330
+            ],
+            "rawEntries": [
+                {
+                    "val": 184330,
+                    "time": 1771791883000
+                },
+                {
+                    "val": 2377950,
+                    "time": 1771796912000
+                }
+            ],
+            "high": 2377950,
+            "low": 184330,
+            "total": 2562280,
+            "avg": 1281140,
+            "comebackGrowth": 2193620,
+            "improvementGap": 2193620
+        },
+        {
+            "name": "Nellz",
+            "scores": [
+                2369690
+            ],
+            "rawEntries": [
+                {
+                    "val": 2369690,
+                    "time": 1771976354000
+                }
+            ],
+            "high": 2369690,
+            "low": 2369690,
+            "total": 2369690,
+            "avg": 2369690,
+            "comebackGrowth": 0,
+            "improvementGap": 0
+        },
+        {
+            "name": "Wileywade",
+            "scores": [
+                2037000
+            ],
+            "rawEntries": [
+                {
+                    "val": 2037000,
+                    "time": 1772167943000
+                }
+            ],
+            "high": 2037000,
+            "low": 2037000,
+            "total": 2037000,
+            "avg": 2037000,
+            "comebackGrowth": 0,
+            "improvementGap": 0
+        },
+        {
+            "name": "That16bitGuy",
+            "scores": [
+                1304470
+            ],
+            "rawEntries": [
+                {
+                    "val": 1304470,
+                    "time": 1771812536000
+                }
+            ],
+            "high": 1304470,
+            "low": 1304470,
+            "total": 1304470,
+            "avg": 1304470,
+            "comebackGrowth": 0,
+            "improvementGap": 0
+        }
+    ]
+}
