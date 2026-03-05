@@ -95,10 +95,18 @@ fetch("https://raw.githubusercontent.com/VirtualPinballSpreadsheet/vps-db/main/d
     const urlParams = new URLSearchParams(window.location.search);
     const tId = urlParams.get('tableId');
     const rId = urlParams.get('releaseId');
+    const searchQuery = urlParams.get('q'); // Grab the new search parameter
 
     if (tId && (rId || urlParams.get('unlistedtable'))) {
         renderFocusedView(tId, rId, urlParams.get('rom'), urlParams.get('unlistedtable'), urlParams.has('swl'), urlParams.has('ttd'), urlParams.has('vpc'), urlParams.get('author'), urlParams.get('tnotes'), urlParams.get('rnotes'), urlParams.has('hide'), urlParams.get('b2s'), urlParams.get('rauthor'), urlParams.get('b2sauthor'), urlParams.get('tfeatures'), urlParams.get('rfeatures'), urlParams.get('img'), urlParams.has('fx'), urlParams.get('fxcode'), urlParams.has('fx3'), urlParams.get('fxhost'), urlParams.get('fxpassword'), urlParams.has('fx24'), urlParams.get('fxstart'), urlParams.has('90min'));
-    } else {
+    } 
+    // Check for 'q' search parameter from homepage
+    else if (searchQuery) {
+        searchInput.value = searchQuery;
+        clearSearchBtn.classList.remove('hidden');
+        performSearch(searchQuery.toLowerCase().trim());
+    } 
+    else {
         renderResults(db);
     }
   });
@@ -158,7 +166,6 @@ function renderFocusedView(itemId, releaseId, romUrl = null, unlistedTableUrl = 
 
     let tNotesHtml = tnotes ? `<div class="bg-orange-500/10 border-l-4 border-orange-500 text-orange-200 p-6 my-8 rounded-2xl"><p class="font-black uppercase italic text-sm mb-1">Note</p><p class="text-sm">${decodeURIComponent(tnotes.replace(/_/g, ' '))}</p></div>` : '';
     
-    // Restoration of &rom parameters
     let dynamicRomHtml = '';
     if (romUrl) {
         const fakeRomFile = { urls: [{ url: romUrl }] };
@@ -188,7 +195,6 @@ function renderFocusedView(itemId, releaseId, romUrl = null, unlistedTableUrl = 
     const tutorialsHtml = (item.tutorialFiles || []).map(f => renderFile(f, "Tutorial Document", null, true)).join("");
     const previewImgUrl = imgUrl || item.b2sFiles?.[0]?.imgUrl || item.tableFiles?.[0]?.imgUrl;
     
-    // Hide buttons if ANY tournament-style flag is present
     const isTournament = isSwl || isTtd || isVpc || isFx || isFx3 || romUrl || unlistedTableUrl;
     const navButtonsHtml = isTournament ? '' : `
         <div class="mb-8 pt-4 flex justify-between items-center">
@@ -303,26 +309,35 @@ clearSearchBtn.addEventListener('click', () => {
     searchInput.value = '';
     clearSearchBtn.classList.add('hidden');
     renderResults(db);
+    // Remove the ?q parameter from the URL when cleared
+    const url = new URL(window.location);
+    url.searchParams.delete('q');
+    window.history.pushState({}, '', url);
 });
 
-searchInput.addEventListener("input", e => {
-  const query = e.target.value.toLowerCase().trim();
-  if (query.length > 0) clearSearchBtn.classList.remove('hidden');
-  else clearSearchBtn.classList.add('hidden');
+// Extracted search logic into a reusable function
+function performSearch(query) {
+    if (query.length > 0) clearSearchBtn.classList.remove('hidden');
+    else clearSearchBtn.classList.add('hidden');
 
-  const filtered = db.filter(item => {
-    const searchString = [
-      item.name,
-      item.manufacturer,
-      ...(item.theme || []),
-      ...(item.tableFiles || []).flatMap(f => f.authors || []),
-      ...(item.tableFiles || []).flatMap(f => f.features || []),
-      ...(item.romFiles || []).flatMap(f => f.authors || []),
-      ...(item.b2sFiles || []).flatMap(f => f.authors || [])
-    ].join(" ").toLowerCase();
-    return searchString.includes(query);
-  });
-  renderResults(filtered);
+    const filtered = db.filter(item => {
+        const searchString = [
+            item.name,
+            item.manufacturer,
+            ...(item.theme || []),
+            ...(item.tableFiles || []).flatMap(f => f.authors || []),
+            ...(item.tableFiles || []).flatMap(f => f.features || []),
+            ...(item.romFiles || []).flatMap(f => f.authors || []),
+            ...(item.b2sFiles || []).flatMap(f => f.authors || [])
+        ].join(" ").toLowerCase();
+        return searchString.includes(query);
+    });
+    renderResults(filtered);
+}
+
+// Map the input event to the new search function
+searchInput.addEventListener("input", e => {
+    performSearch(e.target.value.toLowerCase().trim());
 });
 
 closeModalBtn.addEventListener("click", closeModal);
