@@ -24,7 +24,7 @@
         VPIN<span class="text-orange-500">HUB</span>
       </h1>
       <div class="w-full max-w-2xl mt-4 relative">
-        <input id="searchInput" type="text" placeholder="Search tables, manufacturers, or themes..." 
+        <input id="searchInput" type="text" placeholder="Search tables, authors, or features (e.g. nfozzy, fleep)..." 
                class="w-full p-4 pr-12 rounded-2xl bg-white/10 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 transition">
         <button id="clearSearch" class="absolute right-5 top-1/2 -translate-y-1/2 text-gray-500 hover:text-orange-500 hidden text-2xl">×</button>
       </div>
@@ -277,7 +277,8 @@ function renderFileItem(file, type, gameId, isFinalView) {
   if (type === "MAIN_RELEASE") {
       titleHtml = file.version ? `Version ${file.version}` : `Release`;
   } else {
-      const versionBadge = file.version ? `<span class="bg-white/10 text-gray-300 px-2 py-0.5 rounded text-[10px] ml-2">v${file.version}</span>` : "";
+      // Removed the hardcoded 'v' here so ROMs display correctly
+      const versionBadge = file.version ? `<span class="bg-white/10 text-gray-300 px-2 py-0.5 rounded text-[10px] ml-2">${file.version}</span>` : "";
       titleHtml = `${type} ${versionBadge}`;
   }
 
@@ -339,11 +340,22 @@ function loadMore() {
 
 function performSearch(q) {
   const query = q.toLowerCase();
-  const filtered = db.filter(item => 
-    item.name.toLowerCase().includes(query) || 
-    (item.manufacturer || "").toLowerCase().includes(query) ||
-    (item.theme || []).some(t => t.toLowerCase().includes(query))
-  );
+  
+  // ROBUST SEARCH AGGREGATOR
+  const filtered = db.filter(item => {
+    const searchString = [
+      item.name,
+      item.manufacturer,
+      ...(item.theme || []),
+      ...(item.tableFiles || []).flatMap(f => f.authors || []),
+      ...(item.tableFiles || []).flatMap(f => f.features || []),
+      ...(item.b2sFiles || []).flatMap(f => f.authors || []),
+      ...(item.romFiles || []).flatMap(f => f.authors || [])
+    ].join(" ").toLowerCase();
+    
+    return searchString.includes(query);
+  });
+  
   renderResults(filtered);
 }
 
