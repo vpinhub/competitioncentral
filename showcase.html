@@ -62,6 +62,7 @@ fetch("https://raw.githubusercontent.com/VirtualPinballSpreadsheet/vps-db/main/d
   .then(r => r.json())
   .then(data => {
     db = data;
+    // Base table sort is still by most recently updated
     db.sort((a, b) => new Date(b.updatedAt || b.createdAt || 0) - new Date(a.updatedAt || a.createdAt || 0));
     
     const params = new URLSearchParams(window.location.search);
@@ -167,10 +168,15 @@ function renderTableDetails(tableId) {
     </div>
   `;
 
+  // Helper to sort inner files by date before rendering
   const renderSection = (files, label, isTableFile) => {
     if (!files || !files.length) return;
+    
+    // Sort files by date modified descending
+    const sortedFiles = [...files].sort((a, b) => new Date(b.updatedAt || b.createdAt || 0) - new Date(a.updatedAt || a.createdAt || 0));
+    
     html += `<h3 class="text-sm font-black uppercase tracking-[0.4em] text-orange-500/50 mb-6 mt-12 border-b border-white/5 pb-2">${label}</h3>`;
-    files.forEach(f => { html += renderFileItem(f, isTableFile ? "Table Release" : label, item.id, false); });
+    sortedFiles.forEach(f => { html += renderFileItem(f, isTableFile ? "Table Release" : label, item.id, false); });
   };
 
   renderSection(item.tableFiles, "Table Releases", true);
@@ -221,7 +227,9 @@ function renderReleaseDetails(tableId, releaseId, params) {
 
   let supportingHtml = "";
   const appendSupport = (files, label) => {
-    (files || []).forEach(f => supportingHtml += renderFileItem(f, label, item.id, true));
+    if (!files) return;
+    const sortedFiles = [...files].sort((a, b) => new Date(b.updatedAt || b.createdAt || 0) - new Date(a.updatedAt || a.createdAt || 0));
+    sortedFiles.forEach(f => supportingHtml += renderFileItem(f, label, item.id, true));
   };
 
   appendSupport(item.b2sFiles, "B2S Backglass");
@@ -263,6 +271,7 @@ function renderReleaseDetails(tableId, releaseId, params) {
 // ==========================================
 function renderFileItem(file, type, gameId, isFinalView) {
   const authors = (file.authors || []).join(", ") || "Unknown";
+  const fileDate = formatDate(file.updatedAt || file.createdAt); 
   
   let titleHtml = "";
   if (type === "MAIN_RELEASE") {
@@ -291,8 +300,17 @@ function renderFileItem(file, type, gameId, isFinalView) {
     <div class="glass-card rounded-2xl p-4 md:p-6 mb-4 flex flex-col md:flex-row items-start gap-4 md:gap-6">
       ${imgHtml}
       <div class="flex-1 w-full">
-        <h4 class="text-lg md:text-xl font-black italic uppercase text-white flex items-center flex-wrap gap-2">${titleHtml}</h4>
-        <p class="text-xs text-orange-400 font-bold uppercase tracking-widest mt-1">By: <span class="text-gray-200">${authors}</span></p>
+        <div class="flex justify-between items-start gap-4">
+            <h4 class="text-lg md:text-xl font-black italic uppercase text-white flex items-center flex-wrap gap-2">${titleHtml}</h4>
+            <div class="text-right hidden sm:block flex-shrink-0">
+                <p class="text-[9px] uppercase text-gray-600 font-bold tracking-tighter">Updated</p>
+                <p class="text-xs font-mono text-orange-500/80">${fileDate}</p>
+            </div>
+        </div>
+        <p class="text-xs text-orange-400 font-bold uppercase tracking-widest mt-1">
+            By: <span class="text-gray-200">${authors}</span>
+            <span class="sm:hidden text-gray-500 ml-2 border-l border-gray-600 pl-2">${fileDate}</span>
+        </p>
         <p class="text-[10px] text-gray-500 uppercase font-bold tracking-widest mt-1">Features: ${(file.features || []).join(" • ") || "Standard"}</p>
         <div class="flex flex-wrap gap-2 mt-4">${buttons}</div>
         ${file.comment ? `<p class="mt-4 text-[11px] italic text-gray-400 bg-black/40 p-3 rounded-xl border border-white/5">${file.comment}</p>` : ''}
