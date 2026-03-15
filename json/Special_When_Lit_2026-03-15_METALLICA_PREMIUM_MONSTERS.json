@@ -54,22 +54,6 @@
             "improvementGap": 41059060
         },
         {
-            "name": "dreaddazzman",
-            "scores": [32345230],
-            "rawEntries": [
-                {
-                    "val": 32345230,
-                    "time": 1773596700000
-                }
-            ],
-            "high": 32345230,
-            "low": 32345230,
-            "total": 32345230,
-            "avg": 32345230,
-            "comebackGrowth": 0,
-            "improvementGap": 0
-        },
-        {
             "name": "ED-209",
             "scores": [188516180, 31964790],
             "rawEntries": [
@@ -210,6 +194,19 @@
             "avg": 19827025,
             "comebackGrowth": 25589710,
             "improvementGap": 25589710
+        },
+        {
+            "name": "dreaddazzman",
+            "scores": [32345230],
+            "rawEntries": [
+                { "val": 32345230, "time": 1773596700000 }
+            ],
+            "high": 32345230,
+            "low": 32345230,
+            "total": 32345230,
+            "avg": 32345230,
+            "comebackGrowth": 0,
+            "improvementGap": 0
         },
         {
             "name": "Gordonbot9000",
