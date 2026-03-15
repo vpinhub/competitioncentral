@@ -199,6 +199,8 @@ function renderFinals(data, animate){
         </div>`;
     };
     
+    const niceName = a.nice_award || players.find(p => p.high.toString().startsWith('69'))?.name;
+
     let achHtml = card("🔫","Fast Draw", a.fast_draw, a.fast_draw_detail, "card-red") + 
                   card("🎯","Sharpshooter", a.sharpshooter, a.sharpshooter_detail, "card-orange") + 
                   card("📈","Most Improved", a.most_improved, a.most_improved_detail, "card-green") + 
@@ -207,7 +209,8 @@ function renderFinals(data, animate){
                   card("💰","Billionaires Club", a.billionaire, a.billionaire_detail, "card-gold") +
                   card("☢️","C. Montgomery Burns", a.burns_award, a.burns_award_detail, "card-pink") +
                   card("🥄","Wooden Spoon", a.wooden_spoon, a.wooden_spoon_detail, "card-stone") +
-                  card("🏷️","Price is Right", a.price_is_right, a.price_is_right_detail, "card-yellow");
+                  card("🏷️","Price is Right", a.price_is_right, a.price_is_right_detail, "card-yellow") +
+                  card("😏","69! Nice!", niceName, a.nice_award_detail || "Nice!", "card-pink");
 
     if (!a.billionaire) {
         const billionaires = players.filter(p => p.high >= 1000000000);
@@ -279,6 +282,11 @@ async function copyDiscordTemplate(btn) {
         
         let template = `**${d.table}**\n\n👑 **Winner!**\n${d.results[0].name}\n${d.results[0].high.toLocaleString()}\n\n🔫 **Fast Draw**\n${a.fast_draw || 'N/A'}\n${a.fast_draw_detail || ''}\n\n🎯 **Sharpshooter**\n${a.sharpshooter || 'N/A'}\n${a.sharpshooter_detail || ''}\n\n📈 **Most Improved**\n${a.most_improved || 'N/A'}\n${a.most_improved_detail || ''}\n\n🔄 **Comeback Kid**\n${a.comeback_kid || 'N/A'}\n${a.comeback_kid_detail || ''}\n\n🕹️ **Most Played**\n${a.most_played || 'N/A'}\n${a.most_played_detail || ''}\n\n☢️ **C. Montgomery Burns**\n${a.burns_award || 'N/A'}\n${a.burns_award_detail || ''}`;
         
+        const niceName = a.nice_award || d.results.find(p => p.high.toString().startsWith('69'))?.name;
+        if (niceName) {
+            template += `\n\n😏 **69! Nice!**\n${niceName}\n${a.nice_award_detail || 'Nice!'}`;
+        }
+
         if (a.billionaire) {
             template += `\n\n💰 **Billionaires Club**\n${a.billionaire}\n${a.billionaire_detail}`;
         } else {
