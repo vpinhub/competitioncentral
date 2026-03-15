@@ -212,6 +212,8 @@
                 </div>`;
             };
             
+            const niceName = a.nice_award || players.find(p => p.high.toString().startsWith('69'))?.name;
+
             // Generate Awards HTML
             let achHtml = 
                 card("🔫", "Fast Draw", a.fast_draw, a.fast_draw_detail, "card-red") + 
@@ -222,7 +224,8 @@
                 card("💰", "Billionaires Club", a.billionaire, a.billionaire_detail, "card-gold") + 
                 card("☢️", "C. Montgomery Burns", a.burns_award, a.burns_award_detail, "card-pink") +
                 card("🥄", "Wooden Spoon", a.wooden_spoon, a.wooden_spoon_detail, "card-stone") +
-                card("🏷️", "Price is Right", a.price_is_right, a.price_is_right_detail, "card-yellow");
+                card("🏷️", "Price is Right", a.price_is_right, a.price_is_right_detail, "card-yellow") +
+                card("😏", "69! Nice!", niceName, a.nice_award_detail || "Nice!", "card-pink");
 
             // Backward Compatibility: Calculate Billionaires Club if not present in JSON
             if (!a.billionaire) {
