@@ -70,5 +70,9 @@
     {
         "name": "Special_When_Lit_2026-04-05_JUDGE_DREDD.json",
         "path": "json/Special_When_Lit_2026-04-05_JUDGE_DREDD.json"
+    }.
+    {
+        "name": "Thursday_Throwdown_2026-04-09_SHOVEL_KNIGHT.json",
+        "path": "json/Thursday_Throwdown_2026-04-09_SHOVEL_KNIGHT.json"
     }
 ]
