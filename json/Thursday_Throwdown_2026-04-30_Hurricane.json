@@ -1,0 +1,49 @@
+{
+    "competition": "Thursday_Throwdown",
+    "date_exported": "2026-04-30T19:03:19.834500+00:00",
+    "period": "4/30/2026 - 5/7/2026",
+    "table": "Hurricane",
+    "awards": {
+        "winner": "PinballGramps",
+        "fast_draw": "PinballGramps",
+        "fast_draw_detail": "First Entry",
+        "sharpshooter": "PinballGramps",
+        "sharpshooter_detail": "Top Average",
+        "most_improved": "PinballGramps",
+        "most_improved_detail": "Gap: +0",
+        "comeback_kid": "PinballGramps",
+        "comeback_kid_detail": "Gain: +0",
+        "most_played": "PinballGramps",
+        "most_played_detail": "1 Games",
+        "burns_award": "PinballGramps",
+        "burns_award_detail": "Excellent!",
+        "wooden_spoon": null,
+        "wooden_spoon_detail": "I'm a lumberjack!",
+        "price_is_right": null,
+        "price_is_right_detail": null,
+        "billionaire": null,
+        "billionaire_detail": "Score > 1,000,000,000",
+        "nice_award": null,
+        "nice_award_detail": "Nice!"
+    },
+    "results": [
+        {
+            "name": "PinballGramps",
+            "scores": [
+                4680410
+            ],
+            "rawEntries": [
+                {
+                    "val": 4680410,
+                    "time": 1777557795000.0
+                }
+            ],
+            "high": 4680410,
+            "low": 4680410,
+            "total": 4680410,
+            "avg": 4680410.0,
+            "comebackGrowth": 0,
+            "improvementGap": 0
+        }
+    ]
+}
