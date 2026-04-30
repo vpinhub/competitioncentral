@@ -96,15 +96,7 @@
         "path": "json/Special_When_Lit_2026-04-26_BATMAN_DATA_EAST_1991.json"
     },
     {
-        "name": "Special_When_Lit_2026-04-30_Tales_from_the_Crypt.json",
-        "path": "json/Special_When_Lit_2026-04-30_Tales_from_the_Crypt.json"
-    },
-    {
         "name": "Thursday_Throwdown_2026-04-30_Austin_Powers.json",
         "path": "json/Thursday_Throwdown_2026-04-30_Austin_Powers.json"
-    },
-    {
-        "name": "Thursday_Throwdown_2026-04-30_Hurricane.json",
-        "path": "json/Thursday_Throwdown_2026-04-30_Hurricane.json"
     }
 ]
