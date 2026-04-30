@@ -1,0 +1,38 @@
+name: Save Special When Lit Results
+
+on:
+  schedule:
+    # 17:57 UTC = 1:57 pm EDT (UTC-4, Mar–Nov)
+    # During EST (UTC-5, Nov–Mar) this fires at 12:57 pm — still before the 2 pm cutoff
+    - cron: '57 17 * * 0'
+  workflow_dispatch:   # allow manual trigger from the Actions tab
+
+jobs:
+  save-results:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Fetch and save SWL results
+        run: python scripts/save_results.py swl
+
+      - name: Commit results
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add json/
+          git diff --cached --quiet && echo "Nothing to commit" || \
+            git commit -m "auto: save Special When Lit results $(date -u +%Y-%m-%d)"
+          git push
