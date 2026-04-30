@@ -130,7 +130,9 @@
             let tournamentGame = data.find(g => JSON.stringify(g).includes('game=')) || data[0];
             let pioneer = { name: "N/A", date: Infinity };
 
-            tournamentGame.scores.forEach(s => {
+            tournamentGame.scores
+                .filter(s => !(s.name.toLowerCase() === 'init' && parseInt(s.score, 10) === 0))
+                .forEach(s => {
                 const val = parseInt(s.score, 10);
                 const rawDate = s.date_added || s.date || s.timestamp;
                 const time = rawDate ? new Date(rawDate).getTime() : Date.now();
