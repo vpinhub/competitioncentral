@@ -1,6 +1,6 @@
 {
     "competition": "Thursday_Throwdown",
-    "date_exported": "2026-04-30T19:03:19.834500+00:00",
+    "date_exported": "2026-04-30T19:16:00.038527+00:00",
     "period": "4/30/2026 - 5/7/2026",
     "table": "Hurricane",
     "awards": {
@@ -11,11 +11,11 @@
         "sharpshooter_detail": "Top Average",
         "most_improved": "PinballGramps",
         "most_improved_detail": "Gap: +0",
-        "comeback_kid": "PinballGramps",
+        "comeback_kid": "Mrs Gramps",
         "comeback_kid_detail": "Gain: +0",
         "most_played": "PinballGramps",
         "most_played_detail": "1 Games",
-        "burns_award": "PinballGramps",
+        "burns_award": "Mrs Gramps",
         "burns_award_detail": "Excellent!",
         "wooden_spoon": null,
         "wooden_spoon_detail": "I'm a lumberjack!",
@@ -42,6 +42,24 @@
             "low": 4680410,
             "total": 4680410,
             "avg": 4680410.0,
+            "comebackGrowth": 0,
+            "improvementGap": 0
+        },
+        {
+            "name": "Mrs Gramps",
+            "scores": [
+                383500
+            ],
+            "rawEntries": [
+                {
+                    "val": 383500,
+                    "time": 1777558474000.0
+                }
+            ],
+            "high": 383500,
+            "low": 383500,
+            "total": 383500,
+            "avg": 383500.0,
             "comebackGrowth": 0,
             "improvementGap": 0
         }
