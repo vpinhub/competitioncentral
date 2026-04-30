@@ -167,20 +167,25 @@ function formatTableName(vpsTable, fallback) {
 function renderPreview(targetId, tableName, leader, colorClass, avatarUrl, playerCount, usernameField="name") {
     const container = document.getElementById(targetId);
     if (!container) return;
+    const leaderHtml = leader
+        ? `<div class="flex items-center gap-3 bg-white/5 p-3 rounded-xl border border-white/10">
+                <img src="${avatarUrl}" class="w-8 h-8 rounded-full border border-white/10" onerror="this.src='https://via.placeholder.com/32?text=?'">
+                <div class="overflow-hidden">
+                    <div class="text-[9px] text-gray-500 font-bold uppercase tracking-tighter">Leader</div>
+                    <div class="text-xs font-black truncate">${leader[usernameField]}</div>
+                </div>
+                <div class="ml-auto ${colorClass} font-mono text-xs font-black">${leader.numScore.toLocaleString()}</div>
+            </div>`
+        : `<div class="flex items-center gap-3 bg-white/5 p-3 rounded-xl border border-white/10">
+                <div class="text-xs text-gray-500 italic">No scores yet</div>
+            </div>`;
     container.innerHTML = `
         <div class="flex justify-between items-end mb-1">
             <div class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Current Table</div>
             <div class="text-[10px] ${colorClass} font-black uppercase tracking-widest">${playerCount} Active Players</div>
         </div>
         <div class="text-sm font-bold leading-snug mb-5 line-clamp-2 break-words">${tableName}</div>
-        <div class="flex items-center gap-3 bg-white/5 p-3 rounded-xl border border-white/10">
-            <img src="${avatarUrl}" class="w-8 h-8 rounded-full border border-white/10" onerror="this.src='https://via.placeholder.com/32?text=?'">
-            <div class="overflow-hidden">
-                <div class="text-[9px] text-gray-500 font-bold uppercase tracking-tighter">Leader</div>
-                <div class="text-xs font-black truncate">${leader[usernameField]}</div>
-            </div>
-            <div class="ml-auto ${colorClass} font-mono text-xs font-black">${leader.numScore.toLocaleString()}</div>
-        </div>`;
+        ${leaderHtml}`;
 }
 
 async function fetchIScoredPreview(roomId, targetId, colorClass, overrideKey) {
@@ -190,10 +195,11 @@ async function fetchIScoredPreview(roomId, targetId, colorClass, overrideKey) {
         if (!r.ok) r = await fetch(PROXY + encodeURIComponent(url));
         const data = await r.json();
         const game = data.find(g => JSON.stringify(g).includes('game=')) || data[0];
-        const uniquePlayers = new Set((game.scores || []).map(s => s.name)).size;
-        
+        const filteredScores = (game.scores || []).filter(s => !(s.name.toLowerCase() === 'init' && parseInt(s.score, 10) === 0));
+        const uniquePlayers = new Set(filteredScores.map(s => s.name)).size;
+
         let tableName = "";
-        
+
         if (compOverrides && compOverrides[overrideKey] && compOverrides[overrideKey].tableName) {
             tableName = compOverrides[overrideKey].tableName;
             if (compOverrides[overrideKey].manufacturer) {
@@ -204,8 +210,8 @@ async function fetchIScoredPreview(roomId, targetId, colorClass, overrideKey) {
             tableName = formatTableName(vpsTable, game.longName);
         }
 
-        const leader = [...game.scores].map(s => ({...s, numScore: parseInt(s.score,10)||0})).sort((a,b)=>b.numScore-a.numScore)[0];
-        const avatar = `${AVATAR_BASE}${leader.name.toLowerCase().replace(/\s+/g,'_')}.gif`;
+        const leader = [...filteredScores].map(s => ({...s, numScore: parseInt(s.score,10)||0})).sort((a,b)=>b.numScore-a.numScore)[0];
+        const avatar = leader ? `${AVATAR_BASE}${leader.name.toLowerCase().replace(/\s+/g,'_')}.gif` : '';
         renderPreview(targetId, tableName, leader, colorClass, avatar, uniquePlayers);
     } catch (err) {}
 }

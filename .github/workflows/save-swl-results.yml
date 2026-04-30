@@ -1,11 +1,7 @@
 name: Save Special When Lit Results
 
 on:
-  schedule:
-    # 17:57 UTC = 1:57 pm EDT (UTC-4, Mar–Nov)
-    # During EST (UTC-5, Nov–Mar) this fires at 12:57 pm — still before the 2 pm cutoff
-    - cron: '57 17 * * 0'
-  workflow_dispatch:   # allow manual trigger from the Actions tab
+  workflow_dispatch:   # triggered externally via cron-job.org → GitHub API
 
 jobs:
   save-results:
