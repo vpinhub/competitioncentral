@@ -109,7 +109,7 @@
             renderLeaderboard(window.currentResults);
             renderWinner(window.currentResults[0]);
             renderAchievements(window.currentResults[0], burns);
-            renderTable(weekData.vpsId, weekData.table, weekData.versionNumber);
+            renderTable(weekData.vpsId, weekData.table, weekData.versionNumber, weekData.romUrl, weekData.b2sUrl);
         }
 
         function renderLeaderboard(players) {
@@ -134,12 +134,14 @@
             document.getElementById('achievements').innerHTML = card("🏆", "Front Runner", winner?.name || "N/A", "Ranked #1", "border-indigo-500") + card("☢️", "C. Montgomery Burns Award", burns?.name || "N/A", "Excellent!", "border-indigo-500");
         }
 
-        function renderTable(releaseId, tableName, version) {
+        function renderTable(releaseId, tableName, version, romUrl, b2sUrl) {
             const parentTable = vpsDB.find(t => (t.tableFiles || []).some(f => f.id === releaseId));
             const tableId = parentTable ? parentTable.id : '';
             const img = parentTable?.b2sFiles?.[0]?.imgUrl || parentTable?.tableFiles?.[0]?.imgUrl || "https://via.placeholder.com/400x200";
             const btnClass = tableId ? "" : "btn-disabled";
             const btnText = tableId ? "Download Table Files" : "Searching Database...";
+            const romParam = romUrl ? `&rom=${encodeURIComponent(romUrl)}` : '';
+            const b2sParam = b2sUrl ? `&b2s=${encodeURIComponent(b2sUrl)}` : '';
             document.getElementById('table-card').innerHTML = `
                 <div class="relative rounded-xl overflow-hidden border border-white/10 shadow-2xl">
                     <img src="${img}" class="w-full h-52 object-cover" onerror="this.src='https://via.placeholder.com/400x200?text=Image+Not+Found'">
@@ -148,7 +150,7 @@
                         <p class="text-[10px] text-indigo-400 font-bold uppercase tracking-widest">${version ? 'v' + version : ''} • ${parentTable ? parentTable.manufacturer : 'VPC Competition'}</p>
                     </div>
                 </div>
-                <a id="details-btn" href="https://vpinhub.github.io/tournamenthelper/?tableId=${tableId}&releaseId=${releaseId}&vpc" target="_blank" class="block w-full bg-white text-black text-center py-4 rounded-xl font-black text-xs hover:bg-indigo-500 hover:text-white transition mt-4 uppercase ${btnClass}">${btnText}</a>`;
+                <a id="details-btn" href="https://vpinhub.github.io/tournamenthelper/?tableId=${tableId}&releaseId=${releaseId}&vpc${romParam}${b2sParam}" target="_blank" class="block w-full bg-white text-black text-center py-4 rounded-xl font-black text-xs hover:bg-indigo-500 hover:text-white transition mt-4 uppercase ${btnClass}">${btnText}</a>`;
         }
         init();
     </script>
