@@ -158,5 +158,9 @@
     {
         "name": "Special_When_Lit_2026-06-21_CACTUS_JACK_S.json",
         "path": "json/Special_When_Lit_2026-06-21_CACTUS_JACK_S.json"
+    },
+    {
+        "name": "Thursday_Throwdown_2026-06-25_WORLD_POKER_TOUR.json",
+        "path": "json/Thursday_Throwdown_2026-06-25_WORLD_POKER_TOUR.json"
     }
 ]
