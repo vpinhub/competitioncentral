@@ -166,5 +166,9 @@
     {
         "name": "Special_When_Lit_2026-06-28_EARTH_WIND_FIRE.json",
         "path": "json/Special_When_Lit_2026-06-28_EARTH_WIND_FIRE.json"
+    },
+    {
+        "name": "Thursday_Throwdown_2026-07-02_GOLD_BALL.json",
+        "path": "json/Thursday_Throwdown_2026-07-02_GOLD_BALL.json"
     }
 ]
