@@ -1,6 +1,6 @@
 {
     "competition": "Thursday_Throwdown",
-    "date_exported": "2026-07-09T12:31:37.583Z",
+    "date_exported": "2026-07-09T15:32:58.517Z",
     "period": "7/2/2026 - 7/9/2026",
     "table": "GILLIGAN'S ISLAND",
     "awards": {
@@ -14,8 +14,8 @@
         "comeback_kid": "shelshlock",
         "comeback_kid_detail": "Gain: +66,038,090",
         "most_played": "Autobott",
-        "most_played_detail": "4 Games",
-        "burns_award": "Mrsbriguy3133",
+        "most_played_detail": "5 Games",
+        "burns_award": "LucyGoo",
         "burns_award_detail": "Excellent!",
         "wooden_spoon": "randig53",
         "wooden_spoon_detail": "I'm a lumberjack!",
@@ -194,6 +194,7 @@
         {
             "name": "Autobott",
             "scores": [
+                38847060,
                 35898620,
                 14554730,
                 4460600,
@@ -215,14 +216,41 @@
                 {
                     "val": 35898620,
                     "time": 1783022037000
+                },
+                {
+                    "val": 38847060,
+                    "time": 1783602906000
                 }
             ],
-            "high": 35898620,
+            "high": 38847060,
             "low": 1918650,
-            "total": 56832600,
-            "avg": 14208150,
-            "comebackGrowth": 33979970,
-            "improvementGap": 33979970
+            "total": 95679660,
+            "avg": 19135932,
+            "comebackGrowth": 36928410,
+            "improvementGap": 36928410
+        },
+        {
+            "name": "Tuttiweb1",
+            "scores": [
+                31916550,
+                10745880
+            ],
+            "rawEntries": [
+                {
+                    "val": 10745880,
+                    "time": 1783586515000
+                },
+                {
+                    "val": 31916550,
+                    "time": 1783607211000
+                }
+            ],
+            "high": 31916550,
+            "low": 10745880,
+            "total": 42662430,
+            "avg": 21331215,
+            "comebackGrowth": 21170670,
+            "improvementGap": 21170670
         },
         {
             "name": "Wileywade",
@@ -344,24 +372,6 @@
             "low": 12774450,
             "total": 12774450,
             "avg": 12774450,
-            "comebackGrowth": 0,
-            "improvementGap": 0
-        },
-        {
-            "name": "Tuttiweb1",
-            "scores": [
-                10745880
-            ],
-            "rawEntries": [
-                {
-                    "val": 10745880,
-                    "time": 1783586515000
-                }
-            ],
-            "high": 10745880,
-            "low": 10745880,
-            "total": 10745880,
-            "avg": 10745880,
             "comebackGrowth": 0,
             "improvementGap": 0
         },
