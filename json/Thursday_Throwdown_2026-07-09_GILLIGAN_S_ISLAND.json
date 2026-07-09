@@ -1,6 +1,6 @@
 {
     "competition": "Thursday_Throwdown",
-    "date_exported": "2026-07-09T16:59:35.912Z",
+    "date_exported": "2026-07-09T17:49:55.127Z",
     "period": "7/2/2026 - 7/9/2026",
     "table": "GILLIGAN'S ISLAND",
     "awards": {
@@ -15,7 +15,7 @@
         "comeback_kid_detail": "Gain: +66,038,090",
         "most_played": "Autobott",
         "most_played_detail": "5 Games",
-        "burns_award": "PinheadAK",
+        "burns_award": "JRVirtual34",
         "burns_award_detail": "Excellent!",
         "wooden_spoon": "randig53",
         "wooden_spoon_detail": "I'm a lumberjack!",
@@ -502,6 +502,29 @@
             "avg": 5188115,
             "comebackGrowth": 3377430,
             "improvementGap": 3377430
+        },
+        {
+            "name": "Randig53",
+            "scores": [
+                5077270,
+                4400380
+            ],
+            "rawEntries": [
+                {
+                    "val": 4400380,
+                    "time": 1783615031000
+                },
+                {
+                    "val": 5077270,
+                    "time": 1783615245000
+                }
+            ],
+            "high": 5077270,
+            "low": 4400380,
+            "total": 9477650,
+            "avg": 4738825,
+            "comebackGrowth": 676890,
+            "improvementGap": 676890
         },
         {
             "name": "MomMachine",
