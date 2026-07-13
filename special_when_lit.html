@@ -1,52 +1,296 @@
-function copyToClipboard(text, btnElement) {
-    const originalText = btnElement.innerText;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VPINHUB | Special When Lit</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Encode+Sans:wght@400;700&family=MedievalSharp&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Encode Sans', sans-serif; background: #0f172a; color: white; }
+        .medieval { font-family: 'MedievalSharp', cursive; }
+        .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
+        .swl-accent { border-color: #d946ef; box-shadow: 0 0 15px rgba(217, 70, 239, 0.2); }
+        .achievement-card { transition: all 0.3s ease; }
+        .achievement-card:hover { transform: translateY(-2px); background: rgba(255,255,255,0.12); }
+    </style>
+</head>
+<body class="min-h-screen pb-12">
+    <header class="bg-fuchsia-600 shadow-md sticky top-0 z-40">
+        <div class="container mx-auto px-4 py-4 flex justify-center">
+            <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight text-white uppercase italic text-center">Special When Lit</h1>
+        </div>
+    </header>
+    <main class="container mx-auto px-4 mt-8 max-w-6xl">
+        <div class="mb-6 text-center">
+            <div class="inline-block glass px-6 py-2 rounded-full border border-fuchsia-500/30">
+                <span class="text-xs font-bold text-gray-400 uppercase tracking-widest mr-2">Current Event Period:</span>
+                <span id="event-period" class="text-sm font-bold text-fuchsia-400 tracking-tight">Calculating...</span>
+            </div>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <div class="lg:col-span-5 space-y-6">
+                <div id="table-card" class="glass rounded-2xl p-6 swl-accent min-h-[300px]"></div>
+                <div class="glass rounded-2xl p-6">
+                    <h3 class="text-xl font-bold text-fuchsia-400 mb-6 tracking-tight uppercase border-b border-white/10 pb-2">Rules & Submission</h3>
+                    <ul class="text-left space-y-4 text-sm leading-relaxed text-gray-200 mb-8 list-none">
+                        <li class="flex gap-3"><span class="text-fuchsia-500">•</span><span>All scores must be submitted via <strong>iScored</strong>.</span></li>
+                        <li class="flex gap-3"><span class="text-fuchsia-500">•</span><span>Manual submissions to iScored require a <strong>photo for verification</strong>.</span></li>
+                        <li class="flex gap-3"><span class="text-fuchsia-500">•</span><span>VPinStudio auto-submissions are permitted, but players are responsible for <strong>verifying their score has posted</strong>.</span></li>
+                        <li class="flex gap-3"><span class="text-fuchsia-500">•</span><span>No table or script modifications that affect gameplay are allowed.</span></li>
+                        <li class="flex gap-3"><span class="text-fuchsia-500">•</span><span>The player with the highest valid score at the end of the event period wins.</span></li>
+                        <li class="flex gap-3"><span class="text-fuchsia-500">•</span><span>The submission deadline is <strong>Sunday at 2:00 PM Eastern Time</strong>.</span></li>
+                    </ul>
+                    <div class="space-y-3">
+                        <a href="https://iscored.info/?mode=public&user=vpinhub" target="_blank" class="block w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg text-center transition-colors shadow-sm uppercase text-sm">Submit Score</a>
+                        <button onclick="copyToClipboard('https://www.iScored.info/VPINHUB', this)" class="block w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 rounded-lg text-center transition-colors shadow-sm text-xs">Copy VPinStudio iScored Link</button>
+                    </div>
+                </div>
+            </div>
+            <div class="lg:col-span-7 space-y-6">
+                <div id="achievement-zone" class="space-y-6 hidden">
+                    <div id="winner-banner"></div>
+                    <div id="achievements" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+                </div>
+                <div class="glass rounded-2xl overflow-hidden shadow-2xl">
+                    <div id="leaderboard" class="divide-y divide-white/5 max-h-[1200px] overflow-y-auto"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <script>
+        const AVATAR_BASE = "http://vpinhub.github.io/special-when-lit-leaderboard/img/";
+        const ROOM_ID = "1011";
+        const PRIMARY_API = `https://virtualpinballchat.com/vpc/api/v1/iscored?roomId=${ROOM_ID}`;
+        const VPS_DATA = "https://raw.githubusercontent.com/VirtualPinballSpreadsheet/vps-db/main/db/vpsdb.json";
+        let vpsDB = [];
+        window.achievementData = {};
+        window.compOverride = null;
 
-    const showSuccess = () => {
-        btnElement.innerText = 'Copied!';
-        setTimeout(() => { btnElement.innerText = originalText; }, 2000);
-    };
-
-    const showError = () => {
-        btnElement.innerText = 'Error! Check Console.';
-        setTimeout(() => { btnElement.innerText = originalText; }, 2000);
-    };
-
-    // Modern API (Requires HTTPS and secure iframe)
-    if (navigator.clipboard && window.isSecureContext) {
-        navigator.clipboard.writeText(text)
-            .then(showSuccess)
-            .catch(err => {
-                console.warn('Modern clipboard failed, trying fallback.', err);
-                fallbackCopy(text);
-            });
-    } 
-    // Fallback for HTTP or restrictive iframes
-    else {
-        fallbackCopy(text);
-    }
-
-    function fallbackCopy(textToCopy) {
-        try {
-            const textArea = document.createElement("textarea");
-            textArea.value = textToCopy;
-            // Keep it completely hidden from the user
-            textArea.style.position = "fixed";
-            textArea.style.left = "-9999px";
-            textArea.style.top = "-9999px";
-            document.body.appendChild(textArea);
+        async function init() {
+            calculateSWLPeriod();
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('showachievements')) { document.getElementById('achievement-zone').classList.remove('hidden'); }
             
-            textArea.select();
-            const successful = document.execCommand("copy");
-            textArea.remove();
-            
-            if (successful) {
-                showSuccess();
-            } else {
-                showError();
-            }
-        } catch (err) {
-            console.error("Fallback copy failed: ", err);
-            showError();
+            try {
+                try {
+                    const overrideRes = await fetch('override.json');
+                    const allOverrides = await overrideRes.json();
+                    window.compOverride = allOverrides.swl;
+                } catch(e) { console.log("No override.json found or invalid format."); }
+
+                const dbRes = await fetch(VPS_DATA); vpsDB = await dbRes.json();
+                const scoreRes = await fetch(PRIMARY_API);
+                const scoreData = await scoreRes.json();
+                if (scoreData) {
+                    processTournament(scoreData);
+                    if (urlParams.has('savejson')) { setTimeout(() => exportTournamentData('Special_When_Lit'), 500); }
+                }
+            } catch (err) { console.error(err); }
         }
-    }
-}
+
+        function calculateSWLPeriod() {
+            const cutoffDay = 0, cutoffHour = 14;
+            const nowTZ = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/New_York' }));
+            let endDate = new Date(nowTZ); endDate.setHours(cutoffHour, 0, 0, 0);
+            const daysToAdd = (cutoffDay - nowTZ.getDay() + 7) % 7;
+            endDate.setDate(endDate.getDate() + daysToAdd);
+            if (daysToAdd === 0 && nowTZ.getHours() >= cutoffHour) endDate.setDate(endDate.getDate() + 7);
+            let startDate = new Date(endDate); startDate.setDate(startDate.getDate() - 7);
+            document.getElementById('event-period').innerText = `${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}`;
+        }
+
+        function copyToClipboard(text, btnElement) {
+            navigator.clipboard.writeText(text).then(() => {
+                const originalText = btnElement.innerText; btnElement.innerText = 'Copied!';
+                setTimeout(() => { btnElement.innerText = originalText; }, 2000);
+            });
+        }
+
+        function exportTournamentData(prefix) {
+            const tableName = document.querySelector('#table-card h4')?.innerText || 'Unknown_Table';
+            const safeTableName = tableName.replace(/[^a-zA-Z0-9]/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, '');
+            const exportObj = { 
+                competition: prefix, 
+                date_exported: new Date().toISOString(), 
+                period: document.getElementById('event-period').innerText, 
+                table: document.querySelector('#table-card h4')?.innerText || 'Unknown', 
+                awards: window.achievementData, 
+                results: window.currentResults || [] 
+            };
+            const blob = new Blob([JSON.stringify(exportObj, null, 4)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url; 
+            a.download = `${prefix}_${new Date().toISOString().split('T')[0]}_${safeTableName}.json`;
+            document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        }
+
+        function processTournament(data) {
+            const playerStats = {};
+            let tournamentGame = data.find(g => JSON.stringify(g).includes('game=')) || data[0];
+            let pioneer = { name: "N/A", date: Infinity };
+
+            tournamentGame.scores
+                .filter(s => !(s.name.toLowerCase() === 'init' && parseInt(s.score, 10) === 0))
+                .forEach(s => {
+                const val = parseInt(s.score, 10);
+                const rawDate = s.date_added || s.date || s.timestamp;
+                const time = rawDate ? new Date(rawDate).getTime() : Date.now();
+                if (time < pioneer.date) { pioneer = { name: s.name, date: time }; }
+                if (!playerStats[s.name]) playerStats[s.name] = { name: s.name, scores: [], rawEntries: [], high: 0, low: Infinity, total: 0 };
+                playerStats[s.name].scores.push(val); 
+                playerStats[s.name].total += val;
+                playerStats[s.name].rawEntries.push({ val, time });
+                if (val > playerStats[s.name].high) playerStats[s.name].high = val;
+                if (val < playerStats[s.name].low) playerStats[s.name].low = val;
+            });
+
+            const playerList = Object.values(playerStats).map(p => {
+                p.avg = p.total / p.scores.length;
+                p.rawEntries.sort((a,b) => a.time - b.time);
+                p.comebackGrowth = p.rawEntries.length > 1 ? p.rawEntries[p.rawEntries.length-1].val - p.rawEntries[0].val : 0;
+                p.improvementGap = p.high - p.low;
+                return p;
+            });
+
+            window.currentResults = playerList.sort((a,b) => b.high - a.high);
+            const shooter = [...playerList].sort((a,b) => b.avg - a.avg)[0];
+            const grinder = [...playerList].sort((a,b) => b.scores.length - a.scores.length)[0];
+            const burns = playerList[Math.floor(Math.random() * playerList.length)];
+
+            const improvedList = [...playerList].sort((a,b) => b.improvementGap - a.improvementGap);
+            const comebackList = [...playerList].sort((a,b) => b.comebackGrowth - a.comebackGrowth);
+            
+            let improved = improvedList[0];
+            let comeback = comebackList[0];
+
+            if (improved && comeback && improved.name === comeback.name) {
+                if (comebackList.length > 1) { comeback = comebackList[1]; }
+            }
+
+            let wooden = null;
+            if (window.currentResults.length > 2) {
+                const spoonCandidates = window.currentResults
+                    .slice(1, window.currentResults.length - 1)
+                    .filter(p => p.improvementGap > 0);
+                if (spoonCandidates.length > 0) { wooden = spoonCandidates[spoonCandidates.length - 1]; }
+            }
+
+            const billionaire = window.currentResults.find(p => p.high >= 1000000000);
+            const niceAward = window.currentResults.find(p => p.high.toString().startsWith('69'));
+
+            let pir = null;
+            let closestPIRMargin = 5.0; 
+            
+            for (let i = 1; i < window.currentResults.length; i++) {
+                const pAhead = window.currentResults[i-1];
+                const pCurr = window.currentResults[i];
+                if (pAhead.high > 0) {
+                    const diff = pAhead.high - pCurr.high;
+                    const margin = (diff / pAhead.high) * 100;
+                    if (margin <= 5.0 && margin < closestPIRMargin) {
+                        closestPIRMargin = margin;
+                        pir = { name: pCurr.name, detail: `Closest to ${pAhead.name}` };
+                    }
+                }
+            }
+
+            window.achievementData = {
+                winner: window.currentResults[0]?.name,
+                fast_draw: pioneer.name,
+                fast_draw_detail: "First Entry",
+                sharpshooter: shooter?.name,
+                sharpshooter_detail: "Top Average",
+                most_improved: improved?.name,
+                most_improved_detail: `Gap: +${improved?.improvementGap.toLocaleString()}`,
+                comeback_kid: comeback?.name,
+                comeback_kid_detail: `Gain: +${comeback?.comebackGrowth.toLocaleString()}`,
+                most_played: grinder?.name,
+                most_played_detail: `${grinder?.scores.length} Games`,
+                burns_award: burns?.name,
+                burns_award_detail: "Excellent!",
+                wooden_spoon: wooden?.name,
+                wooden_spoon_detail: "I'm a lumberjack!",
+                price_is_right: pir?.name,
+                price_is_right_detail: pir?.detail,
+                billionaire: billionaire?.name,
+                billionaire_detail: "Score > 1,000,000,000",
+                nice_award: niceAward?.name,
+                nice_award_detail: "Nice!"
+            };
+
+            renderLeaderboard(window.currentResults);
+            renderWinner(window.currentResults[0]);
+            renderAchievements(pioneer, shooter, improved, grinder, comeback, burns, wooden, pir, billionaire, niceAward);
+            
+            const tagMatch = JSON.stringify(tournamentGame).match(/game=([a-zA-Z0-9-_]+)[^#]*#([a-zA-Z0-9-_]+)/);
+            renderTable(tagMatch ? vpsDB.find(t => t.id === tagMatch[1]) : null, tournamentGame.longName, tagMatch?.[1], tagMatch?.[2]);
+        }
+
+        function renderLeaderboard(players) {
+            document.getElementById('leaderboard').innerHTML = players.map((p, i) => `
+                <div class="flex items-center justify-between px-6 py-4 hover:bg-white/5 transition">
+                    <div class="flex items-center gap-4">
+                        <span class="w-6 font-black text-xl italic ${i < 3 ? 'text-fuchsia-500' : 'text-gray-700'}">${i+1}</span>
+                        <img src="${AVATAR_BASE}${p.name.toLowerCase().replace(/\s+/g, '_')}.gif" class="w-10 h-10 rounded-full border border-white/10" onerror="this.src='https://via.placeholder.com/40?text=?'">
+                        <span class="font-bold text-sm text-gray-200">${p.name}</span>
+                    </div>
+                    <span class="font-mono font-bold ${i === 0 ? 'text-yellow-400' : 'text-gray-400'}">${p.high.toLocaleString()}</span>
+                </div>`).join('');
+        }
+
+        function renderWinner(winner) {
+            if (!winner) return;
+            document.getElementById('winner-banner').innerHTML = `<div class="glass p-6 rounded-2xl border-2 border-yellow-500 flex items-center justify-between shadow-[0_0_20px_rgba(234,179,8,0.2)]"><div class="flex items-center gap-6"><div class="relative"><img src="${AVATAR_BASE}${winner.name.toLowerCase().replace(/\s+/g, '_')}.gif" class="w-20 h-20 rounded-full border-4 border-yellow-500" onerror="this.src='https://via.placeholder.com/80?text=?'"><span class="absolute -top-2 -right-2 text-3xl">👑</span></div><div><div class="medieval text-xs text-yellow-500 uppercase tracking-widest">Current Champion</div><div class="text-3xl font-black italic uppercase">${winner.name}</div></div></div><div class="text-right"><div class="text-xs text-gray-400 font-bold uppercase">Record Score</div><div class="text-2xl font-mono font-bold text-yellow-400">${winner.high.toLocaleString()}</div></div></div>`;
+        }
+
+        function renderAchievements(pioneer, shooter, improved, grinder, comeback, burns, wooden, pir, billionaire, niceAward) {
+            const card = (icon, title, name, detail, color) => {
+                if (!name) return ''; 
+                return `<div class="glass p-4 rounded-xl border-l-4 ${color} achievement-card"><div class="medieval text-[10px] text-gray-400 uppercase">${icon} ${title}</div><div class="font-bold text-sm uppercase italic text-white">${name}</div><div class="text-[10px] text-gray-500">${detail}</div></div>`;
+            };
+            document.getElementById('achievements').innerHTML = 
+                card("🔫", "Fast Draw", pioneer.name, "First Entry", "border-red-500") +
+                card("🎯", "Sharpshooter", shooter?.name, "Top Average", "border-fuchsia-500") +
+                card("📈", "Most Improved", improved?.name, `Gap: +${improved?.improvementGap.toLocaleString()}`, "border-green-500") +
+                card("🔄", "Comeback Kid", comeback?.name, `Gain: +${comeback?.comebackGrowth.toLocaleString()}`, "border-purple-500") +
+                card("🕹️", "Most Played", grinder?.name, `${grinder?.scores.length} Games`, "border-blue-500") +
+                card("💰", "Billionaires Club", billionaire?.name, "Welcome to the 1%", "border-yellow-600") +
+                card("☢️", "C. Montgomery Burns Award", burns?.name, "Excellent!", "border-fuchsia-500") +
+                card("🥄", "Wooden Spoon", wooden?.name, "I'm a lumberjack!", "border-stone-500") +
+                card("🏷️", "Price is Right", pir?.name, pir?.detail, "border-yellow-400") +
+                card("😏", "69! Nice!", niceAward?.name, "Nice!", "border-pink-400");
+        }
+
+        function renderTable(table, fallbackName, gameId, releaseId) {
+            let img = table?.b2sFiles?.[0]?.imgUrl || "https://via.placeholder.com/400x200";
+            let displayTableName = table ? table.name : fallbackName;
+            let displayManufacturer = table ? table.manufacturer : 'Premier Table';
+            let downloadUrl = `https://vpinhub.github.io/tournamenthelper/?tableId=${gameId}&releaseId=${releaseId}&swl`;
+            let noteHtml = '';
+
+            if (window.compOverride) {
+                if (window.compOverride.imgUrl) img = window.compOverride.imgUrl;
+                if (window.compOverride.tableName) displayTableName = window.compOverride.tableName;
+                if (window.compOverride.manufacturer) displayManufacturer = window.compOverride.manufacturer;
+                if (window.compOverride.url) downloadUrl = window.compOverride.url;
+                if (window.compOverride.note) {
+                    noteHtml = `<div class="mt-4 p-3 bg-fuchsia-500/10 border border-fuchsia-500/30 rounded-xl text-sm text-fuchsia-200 leading-relaxed shadow-[0_0_15px_rgba(217,70,239,0.1)]"><strong>📌 OVERRIDE NOTE:</strong> ${window.compOverride.note}</div>`;
+                }
+            }
+
+            document.getElementById('table-card').innerHTML = `
+                <div class="relative rounded-xl overflow-hidden border border-white/10 shadow-2xl">
+                    <img src="${img}" class="w-full h-52 object-cover">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent flex flex-col justify-end p-4">
+                        <h4 class="text-2xl font-black italic uppercase tracking-tighter">${displayTableName}</h4>
+                        <p class="text-[10px] text-fuchsia-400 font-bold uppercase tracking-widest">${displayManufacturer}</p>
+                    </div>
+                </div>
+                ${noteHtml}
+                <a href="${downloadUrl}" target="_blank" class="block w-full bg-white text-black text-center py-4 rounded-xl font-black text-xs hover:bg-fuchsia-500 transition mt-4 uppercase shadow-lg">Download Table Files</a>`;
+        }
+        init();
+    </script>
+</body>
+</html>
