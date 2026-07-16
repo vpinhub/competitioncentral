@@ -1,21 +1,21 @@
 {
     "competition": "Thursday_Throwdown",
-    "date_exported": "2026-07-16T16:31:24.060Z",
+    "date_exported": "2026-07-16T17:54:05.781Z",
     "period": "7/9/2026 - 7/16/2026",
     "table": "ROLLERGAMES",
     "awards": {
-        "winner": "Iminimart",
+        "winner": "Autobott",
         "fast_draw": "Smaug",
         "fast_draw_detail": "First Entry",
-        "sharpshooter": "Maniac",
+        "sharpshooter": "Autobott",
         "sharpshooter_detail": "Top Average",
         "most_improved": "Tuttiweb1",
         "most_improved_detail": "Gap: +5,376,050",
-        "comeback_kid": "shelshlock",
-        "comeback_kid_detail": "Gain: +4,955,980",
-        "most_played": "Iminimart",
+        "comeback_kid": "Autobott",
+        "comeback_kid_detail": "Gain: +5,136,930",
+        "most_played": "Autobott",
         "most_played_detail": "4 Games",
-        "burns_award": "SmedleyB",
+        "burns_award": "Arckeron",
         "burns_award_detail": "Excellent!",
         "wooden_spoon": "Arckeron",
         "wooden_spoon_detail": "I'm a lumberjack!",
@@ -25,6 +25,39 @@
         "nice_award_detail": "Nice!"
     },
     "results": [
+        {
+            "name": "Autobott",
+            "scores": [
+                13119980,
+                13119980,
+                9403830,
+                7983050
+            ],
+            "rawEntries": [
+                {
+                    "val": 7983050,
+                    "time": 1783790689000
+                },
+                {
+                    "val": 9403830,
+                    "time": 1784217007000
+                },
+                {
+                    "val": 13119980,
+                    "time": 1784218822000
+                },
+                {
+                    "val": 13119980,
+                    "time": 1784218928000
+                }
+            ],
+            "high": 13119980,
+            "low": 7983050,
+            "total": 43626840,
+            "avg": 10906710,
+            "comebackGrowth": 5136930,
+            "improvementGap": 5136930
+        },
         {
             "name": "Iminimart",
             "scores": [
@@ -124,24 +157,6 @@
             "low": 8712160,
             "total": 8712160,
             "avg": 8712160,
-            "comebackGrowth": 0,
-            "improvementGap": 0
-        },
-        {
-            "name": "Autobott",
-            "scores": [
-                7983050
-            ],
-            "rawEntries": [
-                {
-                    "val": 7983050,
-                    "time": 1783790689000
-                }
-            ],
-            "high": 7983050,
-            "low": 7983050,
-            "total": 7983050,
-            "avg": 7983050,
             "comebackGrowth": 0,
             "improvementGap": 0
         },
