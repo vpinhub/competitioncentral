@@ -1,6 +1,6 @@
 {
     "competition": "Thursday_Throwdown",
-    "date_exported": "2026-07-16T13:23:33.872Z",
+    "date_exported": "2026-07-16T16:31:24.060Z",
     "period": "7/9/2026 - 7/16/2026",
     "table": "ROLLERGAMES",
     "awards": {
@@ -15,9 +15,9 @@
         "comeback_kid_detail": "Gain: +4,955,980",
         "most_played": "Iminimart",
         "most_played_detail": "4 Games",
-        "burns_award": "Autobott",
+        "burns_award": "SmedleyB",
         "burns_award_detail": "Excellent!",
-        "wooden_spoon": "nilBog_gRim",
+        "wooden_spoon": "Arckeron",
         "wooden_spoon_detail": "I'm a lumberjack!",
         "price_is_right": "Tuttiweb1",
         "price_is_right_detail": "Closest to Scottie_Doesnt",
@@ -304,6 +304,39 @@
             "improvementGap": 188100
         },
         {
+            "name": "nilBog_gRim",
+            "scores": [
+                3220600,
+                2562180,
+                2066290,
+                1605240
+            ],
+            "rawEntries": [
+                {
+                    "val": 1605240,
+                    "time": 1783645268000
+                },
+                {
+                    "val": 2066290,
+                    "time": 1783645981000
+                },
+                {
+                    "val": 2562180,
+                    "time": 1784082674000
+                },
+                {
+                    "val": 3220600,
+                    "time": 1784214995000
+                }
+            ],
+            "high": 3220600,
+            "low": 1605240,
+            "total": 9454310,
+            "avg": 2363577.5,
+            "comebackGrowth": 1615360,
+            "improvementGap": 1615360
+        },
+        {
             "name": "Arckeron",
             "scores": [
                 2992220,
@@ -325,34 +358,6 @@
             "avg": 2252655,
             "comebackGrowth": -1479130,
             "improvementGap": 1479130
-        },
-        {
-            "name": "nilBog_gRim",
-            "scores": [
-                2562180,
-                2066290,
-                1605240
-            ],
-            "rawEntries": [
-                {
-                    "val": 1605240,
-                    "time": 1783645268000
-                },
-                {
-                    "val": 2066290,
-                    "time": 1783645981000
-                },
-                {
-                    "val": 2562180,
-                    "time": 1784082674000
-                }
-            ],
-            "high": 2562180,
-            "low": 1605240,
-            "total": 6233710,
-            "avg": 2077903.3333333333,
-            "comebackGrowth": 956940,
-            "improvementGap": 956940
         },
         {
             "name": "Wileywade",
