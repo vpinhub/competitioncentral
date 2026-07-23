@@ -190,5 +190,9 @@
     {
         "name": "Special_When_Lit_2026-07-19_STRIKES_AND_SPARES.json",
         "path": "json/Special_When_Lit_2026-07-19_STRIKES_AND_SPARES.json"
+    },
+    {
+        "name": "Thursday_Throwdown_2026-07-23_SOLAR_FIRE.json",
+        "path": "json/Thursday_Throwdown_2026-07-23_SOLAR_FIRE.json"
     }
 ]
