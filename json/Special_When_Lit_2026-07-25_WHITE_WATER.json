@@ -1,6 +1,6 @@
 {
     "competition": "Special_When_Lit",
-    "date_exported": "2026-07-25T08:02:10.547Z",
+    "date_exported": "2026-07-25T14:40:39.305Z",
     "period": "7/19/2026 - 7/26/2026",
     "table": "WHITE WATER",
     "awards": {
@@ -15,7 +15,7 @@
         "comeback_kid_detail": "Gain: +274,507,380",
         "most_played": "shelshlock",
         "most_played_detail": "10 Games",
-        "burns_award": "Paladin",
+        "burns_award": "shelshlock",
         "burns_award_detail": "Excellent!",
         "wooden_spoon": "emptynine",
         "wooden_spoon_detail": "I'm a lumberjack!",
@@ -155,6 +155,39 @@
             "improvementGap": 247841580
         },
         {
+            "name": "lminimart",
+            "scores": [
+                236757550,
+                211674490,
+                117405370,
+                76016090
+            ],
+            "rawEntries": [
+                {
+                    "val": 76016090,
+                    "time": 1784542999000
+                },
+                {
+                    "val": 117405370,
+                    "time": 1784588942000
+                },
+                {
+                    "val": 211674490,
+                    "time": 1784981687000
+                },
+                {
+                    "val": 236757550,
+                    "time": 1784982339000
+                }
+            ],
+            "high": 236757550,
+            "low": 76016090,
+            "total": 641853500,
+            "avg": 160463375,
+            "comebackGrowth": 160741460,
+            "improvementGap": 160741460
+        },
+        {
             "name": "TheEternalGremmie",
             "scores": [
                 215210280,
@@ -212,29 +245,6 @@
             "avg": 134282010,
             "comebackGrowth": 0,
             "improvementGap": 0
-        },
-        {
-            "name": "lminimart",
-            "scores": [
-                117405370,
-                76016090
-            ],
-            "rawEntries": [
-                {
-                    "val": 76016090,
-                    "time": 1784542999000
-                },
-                {
-                    "val": 117405370,
-                    "time": 1784588942000
-                }
-            ],
-            "high": 117405370,
-            "low": 76016090,
-            "total": 193421460,
-            "avg": 96710730,
-            "comebackGrowth": 41389280,
-            "improvementGap": 41389280
         },
         {
             "name": "cylem",
