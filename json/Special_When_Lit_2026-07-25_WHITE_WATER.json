@@ -1,6 +1,6 @@
 {
     "competition": "Special_When_Lit",
-    "date_exported": "2026-07-25T14:40:39.305Z",
+    "date_exported": "2026-07-25T22:47:15.161Z",
     "period": "7/19/2026 - 7/26/2026",
     "table": "WHITE WATER",
     "awards": {
@@ -15,7 +15,7 @@
         "comeback_kid_detail": "Gain: +274,507,380",
         "most_played": "shelshlock",
         "most_played_detail": "10 Games",
-        "burns_award": "shelshlock",
+        "burns_award": "Midrik",
         "burns_award_detail": "Excellent!",
         "wooden_spoon": "emptynine",
         "wooden_spoon_detail": "I'm a lumberjack!",
@@ -188,6 +188,24 @@
             "improvementGap": 160741460
         },
         {
+            "name": "Dreaddazzman",
+            "scores": [
+                225208140
+            ],
+            "rawEntries": [
+                {
+                    "val": 225208140,
+                    "time": 1785015881000
+                }
+            ],
+            "high": 225208140,
+            "low": 225208140,
+            "total": 225208140,
+            "avg": 225208140,
+            "comebackGrowth": 0,
+            "improvementGap": 0
+        },
+        {
             "name": "TheEternalGremmie",
             "scores": [
                 215210280,
@@ -325,6 +343,24 @@
             "low": 87985500,
             "total": 87985500,
             "avg": 87985500,
+            "comebackGrowth": 0,
+            "improvementGap": 0
+        },
+        {
+            "name": "Arthur Whitecap",
+            "scores": [
+                61633440
+            ],
+            "rawEntries": [
+                {
+                    "val": 61633440,
+                    "time": 1784993190000
+                }
+            ],
+            "high": 61633440,
+            "low": 61633440,
+            "total": 61633440,
+            "avg": 61633440,
             "comebackGrowth": 0,
             "improvementGap": 0
         },
