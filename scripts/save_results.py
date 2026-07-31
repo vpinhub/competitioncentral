@@ -224,12 +224,23 @@ def main() -> None:
     cfg = CONFIGS[key]
 
     print(f"Fetching {cfg['name']} results (room {cfg['room_id']})…")
-    score_data = requests.get(
-        VPC_API.format(room_id=cfg["room_id"]), timeout=30
-    ).json()
+    resp = requests.get(VPC_API.format(room_id=cfg["room_id"]), timeout=30)
+    try:
+        score_data = resp.json()
+    except ValueError:
+        print(f"VPC API returned non-JSON response. Status: {resp.status_code}")
+        print(f"Response headers: {dict(resp.headers)}")
+        print(f"Response body (first 1000 chars): {resp.text[:1000]}")
+        raise
 
     print("Fetching VPS database…")
-    vps_db = requests.get(VPS_DB, timeout=60).json()
+    vps_resp = requests.get(VPS_DB, timeout=60)
+    try:
+        vps_db = vps_resp.json()
+    except ValueError:
+        print(f"VPS DB returned non-JSON response. Status: {vps_resp.status_code}")
+        print(f"Response body (first 1000 chars): {vps_resp.text[:1000]}")
+        raise
 
     results, awards, tournament_game = process_tournament(score_data)
     table_name = get_table_name(tournament_game, vps_db)
