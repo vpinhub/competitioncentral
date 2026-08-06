@@ -206,5 +206,9 @@
     {
         "name": "Special_When_Lit_2026-08-02_AC_DC_LUCI_Premium.json",
         "path": "json/Special_When_Lit_2026-08-02_AC_DC_LUCI_Premium.json"
+    },
+    {
+        "name": "Thursday_Throwdown_2026-08-06_Cybernaut.json",
+        "path": "json/Thursday_Throwdown_2026-08-06_Cybernaut.json"
     }
 ]
