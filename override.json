@@ -1,10 +1,10 @@
 {
     "swl": {
-        "url": "https://vpinhub.github.io/tournamenthelper/?tableId=x9i_W1Ql&releaseId=9f7hh91z&rom=https://vpuniverse.com/files/file/22023-seawitch-mod-rev-93/&rauthor=CarnyPriest&rfeatures=Mod%20rev.%209.3&img=https://i.imgur.com/m0I5vDB.gif&tnotes=To%20play%2C%20you%20must%20have%20the%20latest%20ROM%20revision%209.3%20%28%60seawitchf%60%29.%20%2A%2AUsers%20will%20need%20to%20update%20the%20table%20script%20to%20use%20%60seawitchf%60%20as%20the%20ROM%20name.%2A%2A",
+        "url": "https://vpinhub.github.io/tournamenthelper/?tableId=jvGmSlPi&releaseId=QHG8OrTf&swl&rom=https://vpuniverse.com/files/file/5848-lethal-weapon-3-301-unofficial-mod/&rauthor=CarnyPriest&tnotes=We_are_using_the_updated_rom_from_pinballcode_lw3-301_Remember_to_change_script_line_102_to_lw3_301&rnotes=Mandatory_tournament_ROM",
         "note": null,
         "tableName": null,
         "manufacturer": null,
-        "imgUrl": "https://i.imgur.com/m0I5vDB.gif"
+        "imgUrl": null
     },
     "ttd": {
         "url": null,
