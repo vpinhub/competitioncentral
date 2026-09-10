@@ -246,5 +246,9 @@
     {
         "name": "Special_When_Lit_2026-09-06_Lethal_Weapon_3.json",
         "path": "json/Special_When_Lit_2026-09-06_Lethal_Weapon_3.json"
+    },
+    {
+        "name": "Thursday_Throwdown_2026-09-10_Centaur.json",
+        "path": "json/Thursday_Throwdown_2026-09-10_Centaur.json"
     }
 ]
