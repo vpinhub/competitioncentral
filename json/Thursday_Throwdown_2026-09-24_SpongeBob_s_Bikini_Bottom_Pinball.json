@@ -1,0 +1,415 @@
+{
+    "competition": "Thursday_Throwdown",
+    "date_exported": "2026-09-24T17:57:31.400434+00:00",
+    "period": "9/17/2026 - 9/24/2026",
+    "table": "SpongeBob's Bikini Bottom Pinball",
+    "awards": {
+        "winner": "Autobott",
+        "fast_draw": "Ed209",
+        "fast_draw_detail": "First Entry",
+        "sharpshooter": "LexOntilt",
+        "sharpshooter_detail": "Top Average",
+        "most_improved": "Ed209",
+        "most_improved_detail": "Gap: +1,190,072,180",
+        "comeback_kid": "Autobott",
+        "comeback_kid_detail": "Gain: +915,280,640",
+        "most_played": "Autobott",
+        "most_played_detail": "5 Games",
+        "burns_award": "Tuttiweb1",
+        "burns_award_detail": "Excellent!",
+        "wooden_spoon": "Mr J",
+        "wooden_spoon_detail": "I'm a lumberjack!",
+        "price_is_right": "TheEternalGremmie",
+        "price_is_right_detail": "Closest to Paladin",
+        "billionaire": "Autobott",
+        "billionaire_detail": "Score > 1,000,000,000",
+        "nice_award": null,
+        "nice_award_detail": "Nice!"
+    },
+    "results": [
+        {
+            "name": "Autobott",
+            "scores": [
+                1269541040,
+                707089030,
+                707089030,
+                354260400,
+                354260400
+            ],
+            "rawEntries": [
+                {
+                    "val": 354260400,
+                    "time": 1789750569000.0
+                },
+                {
+                    "val": 354260400,
+                    "time": 1789751205000.0
+                },
+                {
+                    "val": 707089030,
+                    "time": 1790092124000.0
+                },
+                {
+                    "val": 707089030,
+                    "time": 1790092712000.0
+                },
+                {
+                    "val": 1269541040,
+                    "time": 1790172483000.0
+                }
+            ],
+            "high": 1269541040,
+            "low": 354260400,
+            "total": 3392239900,
+            "avg": 678447980.0,
+            "comebackGrowth": 915280640,
+            "improvementGap": 915280640
+        },
+        {
+            "name": "Ed209",
+            "scores": [
+                1204791650,
+                14719470
+            ],
+            "rawEntries": [
+                {
+                    "val": 14719470,
+                    "time": 1789653420000.0
+                },
+                {
+                    "val": 1204791650,
+                    "time": 1789661610000.0
+                }
+            ],
+            "high": 1204791650,
+            "low": 14719470,
+            "total": 1219511120,
+            "avg": 609755560.0,
+            "comebackGrowth": 1190072180,
+            "improvementGap": 1190072180
+        },
+        {
+            "name": "LexOntilt",
+            "scores": [
+                856867160
+            ],
+            "rawEntries": [
+                {
+                    "val": 856867160,
+                    "time": 1789708752000.0
+                }
+            ],
+            "high": 856867160,
+            "low": 856867160,
+            "total": 856867160,
+            "avg": 856867160.0,
+            "comebackGrowth": 0,
+            "improvementGap": 0
+        },
+        {
+            "name": "lminimart",
+            "scores": [
+                450907530,
+                325253450
+            ],
+            "rawEntries": [
+                {
+                    "val": 325253450,
+                    "time": 1790055596000.0
+                },
+                {
+                    "val": 450907530,
+                    "time": 1790188671000.0
+                }
+            ],
+            "high": 450907530,
+            "low": 325253450,
+            "total": 776160980,
+            "avg": 388080490.0,
+            "comebackGrowth": 125654080,
+            "improvementGap": 125654080
+        },
+        {
+            "name": "shelshlock",
+            "scores": [
+                310275580,
+                199761090
+            ],
+            "rawEntries": [
+                {
+                    "val": 199761090,
+                    "time": 1789695164000.0
+                },
+                {
+                    "val": 310275580,
+                    "time": 1789872098000.0
+                }
+            ],
+            "high": 310275580,
+            "low": 199761090,
+            "total": 510036670,
+            "avg": 255018335.0,
+            "comebackGrowth": 110514490,
+            "improvementGap": 110514490
+        },
+        {
+            "name": "Dreaddazzman",
+            "scores": [
+                279187550
+            ],
+            "rawEntries": [
+                {
+                    "val": 279187550,
+                    "time": 1790023787000.0
+                }
+            ],
+            "high": 279187550,
+            "low": 279187550,
+            "total": 279187550,
+            "avg": 279187550.0,
+            "comebackGrowth": 0,
+            "improvementGap": 0
+        },
+        {
+            "name": "Midrik",
+            "scores": [
+                264545850,
+                129403380
+            ],
+            "rawEntries": [
+                {
+                    "val": 129403380,
+                    "time": 1789689924000.0
+                },
+                {
+                    "val": 264545850,
+                    "time": 1789943420000.0
+                }
+            ],
+            "high": 264545850,
+            "low": 129403380,
+            "total": 393949230,
+            "avg": 196974615.0,
+            "comebackGrowth": 135142470,
+            "improvementGap": 135142470
+        },
+        {
+            "name": "Paladin",
+            "scores": [
+                261462610,
+                55213040
+            ],
+            "rawEntries": [
+                {
+                    "val": 55213040,
+                    "time": 1789680815000.0
+                },
+                {
+                    "val": 261462610,
+                    "time": 1789685606000.0
+                }
+            ],
+            "high": 261462610,
+            "low": 55213040,
+            "total": 316675650,
+            "avg": 158337825.0,
+            "comebackGrowth": 206249570,
+            "improvementGap": 206249570
+        },
+        {
+            "name": "TheEternalGremmie",
+            "scores": [
+                258800810
+            ],
+            "rawEntries": [
+                {
+                    "val": 258800810,
+                    "time": 1789692878000.0
+                }
+            ],
+            "high": 258800810,
+            "low": 258800810,
+            "total": 258800810,
+            "avg": 258800810.0,
+            "comebackGrowth": 0,
+            "improvementGap": 0
+        },
+        {
+            "name": "Scottie_Doesnt",
+            "scores": [
+                231332250
+            ],
+            "rawEntries": [
+                {
+                    "val": 231332250,
+                    "time": 1789732613000.0
+                }
+            ],
+            "high": 231332250,
+            "low": 231332250,
+            "total": 231332250,
+            "avg": 231332250.0,
+            "comebackGrowth": 0,
+            "improvementGap": 0
+        },
+        {
+            "name": "Lroy",
+            "scores": [
+                222633380
+            ],
+            "rawEntries": [
+                {
+                    "val": 222633380,
+                    "time": 1789654353000.0
+                }
+            ],
+            "high": 222633380,
+            "low": 222633380,
+            "total": 222633380,
+            "avg": 222633380.0,
+            "comebackGrowth": 0,
+            "improvementGap": 0
+        },
+        {
+            "name": "Wileywade",
+            "scores": [
+                208893890
+            ],
+            "rawEntries": [
+                {
+                    "val": 208893890,
+                    "time": 1790004263000.0
+                }
+            ],
+            "high": 208893890,
+            "low": 208893890,
+            "total": 208893890,
+            "avg": 208893890.0,
+            "comebackGrowth": 0,
+            "improvementGap": 0
+        },
+        {
+            "name": "Desdinova",
+            "scores": [
+                189040270
+            ],
+            "rawEntries": [
+                {
+                    "val": 189040270,
+                    "time": 1790247736000.0
+                }
+            ],
+            "high": 189040270,
+            "low": 189040270,
+            "total": 189040270,
+            "avg": 189040270.0,
+            "comebackGrowth": 0,
+            "improvementGap": 0
+        },
+        {
+            "name": "Tuttiweb1",
+            "scores": [
+                144883160
+            ],
+            "rawEntries": [
+                {
+                    "val": 144883160,
+                    "time": 1789714254000.0
+                }
+            ],
+            "high": 144883160,
+            "low": 144883160,
+            "total": 144883160,
+            "avg": 144883160.0,
+            "comebackGrowth": 0,
+            "improvementGap": 0
+        },
+        {
+            "name": "emptynine",
+            "scores": [
+                102015060
+            ],
+            "rawEntries": [
+                {
+                    "val": 102015060,
+                    "time": 1790111722000.0
+                }
+            ],
+            "high": 102015060,
+            "low": 102015060,
+            "total": 102015060,
+            "avg": 102015060.0,
+            "comebackGrowth": 0,
+            "improvementGap": 0
+        },
+        {
+            "name": "Arthur Bikinibottom",
+            "scores": [
+                70018240,
+                31793360
+            ],
+            "rawEntries": [
+                {
+                    "val": 31793360,
+                    "time": 1789660378000.0
+                },
+                {
+                    "val": 70018240,
+                    "time": 1790083751000.0
+                }
+            ],
+            "high": 70018240,
+            "low": 31793360,
+            "total": 101811600,
+            "avg": 50905800.0,
+            "comebackGrowth": 38224880,
+            "improvementGap": 38224880
+        },
+        {
+            "name": "Mr J",
+            "scores": [
+                68293970,
+                29613430,
+                17097670
+            ],
+            "rawEntries": [
+                {
+                    "val": 17097670,
+                    "time": 1789681969000.0
+                },
+                {
+                    "val": 29613430,
+                    "time": 1789682551000.0
+                },
+                {
+                    "val": 68293970,
+                    "time": 1789683417000.0
+                }
+            ],
+            "high": 68293970,
+            "low": 17097670,
+            "total": 115005070,
+            "avg": 38335023.333333336,
+            "comebackGrowth": 51196300,
+            "improvementGap": 51196300
+        },
+        {
+            "name": "Bailey",
+            "scores": [
+                37947080
+            ],
+            "rawEntries": [
+                {
+                    "val": 37947080,
+                    "time": 1789746853000.0
+                }
+            ],
+            "high": 37947080,
+            "low": 37947080,
+            "total": 37947080,
+            "avg": 37947080.0,
+            "comebackGrowth": 0,
+            "improvementGap": 0
+        }
+    ]
+}

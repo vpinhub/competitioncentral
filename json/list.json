@@ -262,5 +262,9 @@
     {
         "name": "Special_When_Lit_2026-09-20_Tiki_Bob_s_Atomic_Beach_Party.json",
         "path": "json/Special_When_Lit_2026-09-20_Tiki_Bob_s_Atomic_Beach_Party.json"
+    },
+    {
+        "name": "Thursday_Throwdown_2026-09-24_SpongeBob_s_Bikini_Bottom_Pinball.json",
+        "path": "json/Thursday_Throwdown_2026-09-24_SpongeBob_s_Bikini_Bottom_Pinball.json"
     }
 ]
