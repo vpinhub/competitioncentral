@@ -1,10 +1,10 @@
 {
     "swl": {
-        "url": "https://vpinhub.github.io/tournamenthelper/?tableId=9Paf7-CL&releaseId=ZduqSMANBJ&swl&tnotes=We%27ve%20all%20played%20this%20table%20a%20lot,%20and%20everyone%20has%20their%20own%20unique%20spin%20and%20customizations%20on%20it.%20Because%20of%20that,%20this%20week%20mods,%20custom%20POVs,%20and%20visual%20tweaks%20are%20strongly%20encouraged!%20Show%20us%20your%20setup%20pictures%20in%20the%20discord.%20Please%20note%20that%20mods%20should%20not%20interfere%20with%20the%20base%20gameplay%20as%20released.%20Let%27s%20see%20who%20can%20defend%20Earth%20and%20top%20the%20leaderboards%E2%80%94and%20I%27ll%20even%20be%20giving%20away%20a%20small%20prize%20for%20my%20favorite%20setup!",
+        "url": "https://vpinhub.github.io/tournamenthelper/?tableId=FoV04dro_z&releaseId=z_eG_4SCop&swl&img=https://i.imgur.com/cOfcIQg.png&tnotes=NVRAM%20Installation%20(CRITICAL):%20The%20ROM%20(heavymtl.zip)%20and%20NVRAM%20are%20included%20in%20the%20download.%20Because%20this%20table%27s%20original%20code%20remembers%20your%20exact%20mid-game%20state%20if%20you%20quit,%20you%20must%20install%20the%20custom%20NVRAM%20to%20ensure%20a%20fresh,%20tournament-legal%20reset%20for%20every%20game.%20Pup-Pack%20is%20optional%20,but%20a%20nice%20enhancement.%20Music%20Download%20with%20table%20is%20required.",
         "note": null,
         "tableName": null,
         "manufacturer": null,
-        "imgUrl": null
+        "imgUrl": "https://i.imgur.com/cOfcIQg.png"
     },
     "ttd": {
         "url": null,
