@@ -278,5 +278,9 @@
     {
         "name": "Special_When_Lit_2026-10-04_Attack_from_Mars.json",
         "path": "json/Special_When_Lit_2026-10-04_Attack_from_Mars.json"
+    },
+    {
+        "name": "Thursday_Throwdown_2026-10-08_MF_Doom.json",
+        "path": "json/Thursday_Throwdown_2026-10-08_MF_Doom.json"
     }
 ]
