@@ -1,10 +1,10 @@
 {
     "swl": {
-        "url": "https://vpinhub.github.io/tournamenthelper/?tableId=FoV04dro_z&releaseId=z_eG_4SCop&swl&img=https://i.imgur.com/cOfcIQg.png&tnotes=NVRAM%20Installation%20(CRITICAL):%20The%20ROM%20(heavymtl.zip)%20and%20NVRAM%20are%20included%20in%20the%20download.%20Because%20this%20table%27s%20original%20code%20remembers%20your%20exact%20mid-game%20state%20if%20you%20quit,%20you%20must%20install%20the%20custom%20NVRAM%20to%20ensure%20a%20fresh,%20tournament-legal%20reset%20for%20every%20game.%20Pup-Pack%20is%20optional%20,but%20a%20nice%20enhancement.%20Music%20Download%20with%20table%20is%20required.",
+        "url": null,
         "note": null,
         "tableName": null,
         "manufacturer": null,
-        "imgUrl": "https://i.imgur.com/cOfcIQg.png"
+        "imgUrl": null
     },
     "ttd": {
         "url": null,
