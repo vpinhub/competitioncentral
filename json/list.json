@@ -286,5 +286,9 @@
     {
         "name": "Special_When_Lit_2026-10-11_Heavy_Metal_Remastered.json",
         "path": "json/Special_When_Lit_2026-10-11_Heavy_Metal_Remastered.json"
+    },
+    {
+        "name": "Thursday_Throwdown_2026-10-15_Fathom.json",
+        "path": "json/Thursday_Throwdown_2026-10-15_Fathom.json"
     }
 ]
