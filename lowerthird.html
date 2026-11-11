@@ -9,8 +9,10 @@
     /* ===== Lower third: Special When Lit + Thursday Throwdown, breaking-news style =====
        Served by lowerthird_server.py (the VPC score API blocks direct browser requests). OBS: Browser source,
        URL http://localhost:8776/ , 1920x1080; the background is transparent.
-       URL options: ?passes=3 (crawl passes per table) ?speed=110 (crawl px/sec) ?refresh=180 (data, sec)
-                    ?reload=15 (full page reload, min, done between tables) ?only=swl|ttd ?start=ttd ?preview=1 (dark test bg) */
+       Slideshow: each competition is one slide; fresh scores are fetched right before every slide.
+       Keys: → next table, ← previous table, Space pause.
+       URL options: ?passes=1 (crawl passes per slide) ?speed=110 (crawl px/sec) ?refresh=180 (background data refresh, sec)
+                    ?reload=60 (full page reload, min, between slides; resumes on the next table) ?only=swl|ttd ?start=ttd ?preview=1 (dark test bg) */
     :root { --accent: #e879f9; --accent2: #a21caf; --gold: #fde047; --panel: #160b1c; --ink: #08040b; --font: 'Bebas Neue'; }
     html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: transparent; font-family: 'Oswald', sans-serif; color: #fff; }
     * { box-sizing: border-box; }
@@ -60,12 +62,21 @@
     .it.info b { color: var(--accent); font-weight: 700; }
     .it.info .ic { font-size: 34px; }
     .sep { color: var(--accent2); font-size: 28px; padding: 0 4px; }
+    .progress { height: 6px; background: var(--ink); }
+    .progress div { height: 100%; width: 0; background: linear-gradient(90deg, var(--accent), var(--gold), var(--accent2)); }
+    .next { position: absolute; right: 0; top: -44px; height: 44px; display: flex; align-items: center; gap: 10px; padding: 0 22px; background: var(--ink);
+        border-top: 3px solid var(--accent2); font-size: 22px; font-weight: 600; letter-spacing: 0.16em; color: #c9ccd8; text-transform: uppercase; }
+    .next b { color: var(--accent); font-weight: 700; }
+    .next.hide { display: none; }
+    .it.post { color: #fff; font-weight: 700; letter-spacing: 0.03em; }
+    .it.post b { color: var(--ink); background: var(--gold); padding: 2px 14px; border-radius: 6px; font-weight: 700; letter-spacing: 0.02em; }
     .err { position: absolute; left: 60px; bottom: 60px; font-size: 26px; background: rgba(0,0,0,0.75); padding: 10px 18px; border-left: 6px solid #ef4444; display: none; }
 </style>
 </head>
 <body>
 <div id="stage">
     <div class="lt out" id="lt">
+        <div class="next" id="next"></div>
         <div class="head">
             <div class="thumb" id="thumb"></div>
             <div class="flag"><div class="live"><i></i>LIVE</div><div class="comp" id="comp"></div></div>
@@ -76,6 +87,7 @@
             <div class="crawl-label"><span class="ic" id="icon"></span><span>STANDINGS</span></div>
             <div class="view" id="view"><div class="track" id="track"></div></div>
         </div>
+        <div class="progress"><div id="bar"></div></div>
     </div>
     <div class="err" id="err"></div>
 </div>
@@ -83,11 +95,12 @@
 <script src="lowerthird_themes.js"></script>
 <script>
 const Q = new URLSearchParams(location.search);
-const PASSES = Math.max(1, parseInt(Q.get('passes')) || 3);
+const PASSES = Math.max(1, parseInt(Q.get('passes')) || 1);
 const SPEED = Math.max(20, parseFloat(Q.get('speed')) || 110);          // px per second (stage pixels)
 const REFRESH = Math.max(30, parseFloat(Q.get('refresh')) || 180) * 1000;
-const RELOAD = Math.max(0, parseFloat(Q.get('reload') ?? 15)) * 60000;  // 0 disables
+const RELOAD = Math.max(0, parseFloat(Q.get('reload') ?? 60)) * 60000;  // 0 disables
 const ONLY = Q.get('only');
+const POST_URL = 'vpinhub.com/competition';
 const AVATAR_BASE = 'https://vpinhub.github.io/special-when-lit-leaderboard/img/';
 if (Q.get('preview') === '1') document.body.classList.add('preview');
 
@@ -214,10 +227,13 @@ function trackHtml(c, t) {
     const info = (ic, html) => `<span class="it info"><span class="ic">${ic}</span>${html}</span>`;
     const items = [];
     items.push(info('📅', `<b>${esc(c.label.toUpperCase())}</b>&nbsp;${md(start)} – ${md(end)} · ENDS ${esc(endLabel(end).toUpperCase())}`));
+    const post = `<span class="it post"><span class="ic">🎮</span>POST YOUR GAME AT&nbsp;<b>${POST_URL.toUpperCase()}</b></span>`;
+    items.push(post);
     if (!P.length) items.push(info(t.icon || '🏆', 'No scores posted yet. Be the first!'));
     P.forEach((p, i) => items.push(`<span class="it${i === 0 ? ' p1' : ''}"><span class="rk">${i + 1}</span>${avatarHtml(p.name)}<span>${esc(p.name)}</span><span class="sc">${num(p.high)}</span>${p.games > 1 ? `<span class="gm">${p.games} GAMES</span>` : ''}</span>`));
     if (P.length) items.push(info('👥', `<b>${P.length}</b>&nbsp;players · <b>${games}</b>&nbsp;games posted`));
     if (T.authors && T.authors.length) items.push(info('🛠️', `VPX table: ${esc(T.authors.join(', '))}${T.version ? ` · v${esc(T.version)}` : ''}`));
+    items.push(post);
     return items.join(sep) + sep;
 }
 
@@ -231,45 +247,70 @@ function tick() {
 }
 setInterval(tick, 10000);
 
-/* ---------- crawl loop ---------- */
-function runPass(c, t) {
+/* ---------- slideshow: one slide per competition, fresh data before each ---------- */
+let skip = 0, paused = false, bar = null;
+function runPass(c, t, p) {
     return new Promise(res => {
         const tr = el('track');
         tr.innerHTML = trackHtml(c, t);
-        const vw = el('view').clientWidth, w = tr.scrollWidth;
-        anim = tr.animate([{ transform: `translateX(${vw}px)` }, { transform: `translateX(${-w}px)` }],
-            { duration: (vw + w) / SPEED * 1000, easing: 'linear' });
+        const vw = el('view').clientWidth, w = tr.scrollWidth, ms = (vw + w) / SPEED * 1000;
+        anim = tr.animate([{ transform: `translateX(${vw}px)` }, { transform: `translateX(${-w}px)` }], { duration: ms, easing: 'linear' });
+        bar = el('bar').animate([{ width: (100 * p / PASSES) + '%' }, { width: (100 * (p + 1) / PASSES) + '%' }], { duration: ms, easing: 'linear', fill: 'forwards' });
+        if (paused) { anim.pause(); bar.pause(); }
         anim.onfinish = res;
+        anim.oncancel = res;
     });
 }
 const wait = ms => new Promise(r => setTimeout(r, ms));
+function upNext() {
+    const n = el('next');
+    if (order.length < 2) { n.classList.add('hide'); return; }
+    const nx = order[(cur + 1) % order.length];
+    n.classList.remove('hide');
+    n.innerHTML = `Up next&nbsp;<b>${esc(nx.label)}</b>&nbsp;·&nbsp;${esc(nx.table.name)}`;
+}
 
 async function loop() {
     while (true) {
-        if (!order.length) { await wait(5000); await refresh(); continue; }
-        cur = cur % order.length;
-        const key = order[cur].key;
-        const t = await themeFor(order[cur]);
-        applyTheme(t); header(order[cur], t);
-        el('track').innerHTML = '';
+        await refresh();                                   // fresh scores for every slide
+        if (!order.length) { await wait(5000); continue; }
+        cur = ((cur % order.length) + order.length) % order.length;
+        const c = order[cur], key = c.key;
+        const t = await themeFor(c);
+        applyTheme(t); header(c, t); upNext();
+        el('track').innerHTML = ''; el('bar').getAnimations().forEach(a => a.cancel()); el('bar').style.width = '0';
         el('lt').classList.remove('out');
         await wait(900);
-        for (let p = 0; p < PASSES; p++) {
-            const c = order.find(x => x.key === key) || order[cur];   // freshest data each pass
-            header(c, t);
-            await runPass(c, t);
+        skip = 0;
+        for (let p = 0; p < PASSES && !skip; p++) {
+            const fresh = order.find(x => x.key === key) || c;
+            header(fresh, t);
+            await runPass(fresh, t, p);
         }
         el('lt').classList.add('out');
         await wait(1000);
-        if (RELOAD && Date.now() - loadedAt > RELOAD) { location.reload(); return; }
         const i = order.findIndex(x => x.key === key);
-        cur = (i < 0 ? cur : i) + 1;
+        cur = (i < 0 ? cur : i) + (skip < 0 ? -1 : 1);
+        if (RELOAD && Date.now() - loadedAt > RELOAD) {
+            try { sessionStorage.setItem('lt-next', order[((cur % order.length) + order.length) % order.length].key); } catch (e) {}
+            location.reload(); return;
+        }
     }
 }
 
+addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { skip = e.key === 'ArrowRight' ? 1 : -1; paused = false; anim?.cancel(); }
+    else if (e.key === ' ') {
+        e.preventDefault(); paused = !paused;
+        [anim, bar].forEach(a => a && (paused ? a.pause() : a.play()));
+    }
+});
+
 (async () => {
     await refresh();
-    const s = Q.get('start'); if (s) { const i = order.findIndex(c => c.key === s); if (i >= 0) cur = i; }
+    let s = Q.get('start');
+    try { s = s || sessionStorage.getItem('lt-next'); sessionStorage.removeItem('lt-next'); } catch (e) {}
+    if (s) { const i = order.findIndex(c => c.key === s); if (i >= 0) cur = i; }
     setInterval(refresh, REFRESH);
     document.fonts?.ready.then(() => loop()) ?? loop();
 })();
