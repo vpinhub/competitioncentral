@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Live Lower Third</title>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+    /* ===== Lower third: Special When Lit + Thursday Throwdown, breaking-news style =====
+       Served by lowerthird_server.py (the VPC score API blocks direct browser requests). OBS: Browser source,
+       URL http://localhost:8776/ , 1920x1080; the background is transparent.
+       URL options: ?passes=3 (crawl passes per table) ?speed=110 (crawl px/sec) ?refresh=180 (data, sec)
+                    ?reload=15 (full page reload, min, done between tables) ?only=swl|ttd ?start=ttd ?preview=1 (dark test bg) */
+    :root { --accent: #e879f9; --accent2: #a21caf; --gold: #fde047; --panel: #160b1c; --ink: #08040b; --font: 'Bebas Neue'; }
+    html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: transparent; font-family: 'Oswald', sans-serif; color: #fff; }
+    * { box-sizing: border-box; }
+    body.preview { background: #1b1f27 radial-gradient(circle at 30% 30%, #3a4250, #11141a 70%); }
+    #stage { position: absolute; top: 0; left: 0; width: 1920px; height: 1080px; transform-origin: top left; overflow: hidden; }
+
+    .lt { position: absolute; left: 56px; right: 56px; bottom: 44px; transition: transform 0.9s cubic-bezier(.7,0,.3,1), opacity 0.9s; }
+    .lt.out { transform: translateY(340px); opacity: 0; }
+
+    /* headline row */
+    .head { display: flex; height: 128px; filter: drop-shadow(0 10px 24px rgba(0,0,0,0.55)); }
+    .thumb { width: 228px; flex: none; background: var(--ink) center / cover no-repeat; border-top: 6px solid var(--accent); position: relative; }
+    .thumb::after { content: ''; position: absolute; inset: 0; box-shadow: inset 0 0 0 2px rgba(255,255,255,0.08); }
+    .flag { flex: none; display: flex; flex-direction: column; justify-content: center; padding: 0 30px; background: var(--accent2); border-top: 6px solid var(--accent); position: relative; overflow: hidden; }
+    .flag::before { content: ''; position: absolute; inset: 0; background: linear-gradient(100deg, transparent 30%, rgba(255,255,255,0.28) 50%, transparent 70%); transform: translateX(-120%); animation: shine 4.5s ease-in-out infinite; }
+    @keyframes shine { 0%, 60% { transform: translateX(-120%); } 100% { transform: translateX(120%); } }
+    .flag .live { display: flex; align-items: center; gap: 12px; font-weight: 700; font-size: 26px; letter-spacing: 0.22em; }
+    .flag .live i { width: 16px; height: 16px; border-radius: 50%; background: #fff; animation: blink 1.2s ease-in-out infinite; }
+    @keyframes blink { 50% { opacity: 0.2; } }
+    .flag .comp { font-family: 'Bebas Neue', sans-serif; font-size: 54px; line-height: 0.95; letter-spacing: 0.02em; white-space: nowrap; }
+    .title { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; padding: 0 34px; border-top: 6px solid var(--accent);
+        background: linear-gradient(90deg, var(--panel) 0%, var(--panel) 75%, color-mix(in srgb, var(--panel) 88%, transparent) 100%); }
+    .title .name { font-family: var(--font), 'Bebas Neue', sans-serif; font-size: 66px; line-height: 1.02; color: var(--accent); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        text-shadow: 3px 3px 0 #000, 0 0 26px color-mix(in srgb, var(--accent) 45%, transparent); }
+    .title .sub { font-size: 25px; font-weight: 600; letter-spacing: 0.2em; color: #d6d9e4; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 4px; }
+    .title .sub b { color: var(--gold); font-weight: 600; }
+    .clock { width: 270px; flex: none; display: flex; flex-direction: column; justify-content: center; align-items: center; background: var(--ink); border-top: 6px solid var(--accent2); }
+    .clock .t { font-family: 'Bebas Neue', sans-serif; font-size: 58px; line-height: 1; letter-spacing: 0.04em; }
+    .clock .left { font-size: 21px; font-weight: 600; letter-spacing: 0.16em; color: var(--gold); text-transform: uppercase; margin-top: 4px; }
+
+    /* crawl row */
+    .crawl { display: flex; height: 74px; background: var(--ink); border-top: 3px solid var(--accent); border-bottom: 3px solid var(--accent2); }
+    .crawl-label { flex: none; display: flex; align-items: center; gap: 12px; padding: 0 26px; background: var(--accent); color: var(--ink); font-weight: 700; font-size: 30px; letter-spacing: 0.12em; z-index: 1;
+        clip-path: polygon(0 0, 100% 0, calc(100% - 22px) 100%, 0 100%); padding-right: 46px; }
+    .crawl-label .ic { font-size: 34px; }
+    .view { flex: 1; position: relative; overflow: hidden; -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 40px, #000 calc(100% - 40px), transparent 100%); mask-image: linear-gradient(90deg, transparent 0, #000 40px, #000 calc(100% - 40px), transparent 100%); }
+    .track { position: absolute; top: 0; left: 0; height: 100%; display: inline-flex; align-items: center; white-space: nowrap; will-change: transform; }
+    .it { display: inline-flex; align-items: center; gap: 14px; padding: 0 30px; font-size: 36px; font-weight: 600; }
+    .it .rk { font-family: 'Bebas Neue', sans-serif; font-size: 42px; color: var(--accent); min-width: 34px; text-align: right; }
+    .it.p1 .rk { color: var(--gold); }
+    .it .av { width: 52px; height: 52px; border-radius: 50%; border: 3px solid var(--accent); background: var(--panel); object-fit: cover; flex: none; }
+    .it.p1 .av { border-color: var(--gold); box-shadow: 0 0 14px var(--gold); }
+    .it .av.ini { display: inline-flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 700; color: var(--accent); }
+    .it .sc { color: var(--gold); font-variant-numeric: tabular-nums; letter-spacing: 0.02em; }
+    .it .gm { font-size: 22px; color: #9ea3b5; font-weight: 500; letter-spacing: 0.08em; }
+    .it.info { color: #e9ebf3; font-weight: 500; }
+    .it.info b { color: var(--accent); font-weight: 700; }
+    .it.info .ic { font-size: 34px; }
+    .sep { color: var(--accent2); font-size: 28px; padding: 0 4px; }
+    .err { position: absolute; left: 60px; bottom: 60px; font-size: 26px; background: rgba(0,0,0,0.75); padding: 10px 18px; border-left: 6px solid #ef4444; display: none; }
+</style>
+</head>
+<body>
+<div id="stage">
+    <div class="lt out" id="lt">
+        <div class="head">
+            <div class="thumb" id="thumb"></div>
+            <div class="flag"><div class="live"><i></i>LIVE</div><div class="comp" id="comp"></div></div>
+            <div class="title"><div class="name" id="name"></div><div class="sub" id="sub"></div></div>
+            <div class="clock"><div class="t" id="clock"></div><div class="left" id="left"></div></div>
+        </div>
+        <div class="crawl">
+            <div class="crawl-label"><span class="ic" id="icon"></span><span>STANDINGS</span></div>
+            <div class="view" id="view"><div class="track" id="track"></div></div>
+        </div>
+    </div>
+    <div class="err" id="err"></div>
+</div>
+
+<script src="lowerthird_themes.js"></script>
+<script>
+const Q = new URLSearchParams(location.search);
+const PASSES = Math.max(1, parseInt(Q.get('passes')) || 3);
+const SPEED = Math.max(20, parseFloat(Q.get('speed')) || 110);          // px per second (stage pixels)
+const REFRESH = Math.max(30, parseFloat(Q.get('refresh')) || 180) * 1000;
+const RELOAD = Math.max(0, parseFloat(Q.get('reload') ?? 15)) * 60000;  // 0 disables
+const ONLY = Q.get('only');
+const AVATAR_BASE = 'https://vpinhub.github.io/special-when-lit-leaderboard/img/';
+if (Q.get('preview') === '1') document.body.classList.add('preview');
+
+const el = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const num = n => Math.round(n).toLocaleString('en-US');
+const loadedAt = Date.now();
+
+let data = null, order = [], cur = 0, anim = null;
+
+function fitStage() {
+    const st = el('stage'), s = Math.min(innerWidth / 1920, innerHeight / 1080);
+    st.style.transform = `translate(${(innerWidth - 1920 * s) / 2}px, ${(innerHeight - 1080 * s) / 2}px) scale(${s})`;
+}
+addEventListener('resize', fitStage); fitStage();
+
+async function refresh() {
+    try {
+        const r = await fetch('/api/comps', { cache: 'no-store' });
+        if (!r.ok) throw new Error('server ' + r.status);
+        data = await r.json();
+        order = data.comps.filter(c => c.table && (!ONLY || c.key === ONLY));
+        el('err').style.display = 'none';
+    } catch (e) {
+        el('err').textContent = '⚠ Score feed unavailable — is lowerthird_server.py running? (' + e.message + ')';
+        el('err').style.display = data ? 'none' : 'block';
+    }
+}
+
+/* ---------- theming ---------- */
+const fontsLoaded = new Set(['Oswald', 'Bebas Neue']);
+function loadFont(f) {
+    if (!f || fontsLoaded.has(f)) return Promise.resolve();
+    fontsLoaded.add(f);
+    const l = document.createElement('link'); l.rel = 'stylesheet';
+    l.href = `https://fonts.googleapis.com/css2?family=${f.replace(/ /g, '+')}&display=swap`;
+    document.head.appendChild(l);
+    return new Promise(res => { l.onload = () => document.fonts.load(`40px "${f}"`).then(res, res); l.onerror = res; setTimeout(res, 3000); });
+}
+
+// Colors from the backglass for tables without a preset (image comes through the local proxy, so the canvas isn't tainted)
+const sampled = {};
+function sampleColors(url) {
+    if (!url) return Promise.resolve(null);
+    if (sampled[url] !== undefined) return Promise.resolve(sampled[url]);
+    return new Promise(res => {
+        const img = new Image();
+        img.onload = () => {
+            try {
+                const c = document.createElement('canvas'); c.width = c.height = 48;
+                const g = c.getContext('2d'); g.drawImage(img, 0, 0, 48, 48);
+                const px = g.getImageData(0, 0, 48, 48).data, bins = {};
+                for (let i = 0; i < px.length; i += 4) {
+                    const [h, s, l] = rgb2hsl(px[i], px[i + 1], px[i + 2]);
+                    if (s < 0.4 || l < 0.25 || l > 0.8) continue;
+                    const k = Math.round(h * 18) % 18; (bins[k] = bins[k] || { n: 0, h: 0 }); bins[k].n += s; bins[k].h += h;
+                }
+                const hues = Object.entries(bins).sort((a, b) => b[1].n - a[1].n).map(([k]) => (+k + 0.5) / 18);
+                if (!hues.length) return res(sampled[url] = null);
+                const h1 = hues[0], h2 = hues.find(h => Math.min(Math.abs(h - h1), 1 - Math.abs(h - h1)) > 0.15) ?? (h1 + 0.5) % 1;
+                res(sampled[url] = { accent: hsl(h1, 0.85, 0.6), accent2: hsl(h2, 0.75, 0.42), panel: hsl(h1, 0.45, 0.08), ink: hsl(h1, 0.5, 0.04) });
+            } catch (e) { res(sampled[url] = null); }
+        };
+        img.onerror = () => res(sampled[url] = null);
+        img.src = '/img?u=' + encodeURIComponent(url);
+        setTimeout(() => res(null), 5000);
+    });
+}
+function rgb2hsl(r, g, b) {
+    r /= 255; g /= 255; b /= 255; const mx = Math.max(r, g, b), mn = Math.min(r, g, b), l = (mx + mn) / 2, d = mx - mn;
+    if (!d) return [0, 0, l];
+    const s = d / (1 - Math.abs(2 * l - 1));
+    const h = mx === r ? ((g - b) / d + 6) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4;
+    return [h / 6, s, l];
+}
+const hsl = (h, s, l) => `hsl(${Math.round(h * 360)} ${Math.round(s * 100)}% ${Math.round(l * 100)}%)`;
+
+async function themeFor(c) {
+    const preset = LT_THEMES.find(t => t.match.test(c.table.name) || t.match.test(c.table.raw_name || ''));
+    const base = { ...LT_COMP[c.key] };
+    const t = preset ? { ...base, ...preset } : { ...base, ...(await sampleColors(c.table.img) || {}) };
+    await loadFont(t.font);
+    return t;
+}
+function applyTheme(t) {
+    const r = el('lt').style;
+    ['accent', 'accent2', 'gold', 'panel', 'ink'].forEach(k => t[k] && r.setProperty('--' + k, t[k]));
+    r.setProperty('--font', `'${t.font}'`);
+}
+
+/* ---------- content ---------- */
+const ET = { timeZone: 'America/New_York' };
+const md = d => d.toLocaleDateString('en-US', { ...ET, month: 'short', day: 'numeric' });
+const endLabel = d => d.toLocaleDateString('en-US', { ...ET, weekday: 'short' }) + ' ' + d.toLocaleTimeString('en-US', { ...ET, hour: 'numeric' }) + ' ET';
+function byline(a) {
+    if (!a || !a.length) return '';
+    if (a[0].toUpperCase() === 'VPW') return 'VPW';
+    return a.length > 2 ? `${a[0]} & team` : a.join(' & ');
+}
+function initials(n) { return n.replace(/[^A-Za-z0-9]/g, '').slice(0, 2).toUpperCase() || '?'; }
+function avatarHtml(name) {
+    const src = AVATAR_BASE + name.toLowerCase().replace(/\s+/g, '_') + '.gif';
+    return `<img class="av" src="${esc(src)}" alt="" onerror="this.outerHTML='<span class=&quot;av ini&quot;>${esc(initials(name))}</span>'">`;
+}
+
+function header(c, t) {
+    const T = c.table, end = new Date(c.end);
+    el('thumb').style.backgroundImage = T.img ? `url("${T.img}")` : 'none';
+    el('comp').textContent = c.label.toUpperCase();
+    el('name').textContent = T.name;
+    const bits = [T.manufacturer, T.year].filter(Boolean).join(' · ');
+    const by = byline(T.authors);
+    const sub = el('sub'), main = esc(bits) + (by ? ` · TABLE BY <b>${esc(by)}</b>` : '');
+    sub.innerHTML = main + (t.tag ? ` · ${esc(t.tag)}` : '');
+    if (sub.scrollWidth > sub.clientWidth) sub.innerHTML = main;   // drop the tagline rather than cut text off
+    el('icon').textContent = t.icon || '🏆';
+    tick();
+}
+
+function trackHtml(c, t) {
+    const T = c.table, P = c.results || [], start = new Date(c.start), end = new Date(c.end);
+    const games = P.reduce((s, p) => s + p.games, 0);
+    const sep = `<span class="sep">◆</span>`;
+    const info = (ic, html) => `<span class="it info"><span class="ic">${ic}</span>${html}</span>`;
+    const items = [];
+    items.push(info('📅', `<b>${esc(c.label.toUpperCase())}</b>&nbsp;${md(start)} – ${md(end)} · ENDS ${esc(endLabel(end).toUpperCase())}`));
+    if (!P.length) items.push(info(t.icon || '🏆', 'No scores posted yet. Be the first!'));
+    P.forEach((p, i) => items.push(`<span class="it${i === 0 ? ' p1' : ''}"><span class="rk">${i + 1}</span>${avatarHtml(p.name)}<span>${esc(p.name)}</span><span class="sc">${num(p.high)}</span>${p.games > 1 ? `<span class="gm">${p.games} GAMES</span>` : ''}</span>`));
+    if (P.length) items.push(info('👥', `<b>${P.length}</b>&nbsp;players · <b>${games}</b>&nbsp;games posted`));
+    if (T.authors && T.authors.length) items.push(info('🛠️', `VPX table: ${esc(T.authors.join(', '))}${T.version ? ` · v${esc(T.version)}` : ''}`));
+    return items.join(sep) + sep;
+}
+
+function tick() {
+    const c = order[cur]; if (!c) return;
+    el('clock').textContent = new Date().toLocaleTimeString('en-US', { ...ET, hour: 'numeric', minute: '2-digit' });
+    const ms = new Date(c.end) - Date.now();
+    if (ms <= 0) { el('left').textContent = 'Final scores'; return; }
+    const d = Math.floor(ms / 864e5), h = Math.floor(ms / 36e5) % 24, m = Math.floor(ms / 6e4) % 60;
+    el('left').textContent = 'Ends in ' + (d ? `${d}d ${h}h` : h ? `${h}h ${m}m` : `${m}m`);
+}
+setInterval(tick, 10000);
+
+/* ---------- crawl loop ---------- */
+function runPass(c, t) {
+    return new Promise(res => {
+        const tr = el('track');
+        tr.innerHTML = trackHtml(c, t);
+        const vw = el('view').clientWidth, w = tr.scrollWidth;
+        anim = tr.animate([{ transform: `translateX(${vw}px)` }, { transform: `translateX(${-w}px)` }],
+            { duration: (vw + w) / SPEED * 1000, easing: 'linear' });
+        anim.onfinish = res;
+    });
+}
+const wait = ms => new Promise(r => setTimeout(r, ms));
+
+async function loop() {
+    while (true) {
+        if (!order.length) { await wait(5000); await refresh(); continue; }
+        cur = cur % order.length;
+        const key = order[cur].key;
+        const t = await themeFor(order[cur]);
+        applyTheme(t); header(order[cur], t);
+        el('track').innerHTML = '';
+        el('lt').classList.remove('out');
+        await wait(900);
+        for (let p = 0; p < PASSES; p++) {
+            const c = order.find(x => x.key === key) || order[cur];   // freshest data each pass
+            header(c, t);
+            await runPass(c, t);
+        }
+        el('lt').classList.add('out');
+        await wait(1000);
+        if (RELOAD && Date.now() - loadedAt > RELOAD) { location.reload(); return; }
+        const i = order.findIndex(x => x.key === key);
+        cur = (i < 0 ? cur : i) + 1;
+    }
+}
+
+(async () => {
+    await refresh();
+    const s = Q.get('start'); if (s) { const i = order.findIndex(c => c.key === s); if (i >= 0) cur = i; }
+    setInterval(refresh, REFRESH);
+    document.fonts?.ready.then(() => loop()) ?? loop();
+})();
+</script>
+</body>
+</html>
